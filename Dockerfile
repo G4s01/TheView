@@ -1,10 +1,10 @@
 # Build stage
-FROM node:24-alpine AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
-# Dipendenze per compilare better-sqlite3
-RUN apk add --no-cache python3 make g++ 
+# Dipendenze per compilare better-sqlite3 (Debian/Ubuntu)
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 # Copia solo i file essenziali per scaricare le dipendenze
 COPY package.json package-lock.json ./
@@ -19,19 +19,14 @@ RUN npm run build
 RUN npm prune --omit=dev
 
 # Run stage
-FROM node:24-alpine
+FROM node:24-slim
 
 WORKDIR /app
 
-# sqlite.db sarà salvato nella directory /app
-# ma possiamo montare un volume da Docker Compose per persisterlo.
-
+# sqlite.db sarà salvato nella directory /app/data tramite volume docker-compose
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
-# Drizzle configs/migrations/schema might be needed if we want to run migrations on startup,
-# but for now we assume the DB is initialized or we just use it.
-# better-sqlite3 is compiled inside node_modules so it's copied safely.
 
 ENV NODE_ENV=production
 ENV PORT=3001
