@@ -1,3 +1,3 @@
 export const appState = $state({
-	isEditMode: false
+  isEditMode: false,
 });
