@@ -20,7 +20,7 @@ The recommended way to deploy TheView is via Docker Compose.
 ```yaml
 services:
   theview:
-    image: ghcr.io/G4s01/theview:main # Sostituisci con il tuo username se hai forkato la repo
+    image: ghcr.io/g4s01/theview:latest # Immagine ufficiale da GitHub
     container_name: theview_portal
     network_mode: host
     restart: unless-stopped

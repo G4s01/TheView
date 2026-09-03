@@ -2,7 +2,7 @@ services:
   theview:
     # Rimuovi "build: ." e de-commenta "image:" se vuoi usare l'immagine dal tuo GitHub Container Registry
     build: .
-    # image: ghcr.io/G4s01/theview:latest
+    # image: ghcr.io/g4s01/theview:latest
     container_name: theview_portal
     network_mode: host
     restart: unless-stopped
