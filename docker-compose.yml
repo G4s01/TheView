@@ -1,0 +1,22 @@
+services:
+  theview:
+    # Rimuovi "build: ." e de-commenta "image:" se vuoi usare l'immagine dal tuo GitHub Container Registry
+    build: .
+    # image: ghcr.io/TUO_USERNAME_GITHUB/theview:latest
+    container_name: theview_portal
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /mnt/data/docker/theview/data:/app/data
+      # Utile per futuri widget che leggono lo stato dei container Docker
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=Europe/Rome
+      - NODE_ENV=production
+      - PORT=3001
+      - ORIGIN=https://g4ss.duckdns.org # Necessario per l'adapter-node di SvelteKit
+      - DB_PATH=/app/data/sqlite.db
+      # Credenziali qBittorrent (opzionali se bypass localhost è attivo su qBittorrent)
+      # - QBIT_USERNAME=admin
+      # - QBIT_PASSWORD=94zy9DMEfXMc
+      # - QBIT_URL=http://172.17.0.1:8080
