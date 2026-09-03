@@ -15,9 +15,11 @@ export async function load() {
       widgetType: services.widgetType,
       pingEnabled: services.pingEnabled,
       category: categories.name,
+      position: services.position,
     })
     .from(services)
-    .innerJoin(categories, eq(services.categoryId, categories.id));
+    .innerJoin(categories, eq(services.categoryId, categories.id))
+    .orderBy(services.position);
 
   // Group and attach icon details
   const groupedServices = allServices.reduce(

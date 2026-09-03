@@ -27,7 +27,8 @@
 	"dependencies": {
 		"better-sqlite3": "^13.0.3",
 		"drizzle-orm": "^0.45.2",
-		"simple-icons": "^16.29.0"
+		"simple-icons": "^16.29.0",
+		"svelte-dnd-action": "^0.9.79"
 	},
 	"allowScripts": {
 		"better-sqlite3@13.0.3": true,

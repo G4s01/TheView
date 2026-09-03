@@ -3,6 +3,7 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 export const categories = sqliteTable("categories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
+  position: integer("position").default(0),
 });
 
 export const services = sqliteTable("services", {
@@ -18,4 +19,5 @@ export const services = sqliteTable("services", {
   pingEnabled: integer("ping_enabled", { mode: "boolean" })
     .default(true)
     .notNull(),
+  position: integer("position").default(0),
 });

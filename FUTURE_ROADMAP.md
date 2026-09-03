@@ -9,9 +9,9 @@ Questa roadmap raccoglie gli step per implementare le nuove funzionalità richie
 - [x] Una volta sbloccata la sessione, il pulsante chiave inglese rimane attivo e fa comparire:
   - [x] L'icona a ingranaggio per accedere alla rotta `/admin` completa.
   - [x] Un pulsante "Esci dalla modalità modifica" per invalidare la sessione corrente.
-- [ ] In Edit Mode, abilitare bottoni rapidi sulle Service Card e Categorie per:
-  - [ ] Drag-and-drop (ordinamento dinamico sul posto).
-  - [ ] Modifica rapida in-place di nome, url, icona.
+- [x] In Edit Mode, abilitare bottoni rapidi sulle Service Card e Categorie per:
+  - [x] Drag-and-drop (ordinamento dinamico sul posto).
+  - [x] Modifica rapida in-place di nome, url, icona.
 
 ## 2. Gestione Avanzata Categorie e Servizi
 

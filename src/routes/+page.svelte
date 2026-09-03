@@ -1,12 +1,29 @@
 <script lang="ts">
 	import ServiceCard from '$lib/components/ServiceCard.svelte';
+	import QuickEditModal from '$lib/components/QuickEditModal.svelte';
 	import { onMount, onDestroy } from 'svelte';
+	import { appState } from '$lib/client/state.svelte';
+	import { dndzone } from 'svelte-dnd-action';
+	import { flip } from 'svelte/animate';
 	
 	let { data } = $props();
-	let groupedServices = $derived(data.groupedServices);
+	
+	// Create local mutable state for drag and drop
+	let localGroups = $state<Record<string, any[]>>({});
+	
+	$effect(() => {
+		// Sync local state when data changes from server (e.g., after quick edit)
+		if (data.groupedServices) {
+			localGroups = JSON.parse(JSON.stringify(data.groupedServices));
+		}
+	});
 	
 	let statuses = $state<Record<number, { isOnline: boolean; latencyMs?: number }>>({});
 	let interval: ReturnType<typeof setInterval>;
+	
+	// Quick Edit state
+	let showQuickEdit = $state(false);
+	let editingService = $state<any>(null);
 	
 	async function fetchStatus() {
 		try {
@@ -27,6 +44,31 @@
 	onDestroy(() => {
 		if (interval) clearInterval(interval);
 	});
+	
+	const flipDurationMs = 200;
+	
+	function handleDndConsider(e: CustomEvent, categoryName: string) {
+		localGroups[categoryName] = e.detail.items;
+	}
+	
+	async function handleDndFinalize(e: CustomEvent, categoryName: string) {
+		localGroups[categoryName] = e.detail.items;
+		
+		if (appState.isEditMode) {
+			// Save new order to DB
+			const orderedIds = localGroups[categoryName].map((s: any) => s.id);
+			fetch('/api/services/reorder', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ orderedIds })
+			}).catch(console.error);
+		}
+	}
+	
+	function openQuickEdit(service: any) {
+		editingService = service;
+		showQuickEdit = true;
+	}
 </script>
 
 <svelte:head>
@@ -34,7 +76,7 @@
 </svelte:head>
 
 <div class="space-y-6">
-	{#each Object.entries(groupedServices) as [categoryName, services]}
+	{#each Object.entries(localGroups) as [categoryName, services]}
 		<section id="{categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}">
 			<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
 				<span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
@@ -43,18 +85,36 @@
 				{categoryName}
 			</h2>
 			
-			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-				{#each services as service}
-					<ServiceCard {service} liveStatus={statuses[service.id]} />
+			<div 
+				class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 min-h-[100px]"
+				use:dndzone={{items: services, flipDurationMs, dragDisabled: !appState.isEditMode}}
+				onconsider={(e) => handleDndConsider(e, categoryName)}
+				onfinalize={(e) => handleDndFinalize(e, categoryName)}
+			>
+				{#each services as service (service.id)}
+					<div animate:flip={{duration: flipDurationMs}}>
+						<ServiceCard {service} liveStatus={statuses[service.id]} onEdit={() => openQuickEdit(service)} />
+					</div>
 				{/each}
 			</div>
 		</section>
 	{/each}
 	
-	{#if Object.keys(groupedServices).length === 0}
+	{#if Object.keys(localGroups).length === 0}
 		<div class="text-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
 			<h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No services found</h3>
 			<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by adding a new service in the admin panel.</p>
 		</div>
 	{/if}
 </div>
+
+<QuickEditModal 
+	show={showQuickEdit} 
+	service={editingService} 
+	onClose={() => { showQuickEdit = false; editingService = null; }} 
+	onSuccess={() => { 
+		showQuickEdit = false; 
+		editingService = null; 
+		window.location.reload(); 
+	}} 
+/>
