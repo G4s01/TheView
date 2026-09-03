@@ -29,11 +29,11 @@ export function getIconDetails(iconSlug: string | null) {
   }
 
   // Support for custom image URLs
-  if (iconSlug.startsWith('http') || iconSlug.startsWith('/')) {
+  if (iconSlug.startsWith("http") || iconSlug.startsWith("/")) {
     return {
       hex: "#6B7280", // Gray fallback for custom icons
       url: iconSlug,
-      isCustomUrl: true // Flag to skip the white invert filter in UI if we want
+      isCustomUrl: true, // Flag to skip the white invert filter in UI if we want
     };
   }
 
