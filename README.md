@@ -20,7 +20,7 @@ The recommended way to deploy TheView is via Docker Compose.
 ```yaml
 services:
   theview:
-    image: ghcr.io/TUO_USERNAME_GITHUB/theview:main # Sostituisci con il tuo username se hai forkato la repo
+    image: ghcr.io/G4s01/theview:main # Sostituisci con il tuo username se hai forkato la repo
     container_name: theview_portal
     network_mode: host
     restart: unless-stopped
@@ -39,6 +39,7 @@ services:
 ```
 
 3. Start the container:
+
 ```bash
 docker compose up -d
 ```
@@ -60,8 +61,10 @@ npm run dev
 ```
 
 ## 🗄️ Database
+
 The project uses `better-sqlite3` and `drizzle-orm`. The database schema is stored in `src/lib/server/db/schema.ts`.
 To apply migrations after changing the schema, run `npx drizzle-kit push`.
 
 ## 🤖 CI/CD
+
 This repository includes a GitHub Actions workflow that automatically builds and pushes the Docker image to GitHub Container Registry (GHCR) upon pushing to the `main` branch.
