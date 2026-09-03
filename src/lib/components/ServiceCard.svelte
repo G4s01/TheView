@@ -10,7 +10,7 @@
 			icon: string | null;
 			pingEnabled: boolean;
 			widgetType: string | null;
-			iconDetails?: { hex: string, url: string } | null;
+			iconDetails?: { hex: string, url: string, isCustomUrl?: boolean } | null;
 		};
 		liveStatus?: { isOnline: boolean; latencyMs?: number } | null;
 	}>();
@@ -56,7 +56,11 @@
 			style="background-color: {iconBgColor || '#4B5563'}"
 		>
 			{#if service.iconDetails}
-				<img src={service.iconDetails.url} alt={service.name} class="h-6 w-6" style="filter: brightness(0) invert(1);" />
+				{#if service.iconDetails.isCustomUrl}
+					<img src={service.iconDetails.url} alt={service.name} class="h-8 w-8 object-contain rounded" />
+				{:else}
+					<img src={service.iconDetails.url} alt={service.name} class="h-6 w-6" style="filter: brightness(0) invert(1);" />
+				{/if}
 			{:else if service.icon}
 				<span class="text-lg font-bold uppercase text-white">{service.icon.charAt(0)}</span>
 			{:else}
