@@ -80,12 +80,32 @@
 <div class="space-y-6">
 	{#each Object.entries(localGroups) as [categoryName, services]}
 		{#if services.length > 0 || appState.isEditMode}
-		<section id="{categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}">
+		<section id="{categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="scroll-mt-24">
 			<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
 				<span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
 					{services.length}
 				</span>
-				{categoryName}
+				{#if appState.isEditMode}
+					<input 
+						type="text" 
+						value={categoryName} 
+						class="bg-transparent border-b border-dashed border-gray-400 focus:border-blue-500 focus:outline-none w-auto" 
+						title="Modifica Nome Categoria"
+						onchange={async (e) => {
+							const target = e.target as HTMLInputElement;
+							if (target.value === categoryName || !target.value.trim()) return;
+							const cat = data.categories.find(c => c.name === categoryName);
+							if (cat) {
+								try {
+									await fetch('/api/categories/edit', { method: 'POST', body: JSON.stringify({ id: cat.id, name: target.value.trim() }) });
+									window.location.reload();
+								} catch (err) {}
+							}
+						}} 
+					/>
+				{:else}
+					{categoryName}
+				{/if}
 			</h2>
 			
 			<div 

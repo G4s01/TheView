@@ -32,6 +32,7 @@
 	let npmUrl = $state('');
 	let npmEmail = $state('');
 	let npmPassword = $state('');
+	let adminPassword = $state('');
 	
 	let isSettingsLoaded = $state(false);
 	
@@ -54,7 +55,7 @@
 			await fetch('/api/settings', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ npmUrl, npmEmail, npmPassword })
+				body: JSON.stringify({ npmUrl, npmEmail, npmPassword, ...(adminPassword ? { adminPassword } : {}) })
 			});
 
 			const res = await fetch('/api/discovery');
@@ -290,73 +291,165 @@
 			</div>
 		</div>
 		{:else if activeTab === 'discovery'}
-		<div class="space-y-6">
-			<!-- Credenziali NPM -->
-			<div class="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-5 sm:p-6">
-				<h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-2">Credenziali Nginx Proxy Manager (Opzionale)</h3>
-				<p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Se inserite, TheView interrogherà NPM per auto-rilevare gli host.</p>
-				<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">URL NPM</label>
-						<input type="url" bind:value={npmUrl} placeholder="http://172.17.0.1:81" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm">
+		<div class="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+			<!-- Settings & NPM Block -->
+			<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+				
+				<!-- App Settings -->
+				<div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+					<div class="flex items-center space-x-3 mb-4">
+						<div class="p-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg">
+							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+						</div>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white">Sicurezza</h3>
 					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-						<input type="email" bind:value={npmEmail} placeholder="admin@example.com" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm">
+					<p class="text-sm text-gray-500 dark:text-gray-400 mb-4">La password di default è <code>admin</code>. Ti consigliamo di cambiarla per proteggere la tua dashboard.</p>
+					
+					<div class="flex items-end space-x-4">
+						<div class="flex-1 max-w-sm">
+							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nuova Password Admin</label>
+							<input type="password" bind:value={adminPassword} placeholder="Lascia vuoto per non cambiare" class="block w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:text-white">
+						</div>
+						<button
+							onclick={async () => {
+								if (!adminPassword) return alert("Inserisci una password!");
+								try {
+									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminPassword, npmUrl, npmEmail, npmPassword }) });
+									adminPassword = '';
+									alert("Password modificata!");
+								} catch(e) { alert("Errore!"); }
+							}}
+							class="px-6 py-2.5 bg-gray-900 dark:bg-gray-700 text-white font-medium rounded-xl shadow-sm hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors"
+						>
+							Aggiorna
+						</button>
 					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-						<input type="password" bind:value={npmPassword} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm">
+				</div>
+
+				<!-- NPM Integration -->
+				<div class="p-6">
+					<div class="flex items-center space-x-3 mb-6">
+						<img src="https://cdn.simpleicons.org/nginxproxymanager/4B5563" alt="NPM" class="w-8 h-8" />
+						<div>
+							<h3 class="text-xl font-bold text-gray-900 dark:text-white">Nginx Proxy Manager</h3>
+							<p class="text-sm text-gray-500 dark:text-gray-400">Collega NPM per scovare automaticamente i tuoi servizi web esposti.</p>
+						</div>
+						<div class="flex-1"></div>
+						{#if npmUrl && npmEmail && npmPassword}
+							<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+								<span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
+								Connesso
+							</span>
+						{:else}
+							<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+								Non Connesso
+							</span>
+						{/if}
+					</div>
+
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+						<div>
+							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Indirizzo NPM</label>
+							<input type="url" bind:value={npmUrl} placeholder="http://172.17.0.1:81" class="block w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white transition-all">
+						</div>
+						<div>
+							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+							<input type="email" bind:value={npmEmail} placeholder="admin@example.com" class="block w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white transition-all">
+						</div>
+						<div>
+							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+							<input type="password" bind:value={npmPassword} placeholder="••••••••" class="block w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white transition-all">
+						</div>
+					</div>
+
+					<div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-6">
+						{#if npmUrl && npmEmail && npmPassword}
+							<button 
+								onclick={async () => {
+									npmUrl = ''; npmEmail = ''; npmPassword = '';
+									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl, npmEmail, npmPassword }) });
+								}}
+								class="text-red-500 hover:text-red-700 font-medium text-sm transition-colors flex items-center"
+							>
+								<svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+								Disconnetti NPM
+							</button>
+						{:else}
+							<div></div>
+						{/if}
+
+						<div class="flex space-x-3">
+							<button
+								onclick={async () => {
+									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl, npmEmail, npmPassword }) });
+									alert('Credenziali salvate!');
+								}}
+								class="px-5 py-2.5 text-blue-700 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 font-medium rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+							>
+								Salva
+							</button>
+							<button
+								onclick={fetchDiscovery}
+								disabled={isDiscovering}
+								class="flex items-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-xl shadow-md shadow-blue-500/20 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0"
+							>
+								{#if isDiscovering}
+									<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+									Scansione...
+								{:else}
+									<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+									Esegui Discovery
+								{/if}
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
 
+			<!-- Discovery Results -->
 			<div class="flex items-center justify-between">
-				<p class="text-sm text-gray-500 dark:text-gray-400">
-					Questi servizi sono stati trovati su Docker o Nginx Proxy Manager ma non sono ancora in dashboard.
-				</p>
-				<button 
-					onclick={fetchDiscovery}
-					disabled={isDiscovering}
-					class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-				>
-					{isDiscovering ? 'Scansione...' : 'Aggiorna'}
-				</button>
+				<h3 class="text-xl font-bold text-gray-900 dark:text-white">Risultati Discovery</h3>
 			</div>
 
-			<div class="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+			<div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
 				<ul class="divide-y divide-gray-200 dark:divide-gray-700">
 					{#if isDiscovering}
-						<li class="px-4 py-8 text-center text-sm text-gray-500">Ricerca in corso...</li>
+						<li class="px-6 py-12 text-center text-sm text-gray-500">Ricerca in corso su Docker e NPM...</li>
 					{:else if discoveredServices.length === 0}
-						<li class="px-4 py-8 text-center text-sm text-gray-500">Nessun nuovo servizio trovato.</li>
+						<li class="px-6 py-12 text-center text-sm text-gray-500">
+							<svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+							Nessun nuovo servizio trovato. Clicca "Esegui Discovery".
+						</li>
 					{/if}
 
 					{#each discoveredServices as ds}
-						<li class="px-4 py-4 sm:px-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50">
-							<div>
-								<div class="flex items-center space-x-2">
-									<p class="text-sm font-medium text-gray-900 dark:text-white truncate">{ds.name}</p>
-									<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {ds.source === 'npm' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
-										{ds.source}
+						<li class="px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-center justify-between">
+							<div class="flex items-center">
+								<div class="flex-shrink-0">
+									<span class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold uppercase shadow-sm">
+										{ds.name.charAt(0)}
 									</span>
 								</div>
-								{#if ds.url}
-									<p class="text-sm text-blue-600 dark:text-blue-400 truncate mt-1">{ds.url}</p>
-								{/if}
-								{#if ds.description}
-									<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{ds.description}</p>
-								{/if}
+								<div class="ml-4">
+									<p class="text-sm font-semibold text-gray-900 dark:text-white">{ds.name}</p>
+									<p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate max-w-xs sm:max-w-md">{ds.url || ds.description}</p>
+									<span class="mt-1.5 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+										Sorgente: {ds.source}
+									</span>
+								</div>
 							</div>
-							
 							<div class="ml-4">
-								<form method="POST" action="?/createService" use:enhance class="flex items-center space-x-2">
+								<form method="POST" action="?/createService" use:enhance>
 									<input type="hidden" name="name" value={ds.name}>
-									<input type="hidden" name="url" value={ds.url || 'http://'}>
+									<input type="hidden" name="url" value={ds.url || ('http://' + ds.name + '.local')}>
+									<input type="hidden" name="description" value={ds.description}>
 									<!-- Default to the first category for fast insertion -->
 									<input type="hidden" name="categoryId" value={localCategories.length > 0 ? localCategories[0].id : ''}>
 									<input type="hidden" name="icon" value={ds.name}>
-									<button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700">
+									<button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-transform hover:scale-105">
+										<svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+										</svg>
 										Aggiungi
 									</button>
 								</form>

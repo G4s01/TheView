@@ -1,5 +1,6 @@
 import { json } from "@sveltejs/kit";
-import { env } from "$env/dynamic/private";
+import { getSettings } from "$lib/server/settings";
+import { sign } from "jsonwebtoken";
 
 export async function POST({ request, cookies }) {
   const body = await request.json();
@@ -7,10 +8,14 @@ export async function POST({ request, cookies }) {
   const { action, password } = body;
 
   if (action === "login") {
-    const correctPassword = env.ADMIN_PASSWORD || "admin";
+    const settings = getSettings();
+    const correctPassword = settings.adminPassword || "admin";
 
     if (password === correctPassword) {
-      cookies.set("admin_session", "active", {
+      const secret = "g4s-theview-super-secret-key-123";
+      const token = sign({ role: "admin" }, secret, { expiresIn: "7d" });
+
+      cookies.set("admin_session", token, {
         path: "/",
         httpOnly: true,
         sameSite: "strict",

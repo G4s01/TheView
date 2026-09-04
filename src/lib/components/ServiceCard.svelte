@@ -45,6 +45,17 @@
 </script>
 
 <div class="relative h-full group">
+	{#if appState.isEditMode}
+		<div class="absolute top-2 right-2 flex space-x-1.5 z-20">
+			<button onclick={(e) => { e.preventDefault(); e.stopPropagation(); if (onEdit) onEdit(); }} class="p-1.5 bg-white/90 dark:bg-gray-800/90 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm transition-colors text-gray-600 dark:text-gray-300" title="Impostazioni Servizio">
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+			</button>
+			<div class="p-1.5 bg-white/90 dark:bg-gray-800/90 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm transition-colors text-gray-600 dark:text-gray-300 cursor-move" title="Trascina per spostare">
+				<svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+			</div>
+		</div>
+	{/if}
+
 <a 
 	href={appState.isEditMode ? '#' : service.url} 
 	target={appState.isEditMode ? '_self' : '_blank'} 
@@ -55,27 +66,29 @@
 >
 	<div class="flex items-start justify-between">
 		<!-- Icon -->
-		<div 
-			class="relative h-10 w-10 rounded-lg flex items-center justify-center shadow-sm group/icon"
-			style="background-color: {iconBgColor || '#4B5563'}"
-		>
-			{#if service.iconDetails}
-				{#if service.iconDetails.isCustomUrl}
-					<img src={service.iconDetails.url} alt={service.name} class="h-8 w-8 object-contain rounded" />
+		<div class="relative">
+			<div 
+				class="h-10 w-10 rounded-lg flex items-center justify-center shadow-sm"
+				style="background-color: {iconBgColor || '#4B5563'}"
+			>
+				{#if service.iconDetails}
+					{#if service.iconDetails.isCustomUrl}
+						<img src={service.iconDetails.url} alt={service.name} class="h-8 w-8 object-contain rounded" />
+					{:else}
+						<img src={service.iconDetails.url} alt={service.name} class="h-6 w-6" style="filter: brightness(0) invert(1);" />
+					{/if}
+				{:else if service.icon}
+					<span class="text-lg font-bold uppercase text-white">{service.icon.charAt(0)}</span>
 				{:else}
-					<img src={service.iconDetails.url} alt={service.name} class="h-6 w-6" style="filter: brightness(0) invert(1);" />
+					<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+					</svg>
 				{/if}
-			{:else if service.icon}
-				<span class="text-lg font-bold uppercase text-white">{service.icon.charAt(0)}</span>
-			{:else}
-				<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-				</svg>
-			{/if}
+			</div>
 
 			{#if appState.isEditMode}
-				<label class="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/icon:opacity-100 cursor-pointer transition-opacity z-20">
-					<svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<label class="absolute -bottom-1.5 -right-1.5 bg-blue-600 text-white p-1 rounded-full shadow cursor-pointer hover:bg-blue-700 z-20 border-2 border-white dark:border-gray-800" title="Cambia Icona (Upload)" onclick={(e) => e.stopPropagation()}>
+					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
 					</svg>
 					<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
@@ -90,7 +103,6 @@
 							const res = await fetch('/api/icons', { method: 'POST', body: formData });
 							const data = await res.json();
 							if (data.url) {
-								// Quick silent update of the service
 								await fetch('/api/services/quick-edit', {
 									method: 'POST',
 									headers: { 'Content-Type': 'application/json' },
@@ -107,7 +119,7 @@
 		</div>
 
 		<!-- Status Indicator -->
-		{#if service.pingEnabled}
+		{#if service.pingEnabled && !appState.isEditMode}
 			<div class="flex items-center space-x-1.5" title={tooltipText}>
 				<span class="relative flex h-2.5 w-2.5">
 					{#if status === 'checking'}
@@ -124,31 +136,41 @@
 	</div>
 
 	<div class="mt-4 flex-1">
-		<h3 class="text-base font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-			{service.name}
-		</h3>
+		{#if appState.isEditMode}
+			<input 
+				type="text" 
+				value={service.name} 
+				class="text-base font-semibold text-gray-900 dark:text-white bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 w-full px-1 py-0.5"
+				onclick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+				onchange={async (e) => {
+					const target = e.target as HTMLInputElement;
+					if (target.value === service.name || !target.value.trim()) return;
+					try {
+						await fetch('/api/services/quick-edit', { 
+							method: 'POST', 
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ id: service.id, name: target.value.trim(), url: service.url, icon: service.icon }) 
+						});
+						window.location.reload();
+					} catch (err) { console.error(err); }
+				}}
+				title="Modifica Nome (Premi Invio per salvare)"
+			/>
+		{:else}
+			<h3 class="text-base font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+				{service.name}
+			</h3>
+		{/if}
+		
 		<p class="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[40px]">
 			{service.description || service.url}
 		</p>
 	</div>
 
 	{#if service.widgetType === 'qbittorrent'}
-		<!-- Previene il click sul link della card quando si interagisce (se necessario in futuro) col widget -->
 		<div role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
 			<QBittorrentWidget />
 		</div>
 	{/if}
 </a>
-
-{#if appState.isEditMode}
-	<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] rounded-xl flex items-center justify-center space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-		<button class="p-2 bg-white text-gray-800 rounded-full shadow hover:bg-gray-100 transition-transform hover:scale-110" title="Trascina per Spostare (Drag & Drop)">
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
-		</button>
-		<button onclick={(e) => { e.preventDefault(); if (onEdit) onEdit(); }} class="p-2 bg-blue-600 text-white rounded-full shadow hover:bg-blue-700 transition-transform hover:scale-110" title="Modifica Rapida">
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-		</button>
-	</div>
-{/if}
 </div>
-

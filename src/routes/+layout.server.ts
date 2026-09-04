@@ -8,11 +8,13 @@ export async function load({ locals }) {
     .from(categories)
     .orderBy(categories.position);
 
-  const allServices = await db.select({ categoryId: services.categoryId }).from(services);
-  
-  const categoriesWithCount = allCategories.map(c => {
-      const count = allServices.filter(s => s.categoryId === c.id).length;
-      return { ...c, count };
+  const allServices = await db
+    .select({ categoryId: services.categoryId })
+    .from(services);
+
+  const categoriesWithCount = allCategories.map((c) => {
+    const count = allServices.filter((s) => s.categoryId === c.id).length;
+    return { ...c, count };
   });
 
   return {
