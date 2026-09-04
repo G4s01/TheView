@@ -60,6 +60,52 @@ export const actions: Actions = {
     }
   },
 
+  updateService: async ({ request }) => {
+    const data = await request.formData();
+    const id = data.get("id")?.toString();
+    const name = data.get("name")?.toString();
+    const url = data.get("url")?.toString();
+    let categoryIdStr = data.get("categoryId")?.toString();
+
+    if (!id || !name || !url) {
+      return fail(400, { error: "Missing required fields" });
+    }
+
+    let categoryId: number;
+    if (!categoryIdStr) {
+      const [newCat] = await db
+        .insert(categories)
+        .values({ name: "Generale" })
+        .returning();
+      categoryId = newCat.id;
+    } else {
+      categoryId = parseInt(categoryIdStr);
+    }
+
+    const icon = data.get("icon")?.toString() || null;
+    const description = data.get("description")?.toString() || null;
+    const widgetType = data.get("widgetType")?.toString() || null;
+    const pingEnabled = data.get("pingEnabled") === "on";
+
+    try {
+      await db
+        .update(services)
+        .set({
+          name,
+          url,
+          categoryId,
+          icon,
+          description,
+          widgetType,
+          pingEnabled,
+        })
+        .where(eq(services.id, parseInt(id)));
+      return { success: true };
+    } catch (error) {
+      return fail(500, { error: "Database error while updating service" });
+    }
+  },
+
   deleteService: async ({ request }) => {
     const data = await request.formData();
     const id = data.get("id")?.toString();
