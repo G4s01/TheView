@@ -17,8 +17,14 @@ export async function load({ locals }) {
     return { ...c, count };
   });
 
+  const { getSettings } = await import("$lib/server/settings");
+  const settings = getSettings();
+  const needsSetup =
+    !settings.adminPassword || settings.adminPassword === "admin";
+
   return {
     categories: categoriesWithCount,
     isAdmin: locals.isAdmin,
+    needsSetup,
   };
 }

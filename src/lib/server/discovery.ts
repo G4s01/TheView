@@ -378,23 +378,33 @@ export async function discoverAllServices(
     const cleanGuess = guess.replace(/[-_]/g, "");
     const cleanName = s.name.replace(/[-_]/g, "");
 
-    const iconDetails =
+    let iconDetails =
       (s._iconOverride ? getIconDetails(s._iconOverride) : null) ||
-      getIconDetails(guess) ||
-      getIconDetails(cleanGuess) ||
-      getIconDetails(s.name) ||
-      getIconDetails(cleanName);
+      getIconDetails(guess, false) ||
+      getIconDetails(cleanGuess, false) ||
+      getIconDetails(s.name, false) ||
+      getIconDetails(cleanName, false);
+
+    if (!iconDetails) {
+      iconDetails = getIconDetails(guess, true);
+    }
 
     return {
       ...s,
       iconDetails,
-      icon: s._iconOverride || (iconDetails ? guess : s.name),
+      icon:
+        s._iconOverride ||
+        (iconDetails && !iconDetails.isFallback ? guess : s.name),
     };
   });
 
   // Ordina i risultati come richiesto: npm+docker (1), npm (2), docker (3)
   enriched.sort((a, b) => {
-    const order: { [key: string]: number } = { "npm+docker": 1, "npm": 2, "docker": 3 };
+    const order: { [key: string]: number } = {
+      "npm+docker": 1,
+      npm: 2,
+      docker: 3,
+    };
     return order[a.source] - order[b.source];
   });
 

@@ -5,6 +5,7 @@
 	import { themeStore, themes } from '$lib/client/themeStore.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	
 	let { children, data } = $props();
 
@@ -23,6 +24,7 @@
 </script>
 
 <div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
+	{#if $page.url.pathname !== '/setup'}
 	<!-- Topbar Header -->
 	<header class="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
 		<div class="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16 max-w-[1920px] mx-auto">
@@ -90,15 +92,15 @@
 							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
 						</button>
 					{:else}
-						<button class="p-1.5 text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors" onclick={() => showLogin = true} title="Sblocca per Amministrazione">
+						<button class="p-1.5 text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors" onclick={() => data.needsSetup ? goto('/setup') : showLogin = true} title="Sblocca per Amministrazione">
 							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
 						</button>
 						<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-						<button class="p-1.5 text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors" onclick={() => showLogin = true} title="Sblocca per Modificare">
+						<button class="p-1.5 text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors" onclick={() => data.needsSetup ? goto('/setup') : showLogin = true} title="Sblocca per Modificare">
 							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
 						</button>
 						<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-						<button class="p-1.5 text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors" onclick={() => showLogin = true} title="Sblocca Pannello">
+						<button class="p-1.5 text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors" onclick={() => data.needsSetup ? goto('/setup') : showLogin = true} title="Sblocca Pannello">
 							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
 						</button>
 					{/if}
@@ -147,6 +149,7 @@
 		</div>
 		{/if}
 	</header>
+	{/if}
 
 	<!-- Main Page Content -->
 	<main class="flex-1 w-full max-w-7xl mx-auto focus:outline-none">

@@ -9,7 +9,10 @@ function computeSlug(title: string): string {
     .replace(/[^a-z0-9]/g, "");
 }
 
-export function getIconDetails(iconSlug: string | null) {
+export function getIconDetails(
+  iconSlug: string | null,
+  allowFallback: boolean = true,
+) {
   if (!iconSlug) return null;
 
   const slug = iconSlug.toLowerCase();
@@ -54,10 +57,13 @@ export function getIconDetails(iconSlug: string | null) {
     };
   }
 
+  if (!allowFallback) return null;
+
   // Fallback to walkxcode/dashboard-icons for services not in simple-icons (like filebrowser)
   return {
     hex: "#6B7280",
     url: `https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/${slug}.png`,
     isCustomUrl: true,
+    isFallback: true,
   };
 }

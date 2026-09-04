@@ -16,7 +16,7 @@
 		try {
 			const res = await fetch('/api/settings');
 			if (res.ok) {
-				const data = await res.json();
+				const data = await res.json(); console.log("FETCHED DATA:", data);
 				qbit_url = data.qbit_url || '';
 				qbit_username = data.qbit_username || '';
 				qbit_password = data.qbit_password || '';
