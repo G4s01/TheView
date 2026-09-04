@@ -338,11 +338,11 @@
 						{#if npmUrl && npmEmail && npmPassword}
 							<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
 								<span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
-								Connesso
+								Configurato
 							</span>
 						{:else}
 							<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
-								Non Connesso
+								Non Configurato
 							</span>
 						{/if}
 					</div>

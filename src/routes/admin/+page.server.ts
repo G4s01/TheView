@@ -22,10 +22,18 @@ export const actions: Actions = {
     const data = await request.formData();
     const name = data.get("name")?.toString();
     const url = data.get("url")?.toString();
-    const categoryId = data.get("categoryId")?.toString();
+    let categoryIdStr = data.get("categoryId")?.toString();
 
-    if (!name || !url || !categoryId) {
+    if (!name || !url) {
       return fail(400, { error: "Missing required fields" });
+    }
+
+    let categoryId: number;
+    if (!categoryIdStr) {
+      const [newCat] = await db.insert(categories).values({ name: "Generale" }).returning();
+      categoryId = newCat.id;
+    } else {
+      categoryId = parseInt(categoryIdStr);
     }
 
     const icon = data.get("icon")?.toString() || null;
@@ -37,7 +45,7 @@ export const actions: Actions = {
       await db.insert(services).values({
         name,
         url,
-        categoryId: parseInt(categoryId),
+        categoryId,
         icon,
         description,
         widgetType,
