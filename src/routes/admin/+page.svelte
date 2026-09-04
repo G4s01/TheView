@@ -443,7 +443,7 @@
 					{/if}
 
 					{#each discoveredServices as ds}
-						<li class="px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-center justify-between">
+						<li class="px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 							<div class="flex items-center">
 								<div class="flex-shrink-0">
 									<span class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold uppercase shadow-sm">
@@ -458,7 +458,7 @@
 									</span>
 								</div>
 							</div>
-							<div class="ml-4 flex items-center">
+							<div class="w-full sm:w-auto flex-1 flex justify-end">
 								{#if ds.added}
 									<span class="inline-flex items-center px-3 py-1.5 rounded-xl text-sm font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
 										<svg class="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -472,22 +472,53 @@
 											}
 											await update();
 										};
-									}} class="flex items-center gap-2">
-										<input type="hidden" name="name" value={ds.name}>
-										{#if !ds.url}
-											<input type="url" name="url" placeholder="URL mancante (es. https://...)" required class="block w-48 px-3 py-1.5 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:text-white" />
+									}} class="w-full">
+										<div class="flex items-center justify-end gap-2 mb-2">
+											<button type="button" onclick={() => ds.expanded = !ds.expanded} class="text-sm text-blue-600 hover:underline">
+												Personalizza
+											</button>
+											<button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-transform hover:scale-105">
+												<svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+												</svg>
+												Aggiungi
+											</button>
+										</div>
+										
+										{#if ds.expanded || !ds.url}
+											<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+												<div>
+													<label class="block text-xs font-medium text-gray-500 mb-1">Nome</label>
+													<input type="text" name="name" bind:value={ds.name} required class="block w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md" />
+												</div>
+												<div>
+													<label class="block text-xs font-medium text-gray-500 mb-1">URL (Richiesto)</label>
+													<input type="url" name="url" bind:value={ds.url} placeholder="es. https://..." required class="block w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md" />
+												</div>
+												<div>
+													<label class="block text-xs font-medium text-gray-500 mb-1">Descrizione</label>
+													<input type="text" name="description" bind:value={ds.description} class="block w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md" />
+												</div>
+												<div>
+													<label class="block text-xs font-medium text-gray-500 mb-1">Categoria</label>
+													<select name="categoryId" class="block w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md">
+														{#each localCategories as cat}
+															<option value={cat.id}>{cat.name}</option>
+														{/each}
+													</select>
+												</div>
+												<div>
+													<label class="block text-xs font-medium text-gray-500 mb-1">Icona</label>
+													<input type="text" name="icon" value={ds.name} class="block w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md" />
+												</div>
+											</div>
 										{:else}
+											<input type="hidden" name="name" value={ds.name}>
 											<input type="hidden" name="url" value={ds.url}>
+											<input type="hidden" name="description" value={ds.description}>
+											<input type="hidden" name="categoryId" value={localCategories.length > 0 ? localCategories[0].id : ''}>
+											<input type="hidden" name="icon" value={ds.name}>
 										{/if}
-										<input type="hidden" name="description" value={ds.description}>
-										<input type="hidden" name="categoryId" value={localCategories.length > 0 ? localCategories[0].id : ''}>
-										<input type="hidden" name="icon" value={ds.name}>
-										<button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-transform hover:scale-105">
-											<svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-											</svg>
-											Aggiungi
-										</button>
 									</form>
 								{/if}
 							</div>

@@ -129,6 +129,7 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
 
 export async function discoverAllServices(
   existingUrls: string[],
+  existingNames: string[],
   npmUrl?: string,
   npmEmail?: string,
   npmPassword?: string,
@@ -193,7 +194,7 @@ export async function discoverAllServices(
       const d = docker[dIndex];
       merged.push({
         ...n,
-        source: "npm" as any, // Visualizzeremo 'NPM + Docker' nella UI se necessario
+        source: "npm+docker" as any,
         description: `${d.description} (via NPM)`,
       });
       docker.splice(dIndex, 1);
@@ -214,6 +215,7 @@ export async function discoverAllServices(
   });
 
   const filtered = all.filter((s) => {
+    if (existingNames.includes(s.name.toLowerCase())) return false;
     if (!s.url) return true;
     try {
       const hostname = new URL(s.url).hostname.toLowerCase();

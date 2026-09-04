@@ -12,9 +12,10 @@ export const GET: RequestHandler = async ({ locals }) => {
 
   try {
     const existingServices = await db
-      .select({ url: services.url })
+      .select({ url: services.url, name: services.name })
       .from(services);
     const existingUrls = existingServices.map((s) => s.url);
+    const existingNames = existingServices.map((s) => s.name.toLowerCase());
 
     const settings = getSettings();
     const npmUrl = settings.npmUrl;
@@ -23,6 +24,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 
     const result = await discoverAllServices(
       existingUrls,
+      existingNames,
       npmUrl,
       npmEmail,
       npmPassword,
