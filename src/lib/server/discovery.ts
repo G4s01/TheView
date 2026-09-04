@@ -122,7 +122,7 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
             ) {
               for (const net of Object.values(
                 container.NetworkSettings.Networks,
-              )) {
+              ) as any[]) {
                 if (net.IPAddress) ips.push(net.IPAddress);
               }
             }
@@ -179,7 +179,10 @@ export async function discoverAllServices(
 ): Promise<{ services: DiscoveredService[]; npmError?: string }> {
   let npmError: string | undefined = undefined;
 
-  let npm: (DiscoveredService & { forwardHost?: string })[] = [];
+  let npm: (DiscoveredService & {
+    forwardHost?: string;
+    forwardPort?: number | string;
+  })[] = [];
   if (npmUrl && npmEmail && npmPassword) {
     try {
       const tokenRes = await fetch(
@@ -247,7 +250,8 @@ export async function discoverAllServices(
       const dImage = (d.description || "").toLowerCase();
 
       if (dName === fHost || dName === nName) return true;
-      if (d._ips && d._ips.includes(n.forwardHost)) return true;
+      if (d._ips && n.forwardHost && d._ips.includes(n.forwardHost))
+        return true;
 
       // 2. Corrispondenza per Porta Pubblica Esterna (Altamente Affidabile)
       // Se NPM sta puntando all'IP del server host anziché all'IP interno del container,
