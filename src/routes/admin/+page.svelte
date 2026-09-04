@@ -2,7 +2,7 @@
 	import AdminServices from './components/AdminServices.svelte';
 	import AdminCategories from './components/AdminCategories.svelte';
 	import AdminDiscovery from './components/AdminDiscovery.svelte';
-	import AdminSecurity from './components/AdminSecurity.svelte';
+	import AdminSettings from './components/AdminSettings.svelte';
 
 	let { data, form } = $props();
 	
@@ -48,6 +48,12 @@
 			>
 				Discovery
 			</button>
+			<button
+				onclick={() => activeTab = 'settings'}
+				class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm uppercase tracking-wider transition-colors {activeTab === 'settings' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'}"
+			>
+				Impostazioni
+			</button>
 		</nav>
 	</div>
 
@@ -67,11 +73,11 @@
 		</div>
 	{:else if activeTab === 'discovery'}
 		<div class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-			<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
-				<AdminSecurity />
-			</div>
-			
 			<AdminDiscovery bind:localCategories />
+		</div>
+	{:else if activeTab === 'settings'}
+		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
+			<AdminSettings />
 		</div>
 	{/if}
 </div>

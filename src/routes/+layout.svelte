@@ -133,19 +133,8 @@
 					{/if}
 				</div>
 
-				<!-- Theme Dropdown & Dark Mode Toggle Group -->
+				<!-- Theme Toggle (Dark/Light) -->
 				<div class="flex items-center space-x-1">
-					<select 
-						value={themeStore.theme}
-						onchange={(e) => themeStore.setTheme(e.currentTarget.value)}
-						class="bg-transparent text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border-none focus:ring-0 cursor-pointer appearance-none px-2 py-1"
-					>
-						{#each themes as theme}
-							<option value={theme.id} class="text-gray-900 bg-white">{theme.name}</option>
-						{/each}
-					</select>
-
-					<!-- Theme Toggle (Dark/Light) -->
 					<button 
 						class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
 						onclick={() => {

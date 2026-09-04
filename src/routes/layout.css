@@ -4,51 +4,64 @@
 
 /* Dracula Theme */
 :root[data-theme="dracula"] {
-  --color-gray-50: #f8f8f2;
+  --color-gray-50: #ffffff;
   --color-gray-100: #f8f8f2;
   --color-gray-200: #e2e2dc;
-  --color-gray-300: #6272a4;
+  --color-gray-300: #bfbfbf;
   --color-gray-400: #6272a4;
   --color-gray-500: #6272a4;
   --color-gray-600: #6272a4;
   --color-gray-700: #44475a;
-  --color-gray-800: #282a36;
+  --color-gray-800: #343746;
   --color-gray-900: #282a36;
 
   --color-blue-400: #8be9fd;
   --color-blue-500: #8be9fd;
   --color-blue-600: #bd93f9;
-  --color-blue-700: #bd93f9;
+  --color-blue-700: #9d73d9;
   --color-blue-800: #6272a4;
   --color-blue-900: #44475a;
 
+  --color-green-400: #50fa7b;
+  --color-green-500: #50fa7b;
+  --color-green-600: #3ee869;
+  --color-green-700: #2dce55;
+
   --color-red-400: #ff5555;
-  --color-red-600: #ff5555;
+  --color-red-500: #ff5555;
+  --color-red-600: #ff3333;
 }
 
-/* Nord Theme */
-:root[data-theme="nord"] {
-  --color-gray-50: #eceff4;
-  --color-gray-100: #e5e9f0;
-  --color-gray-200: #d8dee9;
-  --color-gray-300: #4c566a;
-  --color-gray-400: #434c5e;
-  --color-gray-500: #434c5e;
-  --color-gray-600: #3b4252;
-  --color-gray-700: #3b4252;
-  --color-gray-800: #2e3440;
-  --color-gray-900: #2e3440;
+/* Dracula Soft Theme */
+:root[data-theme="dracula-soft"] {
+  --color-gray-50: #ffffff;
+  --color-gray-100: #f8f8f2;
+  --color-gray-200: #e2e2dc;
+  --color-gray-300: #bfbfbf;
+  --color-gray-400: #6272a4;
+  --color-gray-500: #6272a4;
+  --color-gray-600: #6272a4;
+  --color-gray-700: #44475a;
+  --color-gray-800: #373a4b;
+  --color-gray-900: #282a36;
 
-  --color-blue-400: #88c0d0;
-  --color-blue-500: #81a1c1;
-  --color-blue-600: #5e81ac;
-  --color-blue-700: #5e81ac;
-  --color-blue-800: #434c5e;
-  --color-blue-900: #3b4252;
+  --color-blue-400: #a4ffff;
+  --color-blue-500: #a4ffff;
+  --color-blue-600: #d6acff;
+  --color-blue-700: #b68cff;
+  --color-blue-800: #6272a4;
+  --color-blue-900: #44475a;
 
-  --color-red-400: #bf616a;
-  --color-red-600: #bf616a;
+  --color-green-400: #69ff94;
+  --color-green-500: #69ff94;
+  --color-green-600: #49df74;
+  --color-green-700: #39cf64;
+
+  --color-red-400: #ff6e6e;
+  --color-red-500: #ff6e6e;
+  --color-red-600: #df4e4e;
 }
+
 
 /* Catppuccin Mocha */
 :root[data-theme="catppuccin"] {
@@ -87,4 +100,184 @@ body {
     "Open Sans",
     "Helvetica Neue",
     sans-serif;
+}
+
+/* Dracula PRO */
+:root[data-theme="dracula-pro"] {
+  --color-gray-50: #ffffff;
+  --color-gray-100: #F8F8F2;
+  --color-gray-200: #e2e2dc;
+  --color-gray-300: #bfbfbf;
+  --color-gray-400: #7970A9;
+  --color-gray-500: #7970A9;
+  --color-gray-600: #7970A9;
+  --color-gray-700: #454158;
+  --color-gray-800: #302d41;
+  --color-gray-900: #22212C;
+
+  --color-blue-400: #80FFEA;
+  --color-blue-500: #80FFEA;
+  --color-blue-600: #9580FF;
+  --color-blue-700: #806ae6;
+  --color-blue-800: #7970A9;
+  --color-blue-900: #454158;
+
+  --color-green-400: #8AFF80;
+  --color-green-500: #8AFF80;
+  --color-green-600: #70e666;
+  --color-green-700: #57cd4d;
+
+  --color-red-400: #FF9580;
+  --color-red-500: #FF9580;
+  --color-red-600: #e67c66;
+}
+
+/* Dracula PRO Alucard (Light) */
+:root[data-theme="dracula-alucard"] {
+  --color-gray-50: #fffbeb;
+  --color-gray-100: #e8e8f2;
+  --color-gray-200: #cfcfde;
+  --color-gray-300: #888888;
+  --color-gray-400: #6c664b;
+  --color-gray-500: #6c664b;
+  --color-gray-600: #6c664b;
+  --color-gray-700: #4d4d4d;
+  --color-gray-800: #2c2c2c;
+  --color-gray-900: #1f1f1f;
+
+  --color-blue-400: #036a96;
+  --color-blue-500: #036a96;
+  --color-blue-600: #644ac9;
+  --color-blue-700: #4f36b3;
+  --color-blue-800: #4d4d4d;
+  --color-blue-900: #2c2c2c;
+
+  --color-green-400: #14710a;
+  --color-green-500: #14710a;
+  --color-green-600: #0d5904;
+  --color-green-700: #084201;
+
+  --color-red-400: #cb3a2a;
+  --color-red-500: #cb3a2a;
+  --color-red-600: #b02a1b;
+}
+
+/* Dracula PRO Van Helsing */
+:root[data-theme="dracula-van-helsing"] {
+  --color-gray-50: #ffffff;
+  --color-gray-100: #F8F8F2;
+  --color-gray-200: #e2e2dc;
+  --color-gray-300: #bfbfbf;
+  --color-gray-400: #6272A4;
+  --color-gray-500: #6272A4;
+  --color-gray-600: #6272A4;
+  --color-gray-700: #333342;
+  --color-gray-800: #1e1f29;
+  --color-gray-900: #0B0D17;
+
+  --color-blue-400: #8BE9FD;
+  --color-blue-500: #8BE9FD;
+  --color-blue-600: #BD93F9;
+  --color-blue-700: #9d73d9;
+  --color-blue-800: #6272A4;
+  --color-blue-900: #333342;
+
+  --color-green-400: #50FA7B;
+  --color-green-500: #50FA7B;
+  --color-green-600: #3ee869;
+  --color-green-700: #2dce55;
+
+  --color-red-400: #FF5555;
+  --color-red-500: #FF5555;
+  --color-red-600: #e64040;
+}
+
+/* Catppuccin Latte */
+:root[data-theme="catppuccin-latte"] {
+  --color-gray-50: #eff1f5;
+  --color-gray-100: #e6e9ef;
+  --color-gray-200: #ccd0da;
+  --color-gray-300: #bcc0cc;
+  --color-gray-400: #acb0be;
+  --color-gray-500: #9ca0b0;
+  --color-gray-600: #8c8fa1;
+  --color-gray-700: #7c7f93;
+  --color-gray-800: #5c5f77;
+  --color-gray-900: #4c4f69;
+
+  --color-blue-400: #7dc4e4;
+  --color-blue-500: #1e66f5;
+  --color-blue-600: #7287fd;
+  --color-blue-700: #5c6bc0;
+  --color-blue-800: #5c5f77;
+  --color-blue-900: #4c4f69;
+
+  --color-green-400: #40a02b;
+  --color-green-500: #40a02b;
+  --color-green-600: #317f22;
+  --color-green-700: #256619;
+
+  --color-red-400: #d20f39;
+  --color-red-500: #d20f39;
+  --color-red-600: #a60c2d;
+}
+
+/* Catppuccin Frappe */
+:root[data-theme="catppuccin-frappe"] {
+  --color-gray-50: #c6d0f5;
+  --color-gray-100: #b5bfe2;
+  --color-gray-200: #a5adce;
+  --color-gray-300: #949cbb;
+  --color-gray-400: #838ba7;
+  --color-gray-500: #737994;
+  --color-gray-600: #626880;
+  --color-gray-700: #51576d;
+  --color-gray-800: #414559;
+  --color-gray-900: #303446;
+
+  --color-blue-400: #8caaee;
+  --color-blue-500: #8caaee;
+  --color-blue-600: #ca9ee6;
+  --color-blue-700: #b58ee0;
+  --color-blue-800: #51576d;
+  --color-blue-900: #414559;
+
+  --color-green-400: #a6d189;
+  --color-green-500: #a6d189;
+  --color-green-600: #8ebc70;
+  --color-green-700: #79a85b;
+
+  --color-red-400: #e78284;
+  --color-red-500: #e78284;
+  --color-red-600: #cf6a6d;
+}
+
+/* Catppuccin Macchiato */
+:root[data-theme="catppuccin-macchiato"] {
+  --color-gray-50: #cad3f5;
+  --color-gray-100: #b8c0e0;
+  --color-gray-200: #a5adcb;
+  --color-gray-300: #939ab7;
+  --color-gray-400: #8087a2;
+  --color-gray-500: #6e738d;
+  --color-gray-600: #5b6078;
+  --color-gray-700: #494d64;
+  --color-gray-800: #363a4f;
+  --color-gray-900: #24273a;
+
+  --color-blue-400: #8aadf4;
+  --color-blue-500: #8aadf4;
+  --color-blue-600: #c6a0f6;
+  --color-blue-700: #b38de0;
+  --color-blue-800: #494d64;
+  --color-blue-900: #363a4f;
+
+  --color-green-400: #a6da95;
+  --color-green-500: #a6da95;
+  --color-green-600: #8fc77d;
+  --color-green-700: #7bb569;
+
+  --color-red-400: #ed8796;
+  --color-red-500: #ed8796;
+  --color-red-600: #d77180;
 }
