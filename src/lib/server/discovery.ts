@@ -7,6 +7,7 @@ export interface DiscoveredService {
   url: string;
   source: "npm" | "docker";
   description?: string;
+  pingEnabled?: boolean;
 }
 
 // Interroga l'API di NPM per trovare i proxy hosts
@@ -62,7 +63,7 @@ export async function getNpmServices(
           id: `npm-${host.id}`,
           name: primaryDomain.split(".")[0],
           url: `${scheme}://${primaryDomain}`,
-          source: "npm",
+          source: "npm", pingEnabled: true,
           description: `Forward to ${host.forward_host}:${host.forward_port}`,
         });
       }
@@ -105,7 +106,7 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
               id: `docker-${container.Id.substring(0, 12)}`,
               name,
               url: "",
-              source: "docker",
+              source: "docker", pingEnabled: true,
               description: container.Image,
             });
           }
@@ -169,7 +170,7 @@ export async function discoverAllServices(
                 id: `npm-${host.id}`,
                 name: primaryDomain.split(".")[0],
                 url: `${scheme}://${primaryDomain}`,
-                source: "npm",
+                source: "npm", pingEnabled: true,
                 description: `Forward to ${host.forward_host}:${host.forward_port}`,
                 forwardHost: host.forward_host,
               });
@@ -194,7 +195,7 @@ export async function discoverAllServices(
       const d = docker[dIndex];
       merged.push({
         ...n,
-        source: "npm+docker" as any,
+        source: "npm+docker" as any, pingEnabled: true,
         description: `${d.description} (via NPM)`,
       });
       docker.splice(dIndex, 1);

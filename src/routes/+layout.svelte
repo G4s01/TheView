@@ -27,8 +27,9 @@
 		<div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
 			<!-- Logo -->
 			<div class="flex items-center space-x-4">
-				<a href="/" class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
-					TheView
+				<a href="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+					<img src="/favicon.svg" alt="TheView Logo" class="w-8 h-8" />
+					<span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">TheView</span>
 				</a>
 			</div>
 

@@ -135,10 +135,13 @@
 						</select>
 					</div>
 				</div>
-				<div class="flex items-center pt-2">
-					<input id="pingEnabled" name="pingEnabled" type="checkbox" checked class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600">
-					<label for="pingEnabled" class="ml-2 block text-sm font-bold text-gray-900 dark:text-gray-300 uppercase tracking-wider">Abilita Ping (Health Check)</label>
-				</div>
+					<div class="pt-2">
+						<label class="relative inline-flex items-center cursor-pointer">
+							<input type="checkbox" name="pingEnabled" checked class="sr-only peer">
+							<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+							<span class="ml-3 text-sm font-bold text-gray-900 dark:text-gray-300 uppercase tracking-wider">Abilita Ping (Health Check)</span>
+						</label>
+					</div>
 				<div class="pt-4 flex justify-end">
 					<button type="submit" class="inline-flex justify-center rounded-xl border border-transparent bg-green-600 py-2.5 px-6 text-sm font-bold text-white shadow-md shadow-green-500/30 hover:bg-green-700 hover:shadow-lg focus:outline-none uppercase tracking-wider transition-all hover:-translate-y-0.5">
 						Salva Servizio
@@ -232,9 +235,12 @@
 												<option value="qbittorrent" selected={service.widgetType === 'qbittorrent'}>qBittorrent</option>
 											</select>
 										</div>
-										<div class="flex items-center sm:col-span-2 pt-2">
-											<input id={"pingEnabled_edit_" + service.id} name="pingEnabled" type="checkbox" checked={service.pingEnabled} class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
-											<label for={"pingEnabled_edit_" + service.id} class="ml-2 block text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-300">Abilita Ping</label>
+										<div class="sm:col-span-2 pt-2">
+											<label class="relative inline-flex items-center cursor-pointer">
+												<input type="checkbox" name="pingEnabled" checked={service.pingEnabled} class="sr-only peer">
+												<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+												<span class="ml-3 text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-300">Abilita Ping</span>
+											</label>
 										</div>
 										<div class="sm:col-span-2 mt-4 flex justify-end space-x-3 border-t border-gray-100 dark:border-gray-700 pt-4">
 											<button type="button" onclick={() => editingServiceId = null} class="px-5 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-sm font-bold uppercase tracking-wider transition-colors shadow-sm">

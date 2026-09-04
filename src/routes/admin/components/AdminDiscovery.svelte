@@ -332,9 +332,12 @@
 									</select>
 								</div>
 								
-								<div class="flex items-center sm:col-span-2 pt-2">
-									<input id={"pingEnabled_dsc_" + ds.id} name="pingEnabled" type="checkbox" bind:checked={ds.pingEnabled} class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
-									<label for={"pingEnabled_dsc_" + ds.id} class="ml-2 block text-sm text-gray-900 dark:text-gray-300">Abilita Ping (Health Check)</label>
+								<div class="sm:col-span-2 pt-2">
+									<label class="relative inline-flex items-center cursor-pointer">
+										<input type="checkbox" name="pingEnabled" bind:checked={ds.pingEnabled} class="sr-only peer">
+										<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+										<span class="ml-3 text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-300">Abilita Ping (Health Check)</span>
+									</label>
 								</div>
 
 								<div class="sm:col-span-2 mt-2 flex justify-end">
