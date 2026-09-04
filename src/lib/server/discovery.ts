@@ -1,3 +1,4 @@
+import { getIconDetails } from "$lib/server/icons";
 import { rewriteUrlForDocker } from "$lib/server/dockerHost";
 import { env } from "$env/dynamic/private";
 import http from "http";
@@ -9,6 +10,7 @@ export interface DiscoveredService {
   source: "npm" | "docker";
   description?: string;
   pingEnabled?: boolean;
+  iconDetails?: any;
 }
 
 // Interroga l'API di NPM per trovare i proxy hosts
@@ -102,6 +104,23 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
           for (const container of containers) {
             let name = container.Names[0] || "";
             if (name.startsWith("/")) name = name.substring(1);
+            
+            // Estrai tutti gli IP del container per il merging
+            const ips = [];
+            if (container.NetworkSettings && container.NetworkSettings.Networks) {
+              for (const net of Object.values(container.NetworkSettings.Networks)) {
+                if (net.IPAddress) ips.push(net.IPAddress);
+              }
+            }
+            
+            // Estrai porte
+            const ports = [];
+            if (container.Ports) {
+              for (const p of container.Ports) {
+                if (p.PrivatePort) ports.push(p.PrivatePort);
+                if (p.PublicPort) ports.push(p.PublicPort);
+              }
+            }
 
             services.push({
               id: `docker-${container.Id.substring(0, 12)}`,
@@ -109,6 +128,8 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
               url: "",
               source: "docker", pingEnabled: true,
               description: container.Image,
+              _ips: ips,
+              _ports: ports
             });
           }
 
@@ -174,6 +195,7 @@ export async function discoverAllServices(
                 source: "npm", pingEnabled: true,
                 description: `Forward to ${host.forward_host}:${host.forward_port}`,
                 forwardHost: host.forward_host,
+                forwardPort: host.forward_port,
               });
             }
           }
@@ -191,9 +213,11 @@ export async function discoverAllServices(
   // Fondere NPM e Docker
   const merged: DiscoveredService[] = [];
   for (const n of npm) {
-    const dIndex = docker.findIndex(
-      (d) => d.name === n.forwardHost || d.name === n.name,
-    );
+    const dIndex = docker.findIndex((d) => {
+      if (d.name === n.forwardHost || d.name === n.name) return true;
+      if (d._ips && d._ips.includes(n.forwardHost)) return true;
+      return false;
+    });
     if (dIndex !== -1) {
       const d = docker[dIndex];
       merged.push({
@@ -229,5 +253,18 @@ export async function discoverAllServices(
     }
   });
 
-  return { services: filtered, npmError };
+  // Popola l'icona usando guess per ogni servizio
+  const enriched = filtered.map(s => {
+    // Cerchiamo di dedurre l'icona dal nome
+    let guess = s.name;
+    if (s.source === "docker" && s.description) {
+      // Usa il nome dell'immagine senza tag (es. linuxserver/qbittorrent -> qbittorrent)
+      const imageParts = s.description.split(':')[0].split('/');
+      guess = imageParts[imageParts.length - 1];
+    }
+    const iconDetails = getIconDetails(guess) || getIconDetails(s.name);
+    return { ...s, iconDetails, icon: guess };
+  });
+
+  return { services: enriched, npmError };
 }

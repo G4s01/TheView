@@ -1,4 +1,6 @@
 <script lang="ts">
+	import TextInput from '$lib/components/ui/TextInput.svelte';
+
 	import { enhance } from '$app/forms';
 	import { dndzone } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';

@@ -1,4 +1,8 @@
 <script lang="ts">
+	import TextInput from '$lib/components/ui/TextInput.svelte';
+	import SelectInput from '$lib/components/ui/SelectInput.svelte';
+	import ToggleInput from '$lib/components/ui/ToggleInput.svelte';
+
 	import { slide } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
@@ -8,6 +12,7 @@
 	let discoveredServices = $state<any[]>([]);
 	let npmError = $state<string | null>(null);
 	let isDiscovering = $state(false);
+	let expandedId = $state<string | null>(null);
 	let isNpmEditing = $state(true);
 	let showNpmPassword = $state(false);
 
@@ -81,7 +86,7 @@
 			</div>
 
 			{#if isNpmEditing}
-				<div transition:slide class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+				<div  class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
 					<div>
 						<label class="block text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1">Indirizzo NPM</label>
 						<div class="flex">
@@ -125,7 +130,7 @@
 					</button>
 				</div>
 			{:else}
-				<div transition:slide class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 dark:border-gray-700">
+				<div  class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 dark:border-gray-700">
 					<div class="flex items-center gap-3 mb-4 sm:mb-0">
 						<div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg">
 							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -196,14 +201,24 @@
 				</li>
 			{/if}
 
-			{#each discoveredServices as ds}
-				<li class="px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex flex-col gap-4">
+			{#each discoveredServices as ds, i}
+				<li class="px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex flex-col gap-4 cursor-pointer" onclick={() => { expandedId = expandedId === ds.id ? null : ds.id; }}>
 					<div class="flex items-center justify-between w-full">
 						<div class="flex items-center space-x-4 flex-1 mr-4">
 							<div class="flex-shrink-0">
-								<span class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold uppercase shadow-sm">
-									{ds.name.charAt(0)}
-								</span>
+								{#if ds.iconDetails}
+									<div class="h-10 w-10 rounded-xl flex items-center justify-center shadow-sm border border-gray-200 dark:border-gray-700" style="background-color: {ds.iconDetails.hex || '#4B5563'};">
+										{#if ds.iconDetails.isCustomUrl}
+											<img src={ds.iconDetails.url} alt={ds.name} class="h-10 w-10 rounded-xl object-contain bg-white dark:bg-gray-800 p-0.5" />
+										{:else}
+											<img src={ds.iconDetails.url} alt={ds.name} class="h-6 w-6" />
+										{/if}
+									</div>
+								{:else}
+									<span class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold uppercase shadow-sm">
+										{ds.name.charAt(0)}
+									</span>
+								{/if}
 							</div>
 							<div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 flex-1 min-w-0">
 								<div class="flex items-center gap-2">
@@ -232,8 +247,8 @@
 									Aggiunto
 								</span>
 							{:else}
-								<button type="button" onclick={() => ds.expanded = !ds.expanded} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-transform hover:scale-110">
-									{#if ds.expanded || !ds.url}
+								<button type="button" onclick={(e) => { e.stopPropagation(); expandedId = expandedId === ds.id ? null : ds.id; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-transform hover:scale-110">
+									{#if expandedId === ds.id}
 										<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
 									{:else}
 										<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
@@ -243,116 +258,92 @@
 						</div>
 					</div>
 					
-					{#if !ds.added && (ds.expanded || !ds.url)}
-						<form method="POST" action="?/createService" use:enhance={() => {
+					{#if !ds.added && expandedId === ds.id}
+						<form method="POST" action="?/createService" onclick={(e) => e.stopPropagation()} use:enhance={() => {
 							return async ({ result, update }) => {
 								if (result.type === 'success') {
 									ds.added = true;
-									ds.expanded = false;
+									expandedId = null;
 								}
 								await update();
 							};
 						}} class="w-full mt-2">
-							<div transition:slide|local={{ duration: 250 }} class="space-y-4 p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+							<div  class="space-y-4 p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 relative overflow-hidden">
 								<!-- Decoration line -->
 								<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
 
 								<div class="space-y-4 relative w-full pt-2">
 									<!-- Row 1: Nome, URL -->
 									<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div>
-											<label class="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Nome</label>
-											<input type="text" name="name" bind:value={ds.name} required class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500" />
-										</div>
-										<div>
-											<label class="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">URL (Richiesto)</label>
-											<input type="url" name="url" bind:value={ds.url} placeholder="es. https://..." required class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500" />
-										</div>
+										<TextInput label="Nome" name="name" bind:value={ds.name} required />
+										<TextInput label="URL (Richiesto)" type="url" name="url" bind:value={ds.url} required />
 									</div>
 									
-									<!-- Row 2: Categoria, Descrizione -->
-									<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div>
-											<label class="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Categoria</label>
-											<div class="flex flex-col gap-2">
-												{#if ds.isCreatingCategory}
-													<div class="flex gap-2" transition:slide|local>
-														<input type="text" bind:value={ds.newCategoryName} placeholder="Nome categoria" class="block w-full px-4 py-2.5 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500" />
-														<button type="button" onclick={async () => {
-															if (!ds.newCategoryName) { ds.isCreatingCategory = false; return; }
-															try {
-																const res = await fetch('/api/categories/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: ds.newCategoryName }) });
-																if (res.ok) {
-																	const data = await res.json();
-																	localCategories = [...localCategories, data.category];
-																	ds.categoryId = data.category.id;
-																	ds.isCreatingCategory = false;
-																}
-															} catch(e) { console.error(e); }
-														}} class="px-3 bg-green-600 text-white rounded-xl hover:bg-green-700 text-sm font-medium whitespace-nowrap">Crea</button>
-														<button type="button" onclick={() => ds.isCreatingCategory = false} class="px-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium">X</button>
-													</div>
-												{:else}
-													<select name="categoryId" bind:value={ds.categoryId} class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500" onchange={(e) => { if ((e.target as HTMLSelectElement).value === 'new_category_trigger') { ds.isCreatingCategory = true; ds.categoryId = ''; } }}>
-														<option value="" disabled selected={!ds.categoryId}>-- Seleziona Categoria --</option>
-														{#each localCategories as cat}
-															<option value={cat.id}>{cat.name}</option>
-														{/each}
-														<option value="new_category_trigger" class="font-bold text-blue-600">+ Nuova Categoria...</option>
-													</select>
-												{/if}
-											</div>
-										</div>
-										<div>
-											<label class="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Descrizione</label>
-											<input type="text" name="description" bind:value={ds.description} class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500" />
-										</div>
-									</div>
-									
-									<!-- Row 3: Icona, Widget, Ping, Button -->
-									<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-										<div>
-											<label class="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Icona</label>
-											<div class="flex gap-2">
-												<input type="text" name="icon" id={"icon_dsc_" + ds.id} value={ds.name} class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500" />
-												<label class="cursor-pointer bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 flex items-center justify-center transition-colors shadow-sm">
-													<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-													</svg>
-													<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
-														const target = e.target as HTMLInputElement; const file = target.files?.[0];
-														if (!file) return;
-														
-														const formData = new FormData();
-														formData.append('file', file);
-														const btn = target.parentElement as HTMLElement; btn.classList.add('opacity-50');
-														
-														try {
-															const res = await fetch('/api/icons', { method: 'POST', body: formData });
-															const data = await res.json();
-															if (data.url) { (document.getElementById("icon_dsc_" + ds.id) as HTMLInputElement).value = data.url; }
-														} catch (err) { console.error(err); } finally { btn.classList.remove('opacity-50'); }
-													}} />
-												</label>
-											</div>
-										</div>
-										<div>
-											<label class="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Widget</label>
-											<select name="widgetType" bind:value={ds.widgetType} class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500">
-												<option value="">Nessuno</option>
-												<option value="qbittorrent">qBittorrent</option>
-											</select>
-										</div>
-										<div class="pb-1.5 flex items-center">
-											<label class="relative inline-flex items-center cursor-pointer">
-												<input type="checkbox" name="pingEnabled" bind:checked={ds.pingEnabled} class="sr-only peer">
-												<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-												<span class="ml-3 text-xs sm:text-sm font-bold text-gray-900 dark:text-gray-300 uppercase tracking-wider">Ping</span>
+									<!-- Row 2: Icona, Descrizione -->
+									<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+										<div class="flex gap-2 items-center">
+											<TextInput label="Icona" name="icon" id={"icon_dsc_" + ds.id} value={ds.icon || ds.name} />
+											<label class="cursor-pointer border border-gray-200 dark:border-gray-700 rounded-xl w-[42px] h-[42px] flex items-center justify-center transition-colors shadow-sm shrink-0">
+												<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+												</svg>
+												<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
+													const target = e.target as HTMLInputElement; const file = target.files?.[0];
+													if (!file) return;
+													const formData = new FormData(); formData.append('file', file);
+													const btn = target.parentElement as HTMLElement; btn.classList.add('opacity-50');
+													try {
+														const res = await fetch('/api/icons', { method: 'POST', body: formData });
+														const data = await res.json();
+														if (data.url) { (document.getElementById("icon_dsc_" + ds.id) as HTMLInputElement).value = data.url; }
+													} catch (err) { console.error(err); } finally { btn.classList.remove('opacity-50'); }
+												}} />
 											</label>
 										</div>
-										<div class="flex justify-end">
-											<button type="submit" class="inline-flex items-center w-full justify-center px-4 py-2.5 border border-transparent rounded-xl shadow-md shadow-green-500/30 text-sm font-bold uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 hover:shadow-lg focus:outline-none transition-all">
-												<svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<TextInput label="Descrizione" name="description" bind:value={ds.description} />
+									</div>
+									
+									<!-- Row 3: Categoria, Ping, Widget, Button -->
+									<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+										<div class="flex flex-col gap-2">
+											{#if ds.isCreatingCategory}
+												<div class="flex gap-2 h-[42px]" >
+													<TextInput label="Nome" bind:value={ds.newCategoryName} />
+													<button type="button" onclick={async () => {
+														if (!ds.newCategoryName) { ds.isCreatingCategory = false; return; }
+														try {
+															const res = await fetch('/api/categories/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: ds.newCategoryName }) });
+															if (res.ok) {
+																const data = await res.json();
+																localCategories = [...localCategories, data.category];
+																ds.categoryId = data.category.id;
+																ds.isCreatingCategory = false;
+															}
+														} catch(e) { console.error(e); }
+													}} class="px-3 bg-green-600 text-white rounded-xl hover:bg-green-700 text-sm font-medium">Ok</button>
+													<button type="button" onclick={() => ds.isCreatingCategory = false} class="px-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium">X</button>
+												</div>
+											{:else}
+												<SelectInput label="Categoria" name="categoryId" bind:value={ds.categoryId} onchange={(e) => { if ((e.target as HTMLSelectElement).value === 'new_category_trigger') { ds.isCreatingCategory = true; ds.categoryId = ''; } }}>
+													<option value="" disabled selected={!ds.categoryId}>-- Seleziona --</option>
+													{#each localCategories as cat}
+														<option value={cat.id}>{cat.name}</option>
+													{/each}
+													<option value="new_category_trigger" class="font-bold text-blue-600">+ Nuova...</option>
+												</SelectInput>
+											{/if}
+										</div>
+
+										<ToggleInput label="Ping" name="pingEnabled" bind:checked={ds.pingEnabled} />
+
+										<SelectInput label="Widget" name="widgetType" bind:value={ds.widgetType}>
+											<option value="">Nessuno</option>
+											<option value="qbittorrent">qBittorrent</option>
+										</SelectInput>
+
+										<div>
+											<button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-xl shadow-md shadow-green-500/30 text-sm font-bold uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 hover:shadow-lg focus:outline-none transition-all h-[42px]">
+												<svg class="-ml-1 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 												</svg>
 												Aggiungi
@@ -361,7 +352,7 @@
 									</div>
 								</div>
 							</div>
-						</form>
+</form>
 					{/if}
 				</li>
 			{/each}
