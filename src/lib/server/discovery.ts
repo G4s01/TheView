@@ -180,7 +180,9 @@ export async function discoverAllServices(
         }
       }
     } catch (e: any) {
-      npmError = `Network error: ${e.message}`;
+      const cause = e.cause ? ` (Cause: ${e.cause.message || e.cause})` : '';
+      npmError = `Network error: ${e.message}${cause}`;
+      console.error("NPM Fetch Error Details:", e, e.cause);
     }
   }
 

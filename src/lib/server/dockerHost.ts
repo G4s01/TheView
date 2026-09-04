@@ -25,10 +25,10 @@ export function rewriteUrlForDocker(urlStr: string): string {
   try {
     const url = new URL(urlStr);
     if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
-      if (fs.existsSync('/.dockerenv')) {
-        url.hostname = getDockerHostIp();
-        return url.toString();
-      }
+      const newIp = getDockerHostIp();
+      url.hostname = newIp;
+      console.log(`[TheView Network] Rewriting ${urlStr} -> ${url.toString()} (Docker Host Gateway)`);
+      return url.toString();
     }
   } catch (e) {
     // Invalid URL
