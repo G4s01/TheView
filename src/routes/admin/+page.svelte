@@ -40,7 +40,7 @@
 	
 	// Carica credenziali dal server
 	$effect(() => {
-		if (activeTab === 'discovery' && !isSettingsLoaded) {
+		if (!isSettingsLoaded) {
 			isSettingsLoaded = true;
 			fetch('/api/settings').then(r => r.json()).then(data => {
 				if (data.npmUrl) {
@@ -320,7 +320,7 @@
 							onclick={async () => {
 								if (!adminPassword) return alert("Inserisci una password!");
 								try {
-									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminPassword, npmUrl, npmEmail, npmPassword }) });
+									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminPassword, npmUrl: npmHost ? npmScheme + npmHost : '', npmEmail, npmPassword }) });
 									adminPassword = '';
 									alert("Password modificata!");
 								} catch(e) { alert("Errore!"); }
@@ -357,7 +357,7 @@
 						<div>
 							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Indirizzo NPM</label>
 							<div class="flex">
-									<select bind:value={npmScheme} class="block w-[85px] px-2 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-l-xl focus:ring-2 focus:ring-blue-500 dark:text-white border-r-0">
+									<select bind:value={npmScheme} class="block w-24 px-2 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-l-xl focus:ring-2 focus:ring-blue-500 dark:text-white border-r-0">
 										<option value="http://">http://</option>
 										<option value="https://">https://</option>
 									</select>
@@ -378,6 +378,7 @@
 						{#if npmHost && npmEmail && npmPassword}
 							<button 
 								onclick={async () => {
+									if (!confirm("Sei sicuro di voler disconnettere NPM e cancellare le credenziali salvate?")) return;
 									npmHost = ''; npmEmail = ''; npmPassword = '';
 									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: npmHost ? npmScheme + npmHost : '', npmEmail, npmPassword }) });
 								}}

@@ -170,7 +170,7 @@ export async function discoverAllServices(
                 url: `${scheme}://${primaryDomain}`,
                 source: "npm",
                 description: `Forward to ${host.forward_host}:${host.forward_port}`,
-                forwardHost: host.forward_host
+                forwardHost: host.forward_host,
               });
             }
           }
@@ -182,17 +182,19 @@ export async function discoverAllServices(
   }
 
   const docker = await getDockerServices();
-  
+
   // Fondere NPM e Docker
   const merged: DiscoveredService[] = [];
   for (const n of npm) {
-    const dIndex = docker.findIndex(d => d.name === n.forwardHost || d.name === n.name);
+    const dIndex = docker.findIndex(
+      (d) => d.name === n.forwardHost || d.name === n.name,
+    );
     if (dIndex !== -1) {
       const d = docker[dIndex];
       merged.push({
         ...n,
         source: "npm" as any, // Visualizzeremo 'NPM + Docker' nella UI se necessario
-        description: `${d.description} (via NPM)`
+        description: `${d.description} (via NPM)`,
       });
       docker.splice(dIndex, 1);
     } else {
