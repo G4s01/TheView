@@ -16,10 +16,18 @@
 	let expandedId = $state<string | null>(null);
 	let isNpmEditing = $state(true);
 	let showNpmPassword = $state(false);
+	let showNpmDisconnectModal = $state(false);
 
 	let npmUrlCombined = $state('');
 	let npmEmail = $state('');
 	let npmPassword = $state('');
+
+	async function confirmNpmDisconnect() {
+		showNpmDisconnectModal = false;
+		npmUrlCombined = ''; npmEmail = ''; npmPassword = '';
+		isNpmEditing = true;
+		await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: '', npmEmail: '', npmPassword: '' }) });
+	}
 
 	onMount(async () => {
 		const res = await fetch('/api/settings');
@@ -131,12 +139,10 @@
 					</div>
 					<div class="flex items-center space-x-3 w-full sm:w-auto justify-end">
 						<button 
-							onclick={async () => {
-								if (!confirm("Sei sicuro di voler disconnettere NPM e cancellare le credenziali salvate?")) return;
-								npmUrlCombined = ''; npmEmail = ''; npmPassword = '';
-								isNpmEditing = true;
-								await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: '', npmEmail: '', npmPassword: '' }) });
-							}} 
+							type="button"
+							aria-label="Disconnetti NPM"
+							title="Disconnetti NPM"
+							onclick={() => showNpmDisconnectModal = true} 
 							class="text-red-500 hover:text-red-600 dark:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
 						>
 							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -199,6 +205,8 @@
 			{/if}
 
 			{#each discoveredServices as ds, i}
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 				<li class="px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex flex-col gap-4 cursor-pointer" onclick={() => { expandedId = expandedId === ds.id ? null : ds.id; }}>
 					<div class="flex items-center justify-between w-full">
 						<div class="flex items-center space-x-4 flex-1 min-w-0 mr-4">
@@ -244,7 +252,7 @@
 									Aggiunto
 								</span>
 							{:else}
-								<button type="button" onclick={(e) => { e.stopPropagation(); expandedId = expandedId === ds.id ? null : ds.id; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-transform hover:scale-110">
+								<button type="button" onclick={(e: Event) => { e.stopPropagation(); expandedId = expandedId === ds.id ? null : ds.id; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-transform hover:scale-110">
 									{#if expandedId === ds.id}
 										<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
 									{:else}
@@ -256,8 +264,10 @@
 					</div>
 					
 					{#if !ds.added && expandedId === ds.id}
-						<form novalidate method="POST" action="?/createService" onclick={(e) => e.stopPropagation()} oninput={(e) => e.currentTarget.classList.remove('show-errors')} onchange={(e) => e.currentTarget.classList.remove('show-errors')} onsubmit={(e) => {
-							const form = e.currentTarget;
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+						<form novalidate method="POST" action="?/createService" onclick={(e: Event) => e.stopPropagation()} oninput={(e: Event) => (e.currentTarget as HTMLFormElement).classList.remove('show-errors')} onchange={(e: Event) => (e.currentTarget as HTMLFormElement).classList.remove('show-errors')} onsubmit={(e: Event) => {
+							const form = e.currentTarget as HTMLFormElement;
 							form.classList.remove('show-errors');
 							if (!form.checkValidity()) {
 								e.preventDefault();
@@ -333,7 +343,7 @@
 													<button type="button" onclick={() => ds.isCreatingCategory = false} class="px-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium">X</button>
 												</div>
 											{:else}
-												<SelectInput label="Categoria" name="categoryId" bind:value={ds.categoryId} required options={[{value: '', label: '-- Seleziona --'}, ...localCategories.map(c => ({value: c.id, label: c.name})), {value: 'new_category_trigger', label: '+ Nuova...', class: 'font-bold text-blue-600'}]} onchange={(val) => { if (val === 'new_category_trigger') { ds.isCreatingCategory = true; ds.categoryId = ''; } }} />
+												<SelectInput label="Categoria" name="categoryId" bind:value={ds.categoryId} required options={[{value: '', label: '-- Seleziona --'}, ...localCategories.map((c: any) => ({value: c.id, label: c.name})), {value: 'new_category_trigger', label: '+ Nuova...', class: 'font-bold text-blue-600'}]} onchange={(val) => { if (val === 'new_category_trigger') { ds.isCreatingCategory = true; ds.categoryId = ''; } }} />
 											{/if}
 										</div>
 
@@ -362,3 +372,37 @@
 
 </div>
 </div>
+
+{#if showNpmDisconnectModal}
+	<div class="fixed inset-0 bg-gray-900/50 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+		<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-sm w-full overflow-hidden transform transition-all border border-gray-100 dark:border-gray-700 p-6" role="dialog" aria-modal="true">
+			<div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
+				<svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+			</div>
+			
+			<h3 class="text-lg font-bold text-center text-gray-900 dark:text-white mb-2">
+				Disconnetti NPM
+			</h3>
+			<p class="text-sm text-center text-gray-500 dark:text-gray-400 mb-6">
+				Attenzione: disconnettendo Nginx Proxy Manager eliminerai inesorabilmente le <strong>credenziali salvate</strong>. Vuoi davvero procedere?
+			</p>
+			
+			<div class="flex gap-3 justify-center w-full">
+				<button 
+					type="button" 
+					class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-bold uppercase tracking-wider rounded-xl transition-colors"
+					onclick={() => showNpmDisconnectModal = false}
+				>
+					Annulla
+				</button>
+				<button 
+					type="button" 
+					class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-bold uppercase tracking-wider rounded-xl shadow-md shadow-red-500/30 transition-colors"
+					onclick={confirmNpmDisconnect}
+				>
+					Disconnetti
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}

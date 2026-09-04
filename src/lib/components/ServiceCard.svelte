@@ -118,12 +118,16 @@
 	href={appState.isEditMode ? undefined : service.url} 
 	target={appState.isEditMode ? '_self' : '_blank'} 
 	rel="noopener noreferrer"
+	role={appState.isEditMode ? 'button' : undefined}
+	tabindex={appState.isEditMode ? 0 : undefined}
 	class="flex flex-col h-full bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-all duration-200"
 	style="background-color: {bgColor}; border-color: {borderColor};"
-	onclick={(e) => { if (appState.isEditMode) e.preventDefault(); }}
+	onclick={(e: Event) => { if (appState.isEditMode) e.preventDefault(); }}
 >
 	{#if isExpanded}
-		<form novalidate onsubmit={saveEdit} oninput={(e) => e.currentTarget.classList.remove('show-errors')} onchange={(e) => e.currentTarget.classList.remove('show-errors')} class="flex flex-col gap-4 w-full h-full justify-between" onclick={(e) => e.stopPropagation()}>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+		<form novalidate onsubmit={saveEdit} oninput={(e: Event) => (e.currentTarget as HTMLFormElement).classList.remove('show-errors')} onchange={(e: Event) => (e.currentTarget as HTMLFormElement).classList.remove('show-errors')} class="flex flex-col gap-4 w-full h-full justify-between" onclick={(e: Event) => e.stopPropagation()}>
 			<div class="space-y-4">
 				<TextInput label="Nome" bind:value={editName} required />
 				<UrlInput label="URL" bind:value={editUrl} required />
@@ -134,12 +138,12 @@
 					</div>
 					<label class="cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl px-4 flex items-center justify-center transition-colors shadow-sm shrink-0 h-full">
 						<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-						<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
-							const target = e.target;
+						<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e: Event) => {
+							const target = e.target as HTMLInputElement;
 							const file = target?.files?.[0];
 							if (!file) return;
 							const formData = new FormData(); formData.append('file', file);
-							const btn = target.parentElement; btn.classList.add('opacity-50');
+							const btn = target.parentElement as HTMLElement; btn.classList.add('opacity-50');
 							try {
 								const res = await fetch('/api/icons', { method: 'POST', body: formData });
 								const data = await res.json();
@@ -151,7 +155,7 @@
 				
 				<TextInput label="Descrizione" bind:value={editDesc} />
 				
-				<SelectInput name="categoryId" label="Categoria" bind:value={editCat} required options={categories.map(c => ({value: c.id, label: c.name}))} />
+				<SelectInput name="categoryId" label="Categoria" bind:value={editCat} required options={categories.map((c: any) => ({value: c.id, label: c.name}))} />
 				
 				<div class="flex gap-4">
 					<div class="flex-1">
@@ -196,11 +200,13 @@
 			</div>
 
 			{#if appState.isEditMode && !isExpanded}
-				<label class="absolute -bottom-1.5 -right-1.5 bg-blue-600 text-white p-1 rounded-full shadow cursor-pointer hover:bg-blue-700 z-20 border-2 border-white dark:border-gray-800" title="Cambia Icona (Upload)" onclick={(e) => e.stopPropagation()}>
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+				<label class="absolute -bottom-1.5 -right-1.5 bg-blue-600 text-white p-1 rounded-full shadow cursor-pointer hover:bg-blue-700 z-20 border-2 border-white dark:border-gray-800" title="Cambia Icona (Upload)" onclick={(e: Event) => e.stopPropagation()}>
 					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
 					</svg>
-					<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
+					<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e: Event) => {
 						const target = e.target as HTMLInputElement;
 						const file = target?.files?.[0];
 						if (!file) return;
@@ -250,8 +256,8 @@
 				type="text" 
 				value={service.name} 
 				class="text-base font-semibold text-gray-900 dark:text-white bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 w-full px-1 py-0.5"
-				onclick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-				onchange={async (e) => {
+				onclick={(e: Event) => { e.preventDefault(); e.stopPropagation(); }}
+				onchange={async (e: Event) => {
 					const target = e.target as HTMLInputElement;
 					if (target.value === service.name || !target.value.trim()) return;
 					try {
@@ -277,7 +283,7 @@
 	</div>
 
 	{#if service.widgetType === 'qbittorrent'}
-		<div role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
+		<div role="presentation" onclick={(e: Event) => e.preventDefault()} onkeydown={(e: Event) => e.stopPropagation()}>
 			<QBittorrentWidget />
 		</div>
 	{/if}

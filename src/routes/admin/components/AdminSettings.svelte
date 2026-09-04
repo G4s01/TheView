@@ -1,6 +1,8 @@
 <script lang="ts">
 	import TextInput from '$lib/components/ui/TextInput.svelte';
 	import UrlInput from '$lib/components/ui/UrlInput.svelte';
+	import ToggleInput from '$lib/components/ui/ToggleInput.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	import { slide } from 'svelte/transition';
 	import { themeStore, themes } from '$lib/client/themeStore.svelte';
@@ -11,6 +13,12 @@
 	let qbit_password = $state('');
 	let isSavingQbit = $state(false);
 	let showQbitPassword = $state(false);
+	
+	let showCategoriesDesktop = $state(true);
+	let showCategoriesMobile = $state(true);
+	let customNavbarTitleDesktop = $state('');
+	let customNavbarTitleMobile = $state('');
+	let isSavingAppearance = $state(false);
 
 	onMount(async () => {
 		try {
@@ -20,6 +28,12 @@
 				qbit_url = data.qbit_url || '';
 				qbit_username = data.qbit_username || '';
 				qbit_password = data.qbit_password || '';
+				showCategoriesDesktop = data.showCategoriesDesktop !== false;
+				showCategoriesMobile = data.showCategoriesMobile !== false;
+				
+				// Migration from old customNavbarTitle
+				customNavbarTitleDesktop = data.customNavbarTitleDesktop || data.customNavbarTitle || '';
+				customNavbarTitleMobile = data.customNavbarTitleMobile || data.customNavbarTitle || '';
 			}
 		} catch (e) {
 			console.error(e);
@@ -40,6 +54,26 @@
 			alert('Errore di rete.');
 		} finally {
 			isSavingQbit = false;
+		}
+	}
+
+	async function saveAppearanceSettings() {
+		isSavingAppearance = true;
+		try {
+			const res = await fetch('/api/settings', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ showCategoriesDesktop, showCategoriesMobile, customNavbarTitleDesktop, customNavbarTitleMobile })
+			});
+			if (res.ok) {
+				await invalidateAll();
+			} else {
+				alert('Errore durante il salvataggio.');
+			}
+		} catch (e) {
+			alert('Errore di rete.');
+		} finally {
+			isSavingAppearance = false;
 		}
 	}
 
@@ -108,6 +142,76 @@
 						</div>
 					</div>
 				{/each}
+			</div>
+		</div>
+	</div>
+
+	<!-- Appearance Section -->
+	<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
+		<div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
+			<div class="flex items-center space-x-3 mb-4">
+				<div class="p-2 bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 rounded-lg">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+				</div>
+				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Aspetto e Navigazione</h3>
+			</div>
+			
+			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Personalizza l'aspetto della navbar e della barra di navigazione.</p>
+			
+			<div class="space-y-6">
+				<h4 class="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2">Home Navbar</h4>
+				
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+						<div>
+							<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Categorie su Desktop</h4>
+							<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Mostra la topbar con le categorie sui display grandi</p>
+						</div>
+						<ToggleInput bind:checked={showCategoriesDesktop} />
+					</div>
+					
+					<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+						<div>
+							<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Categorie su Mobile</h4>
+							<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Mostra la bottom bar con le categorie su smartphone</p>
+						</div>
+						<ToggleInput bind:checked={showCategoriesMobile} />
+					</div>
+				</div>
+
+				{#if !showCategoriesDesktop || !showCategoriesMobile}
+					<div transition:slide class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+						<TextInput 
+							label="Titolo Sostitutivo Desktop" 
+							bind:value={customNavbarTitleDesktop} 
+							placeholder="Es. TheView Dashboard" 
+							disabled={showCategoriesDesktop}
+							class={showCategoriesDesktop ? 'opacity-50 cursor-not-allowed' : ''}
+						/>
+						<TextInput 
+							label="Titolo Sostitutivo Mobile" 
+							bind:value={customNavbarTitleMobile} 
+							placeholder="Es. TheView" 
+							disabled={showCategoriesMobile}
+							class={showCategoriesMobile ? 'opacity-50 cursor-not-allowed' : ''}
+						/>
+					</div>
+				{/if}
+				
+				<div class="flex justify-end pt-2">
+					<button 
+						onclick={saveAppearanceSettings}
+						disabled={isSavingAppearance}
+						class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 border border-transparent rounded-xl shadow-md shadow-purple-500/30 text-sm font-bold uppercase tracking-wider text-white bg-purple-600 hover:bg-purple-700 focus:outline-none transition-all disabled:opacity-50"
+					>
+						{#if isSavingAppearance}
+							<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+							Salvataggio...
+						{:else}
+							Salva Impostazioni Aspetto
+						{/if}
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>

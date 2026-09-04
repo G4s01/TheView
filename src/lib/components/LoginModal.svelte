@@ -43,6 +43,8 @@
 
 {#if show}
 	<!-- Backdrop -->
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div 
 		class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
 		transition:fade={{ duration: 150 }}
@@ -50,11 +52,14 @@
 		role="presentation"
 	>
 		<!-- Modal -->
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div 
 			class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-sm w-full p-6 border border-gray-200 dark:border-gray-700"
 			transition:scale={{ duration: 150, start: 0.95 }}
-			onclick={(e) => e.stopPropagation()}
+			onclick={(e: Event) => e.stopPropagation()}
 			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
 		>
 			<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Modalità Modifica</h2>
 			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Inserisci la password di amministrazione per abilitare le modifiche.</p>

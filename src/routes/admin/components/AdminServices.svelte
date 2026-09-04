@@ -124,14 +124,14 @@
 							<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
 							</svg>
-							<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
-								const target = e.target; const file = target.files?.[0]; if (!file) return;
+							<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e: Event) => {
+								const target = e.target as HTMLInputElement; const file = target?.files?.[0]; if (!file) return;
 								const formData = new FormData(); formData.append('file', file);
-								const btn = target.parentElement; btn.classList.add('opacity-50');
+								const btn = target.parentElement as HTMLElement; btn.classList.add('opacity-50');
 								try {
 									const res = await fetch('/api/icons', { method: 'POST', body: formData });
 									const data = await res.json();
-									if (data.url) (document.getElementById("icon")).value = data.url;
+									if (data.url) (document.getElementById("icon") as HTMLInputElement).value = data.url;
 								} catch (err) { console.error(err); } finally { btn.classList.remove('opacity-50'); }
 							}} />
 						</label>
@@ -163,7 +163,7 @@
 								<button type="button" onclick={() => isCreatingCategory = false} class="px-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium">X</button>
 							</div>
 						{:else}
-							<SelectInput label="Categoria" name="categoryId" bind:value={newServiceCategoryId} required options={[{value: '', label: '-- Seleziona --'}, ...localCategories.map(c => ({value: c.id, label: c.name})), {value: 'new_category_trigger', label: '+ Nuova...', class: 'font-bold text-blue-600'}]} onchange={(val) => { if (val === 'new_category_trigger') { isCreatingCategory = true; newServiceCategoryId = ''; } }} />
+							<SelectInput label="Categoria" name="categoryId" bind:value={newServiceCategoryId} required options={[{value: '', label: '-- Seleziona --'}, ...localCategories.map((c: any) => ({value: c.id, label: c.name})), {value: 'new_category_trigger', label: '+ Nuova...', class: 'font-bold text-blue-600'}]} onchange={(val) => { if (val === 'new_category_trigger') { isCreatingCategory = true; newServiceCategoryId = ''; } }} />
 						{/if}
 					</div>
 
@@ -244,15 +244,15 @@
 													<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
 													</svg>
-													<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
-														const target = e.target; const file = target.files?.[0];
+													<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e: Event) => {
+														const target = e.target as HTMLInputElement; const file = target?.files?.[0];
 														if (!file) return;
 														const formData = new FormData(); formData.append('file', file);
-														const btn = target.parentElement; btn.classList.add('opacity-50');
+														const btn = target.parentElement as HTMLElement; btn.classList.add('opacity-50');
 														try {
 															const res = await fetch('/api/icons', { method: 'POST', body: formData });
 															const data = await res.json();
-															if (data.url) (document.getElementById("icon_edit_" + service.id)).value = data.url;
+															if (data.url) (document.getElementById("icon_edit_" + service.id) as HTMLInputElement).value = data.url;
 														} catch (err) { console.error(err); } finally { btn.classList.remove('opacity-50'); }
 													}} />
 												</label>
@@ -262,7 +262,7 @@
 										
 										<!-- Row 3: Categoria, Ping, Widget, Button -->
 										<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-											<SelectInput label="Categoria" name="categoryId" value={service.categoryId} required options={localCategories.map(c => ({value: c.id, label: c.name}))} />
+											<SelectInput label="Categoria" name="categoryId" value={service.categoryId} required options={localCategories.map((c: any) => ({value: c.id, label: c.name}))} />
 
 											<ToggleInput label="Ping" name="pingEnabled" value="true" checked={service.pingEnabled} />
 

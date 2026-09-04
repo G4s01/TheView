@@ -64,14 +64,20 @@
 				{:else}
 					<div class="relative w-full overflow-hidden flex items-center" style="-webkit-mask-image: linear-gradient(to right, transparent, black 32px, black calc(100% - 64px), transparent); mask-image: linear-gradient(to right, transparent, black 32px, black calc(100% - 64px), transparent);">
 						<nav class="flex items-center space-x-2 w-full justify-start md:justify-center overflow-x-auto no-scrollbar relative z-0 px-2">
-						{#each categories as category}
-							{#if category.count > 0 || appState.isEditMode}
-								<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 hover:border-gray-300 dark:hover:bg-gray-800/50 dark:hover:border-gray-600">
-									{category.name}
-								</a>
-							{/if}
-						{/each}
-					</nav>
+						{#if data.showCategoriesDesktop}
+							{#each categories as category}
+								{#if category.count > 0 || appState.isEditMode}
+									<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 hover:border-gray-300 dark:hover:bg-gray-800/50 dark:hover:border-gray-600">
+										{category.name}
+									</a>
+								{/if}
+							{/each}
+						{:else if data.customNavbarTitleDesktop}
+							<span class="px-4 py-2 text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 whitespace-nowrap">
+								{data.customNavbarTitleDesktop}
+							</span>
+						{/if}
+						</nav>
 					</div>
 				{/if}
 			</div>
@@ -136,13 +142,19 @@
 		{:else}
 		<div class="md:hidden relative border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/90 w-full" style="-webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent);">
 			<nav class="flex items-center space-x-2 px-4 py-3 overflow-x-auto no-scrollbar relative z-0">
-			{#each categories as category}
-				{#if category.count > 0 || appState.isEditMode}
-				<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 hover:border-gray-300 dark:hover:bg-gray-800/50 dark:hover:border-gray-600">
-					{category.name}
-				</a>
-				{/if}
-			{/each}
+			{#if data.showCategoriesMobile}
+				{#each categories as category}
+					{#if category.count > 0 || appState.isEditMode}
+					<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 hover:border-gray-300 dark:hover:bg-gray-800/50 dark:hover:border-gray-600">
+						{category.name}
+					</a>
+					{/if}
+				{/each}
+			{:else if data.customNavbarTitleMobile}
+				<div class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 whitespace-nowrap">
+					{data.customNavbarTitleMobile}
+				</div>
+			{/if}
 			<!-- spacer for right padding scroll -->
 			<div class="w-1 shrink-0"></div>
 			</nav>

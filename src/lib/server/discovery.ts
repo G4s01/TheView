@@ -7,7 +7,7 @@ export interface DiscoveredService {
   id: string;
   name: string;
   url: string;
-  source: "npm" | "docker";
+  source: "npm" | "docker" | "npm+docker";
   description?: string;
   pingEnabled?: boolean;
   iconDetails?: any;
@@ -256,13 +256,13 @@ export async function discoverAllServices(
   // Fondere NPM e Docker
   const merged: DiscoveredService[] = [];
   for (const n of npm) {
+    const nName = n.name.toLowerCase();
     const dIndex = docker.findIndex((d) => {
       // 0. Match Deterministico Esplicito (via Label Docker)
       if (d._npmMatch && d._npmMatch === nName) return true;
 
       // 1. Corrispondenza per Hostname o IP interno
       const fHost = (n.forwardHost || "").toLowerCase();
-      const nName = n.name.toLowerCase();
       const dName = d.name.toLowerCase();
       const dImage = (d.description || "").toLowerCase();
 

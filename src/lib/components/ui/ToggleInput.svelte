@@ -1,6 +1,6 @@
 <script lang="ts">
 	interface Props {
-		label: string;
+		label?: string;
 		checked?: boolean | null;
 		activeText?: string;
 		inactiveText?: string;
@@ -8,7 +8,7 @@
 		value?: string;
 	}
 
-	let { label, checked = $bindable(), activeText = 'ON', inactiveText = 'OFF', name, value }: Props = $props();
+	let { label = '', checked = $bindable(), activeText = 'ON', inactiveText = 'OFF', name, value }: Props = $props();
 </script>
 
 <div class="relative w-full h-[42px]">
@@ -29,7 +29,9 @@
             <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
         </label>
     </button>
-    <label class="absolute text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 transform -translate-y-[21px] top-2.5 z-10 origin-[0] bg-white dark:bg-gray-800 px-1.5 start-3 pointer-events-none">
+    {#if label}
+    <span class="absolute text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 transform -translate-y-[21px] top-2.5 z-10 origin-[0] bg-white dark:bg-gray-800 px-1.5 start-3 pointer-events-none">
         {label}
-    </label>
+    </span>
+    {/if}
 </div>

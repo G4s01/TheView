@@ -26,5 +26,11 @@ export async function load({ locals }) {
     categories: categoriesWithCount,
     isAdmin: locals.isAdmin,
     needsSetup,
+    showCategoriesDesktop: settings.showCategoriesDesktop !== false,
+    showCategoriesMobile: settings.showCategoriesMobile !== false,
+    customNavbarTitleDesktop:
+      settings.customNavbarTitleDesktop || settings.customNavbarTitle || "",
+    customNavbarTitleMobile:
+      settings.customNavbarTitleMobile || settings.customNavbarTitle || "",
   };
 }
