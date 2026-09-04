@@ -5,9 +5,10 @@
 		activeText?: string;
 		inactiveText?: string;
 		name?: string;
+		value?: string;
 	}
 
-	let { label, checked = $bindable(), activeText = 'ON', inactiveText = 'OFF', name }: Props = $props();
+	let { label, checked = $bindable(), activeText = 'ON', inactiveText = 'OFF', name, value }: Props = $props();
 </script>
 
 <div class="relative w-full h-[42px]">
@@ -24,7 +25,7 @@
             {checked ? activeText : inactiveText}
         </span>
         <label class="relative inline-flex items-center pointer-events-none">
-            <input type="checkbox" {name} bind:checked class="sr-only peer">
+            <input type="checkbox" {name} {value} bind:checked class="sr-only peer">
             <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
         </label>
     </button>

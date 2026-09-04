@@ -1,5 +1,7 @@
 <script lang="ts">
     import type { HTMLInputAttributes } from 'svelte/elements';
+    import { clickOutside } from '$lib/actions/clickOutside';
+    import { scale } from 'svelte/transition';
 
     interface Props extends HTMLInputAttributes {
         label: string;
@@ -13,6 +15,7 @@
 
     let protocol = $state('http://');
     let domain = $state('');
+    let isProtocolOpen = $state(false);
 
     // Watch for external value changes (e.g. from DB)
     $effect(() => {
@@ -53,16 +56,33 @@
 </script>
 
 <div class="relative w-full h-[42px] flex">
-    <div class="relative h-full w-[85px] shrink-0">
-        <select bind:value={protocol} class="h-full w-full bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 border-r-0 rounded-l-xl pl-3 pr-6 text-xs font-bold text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 cursor-pointer appearance-none transition-colors">
-            <option value="http://">http://</option>
-            <option value="https://">https://</option>
-        </select>
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500">
-            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="relative h-full w-[85px] shrink-0" use:clickOutside={() => isProtocolOpen = false}>
+        <button 
+            type="button"
+            class="flex items-center justify-between h-full w-full bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 border-r-0 rounded-l-xl pl-3 pr-2 text-xs font-bold text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-1 focus:border-blue-600 transition-colors"
+            onclick={(e) => { e.preventDefault(); isProtocolOpen = !isProtocolOpen; }}
+        >
+            <span>{protocol}</span>
+            <svg class="h-4 w-4 text-gray-500 transition-transform duration-200 {isProtocolOpen ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
-        </div>
+        </button>
+        
+        {#if isProtocolOpen}
+            <div 
+                class="absolute z-50 w-[100px] mt-1 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-black/50 overflow-hidden origin-top-left"
+                transition:scale={{ duration: 150, start: 0.95 }}
+            >
+                <ul class="py-1">
+                    <li>
+                        <button type="button" class="w-full text-left px-4 py-2.5 text-xs hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors {protocol === 'http://' ? 'bg-blue-50/50 dark:bg-gray-700/50 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}" onclick={() => { protocol = 'http://'; isProtocolOpen = false; }}>http://</button>
+                    </li>
+                    <li>
+                        <button type="button" class="w-full text-left px-4 py-2.5 text-xs hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors {protocol === 'https://' ? 'bg-blue-50/50 dark:bg-gray-700/50 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}" onclick={() => { protocol = 'https://'; isProtocolOpen = false; }}>https://</button>
+                    </li>
+                </ul>
+            </div>
+        {/if}
     </div>
     
     <div class="relative flex-1 h-full min-w-0">

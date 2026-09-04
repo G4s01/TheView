@@ -210,12 +210,23 @@ export async function discoverAllServices(
 
   const docker = await getDockerServices();
 
-  // Fondere NPM e Docker
+    // Fondere NPM e Docker
   const merged: DiscoveredService[] = [];
   for (const n of npm) {
     const dIndex = docker.findIndex((d) => {
+      // 1. Corrispondenza per Hostname o IP interno
       if (d.name === n.forwardHost || d.name === n.name) return true;
       if (d._ips && d._ips.includes(n.forwardHost)) return true;
+      
+      // 2. Corrispondenza per Porta esposta (se l'IP non combacia, ad esempio proxy punta all'IP dell'host)
+      if (n.forwardPort && d._ports && d._ports.includes(parseInt(n.forwardPort as string))) {
+          // Aggiungiamo un check sul nome per evitare di fondere container diversi che usano la stessa porta internamente
+          const dName = d.name.toLowerCase();
+          const nName = n.name.toLowerCase();
+          if (dName.includes(nName) || nName.includes(dName)) return true;
+          // Se NPM punta a un dominio generico e la porta corrisponde esattamente a quella esposta pubblica, probabile match
+          return true;
+      }
       return false;
     });
     if (dIndex !== -1) {

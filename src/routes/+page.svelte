@@ -1,7 +1,6 @@
 <script lang="ts">
 	import ServiceCard from '$lib/components/ServiceCard.svelte';
-	import QuickEditModal from '$lib/components/QuickEditModal.svelte';
-	import { onMount, onDestroy } from 'svelte';
+		import { onMount, onDestroy } from 'svelte';
 	import { appState } from '$lib/client/state.svelte';
 	import { dndzone } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
@@ -21,9 +20,8 @@
 	let statuses = $state<Record<number, { isOnline: boolean; latencyMs?: number }>>({});
 	let interval: ReturnType<typeof setInterval>;
 	
-	// Quick Edit state
-	let showQuickEdit = $state(false);
-	let editingService = $state<any>(null);
+	let editingServiceId = $state<number | null>(null);
+	
 	
 	async function fetchStatus() {
 		try {
@@ -67,10 +65,6 @@
 		}
 	}
 	
-	function openQuickEdit(service: any) {
-		editingService = service;
-		showQuickEdit = true;
-	}
 </script>
 
 <svelte:head>
@@ -81,7 +75,7 @@
 	{#each Object.entries(localGroups) as [categoryName, services]}
 		{#if services.length > 0 || appState.isEditMode}
 		<section id="{categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="scroll-mt-24">
-			<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+			<h2 class="text-lg font-bold uppercase tracking-wider text-gray-900 dark:text-white mb-3 flex items-center">
 				<span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
 					{services.length}
 				</span>
@@ -110,13 +104,13 @@
 			
 			<div 
 				class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 min-h-[100px]"
-				use:dndzone={{items: services, flipDurationMs, dragDisabled: !appState.isEditMode}}
+				use:dndzone={{items: services, flipDurationMs, dragDisabled: !appState.isEditMode || editingServiceId !== null}}
 				onconsider={(e) => handleDndConsider(e, categoryName)}
 				onfinalize={(e) => handleDndFinalize(e, categoryName)}
 			>
 				{#each services as service (service.id)}
-					<div animate:flip={{duration: flipDurationMs}}>
-						<ServiceCard {service} liveStatus={statuses[service.id]} onEdit={() => openQuickEdit(service)} />
+					<div animate:flip={{duration: flipDurationMs}} class="transition-all duration-300 {editingServiceId === service.id ? 'col-span-full sm:col-span-2 lg:col-span-2 xl:col-span-2 2xl:col-span-2' : ''}">
+						<ServiceCard {service} liveStatus={statuses[service.id]} categories={data.categories || []} isExpanded={editingServiceId === service.id} onExpandToggle={(val) => editingServiceId = val ? service.id : null} />
 					</div>
 				{/each}
 			</div>
@@ -126,19 +120,9 @@
 	
 	{#if Object.keys(localGroups).length === 0}
 		<div class="text-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-			<h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No services found</h3>
+			<h3 class="mt-2 text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white">No services found</h3>
 			<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by adding a new service in the admin panel.</p>
 		</div>
 	{/if}
 </div>
 
-<QuickEditModal 
-	show={showQuickEdit} 
-	service={editingService} 
-	onClose={() => { showQuickEdit = false; editingService = null; }} 
-	onSuccess={() => { 
-		showQuickEdit = false; 
-		editingService = null; 
-		window.location.reload(); 
-	}} 
-/>

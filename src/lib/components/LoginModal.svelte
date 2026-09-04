@@ -11,6 +11,10 @@
 	let error = $state('');
 	let loading = $state(false);
 
+	function autofocus(node: HTMLElement) {
+		setTimeout(() => node.focus(), 10);
+	}
+
 	async function handleLogin(e: Event) {
 		e.preventDefault();
 		loading = true;
@@ -63,7 +67,7 @@
 						placeholder="Password" 
 						class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
 						required
-						autofocus
+						use:autofocus
 					/>
 				</div>
 				

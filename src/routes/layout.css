@@ -4,6 +4,7 @@
 
 /* Dracula Theme */
 :root[data-theme="dracula"] {
+  color-scheme: dark;
   --color-gray-50: #ffffff;
   --color-gray-100: #f8f8f2;
   --color-gray-200: #e2e2dc;
@@ -34,6 +35,7 @@
 
 /* Dracula Soft Theme */
 :root[data-theme="dracula-soft"] {
+  color-scheme: dark;
   --color-gray-50: #ffffff;
   --color-gray-100: #f8f8f2;
   --color-gray-200: #e2e2dc;
@@ -65,6 +67,7 @@
 
 /* Catppuccin Mocha */
 :root[data-theme="catppuccin"] {
+  color-scheme: dark;
   --color-gray-50: #cdd6f4;
   --color-gray-100: #bac2de;
   --color-gray-200: #a6adc8;
@@ -104,6 +107,7 @@ body {
 
 /* Dracula PRO */
 :root[data-theme="dracula-pro"] {
+  color-scheme: dark;
   --color-gray-50: #ffffff;
   --color-gray-100: #F8F8F2;
   --color-gray-200: #e2e2dc;
@@ -134,6 +138,7 @@ body {
 
 /* Dracula PRO Alucard (Light) */
 :root[data-theme="dracula-alucard"] {
+  color-scheme: light;
   --color-gray-50: #fffbeb;
   --color-gray-100: #e8e8f2;
   --color-gray-200: #cfcfde;
@@ -164,6 +169,7 @@ body {
 
 /* Dracula PRO Van Helsing */
 :root[data-theme="dracula-van-helsing"] {
+  color-scheme: dark;
   --color-gray-50: #ffffff;
   --color-gray-100: #F8F8F2;
   --color-gray-200: #e2e2dc;
@@ -194,6 +200,7 @@ body {
 
 /* Catppuccin Latte */
 :root[data-theme="catppuccin-latte"] {
+  color-scheme: light;
   --color-gray-50: #eff1f5;
   --color-gray-100: #e6e9ef;
   --color-gray-200: #ccd0da;
@@ -224,6 +231,7 @@ body {
 
 /* Catppuccin Frappe */
 :root[data-theme="catppuccin-frappe"] {
+  color-scheme: dark;
   --color-gray-50: #c6d0f5;
   --color-gray-100: #b5bfe2;
   --color-gray-200: #a5adce;
@@ -254,6 +262,7 @@ body {
 
 /* Catppuccin Macchiato */
 :root[data-theme="catppuccin-macchiato"] {
+  color-scheme: dark;
   --color-gray-50: #cad3f5;
   --color-gray-100: #b8c0e0;
   --color-gray-200: #a5adcb;
@@ -280,4 +289,17 @@ body {
   --color-red-400: #ed8796;
   --color-red-500: #ed8796;
   --color-red-600: #d77180;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+html:not(.dark) {
+  color-scheme: light;
+}
+
+@layer base {
+  option {
+    @apply bg-white text-gray-900 dark:bg-gray-800 dark:text-white;
+  }
 }

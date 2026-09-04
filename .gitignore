@@ -1,40 +1,56 @@
-node_modules
-.svelte-kit
-/build
+# Dependencies
+node_modules/
 
-# Output
-.output
-.vercel
-.netlify
-.wrangler
+# SvelteKit/Vite Output
+.svelte-kit/
+build/
+dist/
+.output/
+.vercel/
+.netlify/
+.wrangler/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
 
-# OS
-.DS_Store
-Thumbs.db
+# Database & Data
+data/
+sqlite.db
+sqlite.db-journal
+sqlite.db-shm
+sqlite.db-wal
+settings.json
 
-# Env
+# Uploads
+static/uploads/
+uploads/
+
+# Environment Variables
 .env
 .env.*
 !.env.example
 !.env.test
 
-# Vite
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
+# OS Files
+.DS_Store
+Thumbs.db
 
-# Data & Settings
-data/
-sqlite.db
-sqlite.db-journal
-settings.json
-static/uploads/
-uploads/
-
-# IDE
+# IDEs and Editors
 .vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# Temp files
+# Agent Workspace & Temp Files
+.gemini/
 *.patch
 patch*.py
 patch*.txt
 patch*.cjs
+patch*.js
+*.log
+check_console.js
+*.pyc
+__pycache__/

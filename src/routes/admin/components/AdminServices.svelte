@@ -2,6 +2,7 @@
 	import TextInput from '$lib/components/ui/TextInput.svelte';
 	import SelectInput from '$lib/components/ui/SelectInput.svelte';
 	import ToggleInput from '$lib/components/ui/ToggleInput.svelte';
+	import UrlInput from '$lib/components/ui/UrlInput.svelte';
 
 	import { enhance } from '$app/forms';
 	import { slide } from 'svelte/transition';
@@ -78,7 +79,7 @@
 
 <div class="space-y-8">
 	<!-- Add New Service Form -->
-	<div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+	<div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl border border-gray-100 dark:border-gray-700">
 		<button 
 			onclick={() => isAddServiceExpanded = !isAddServiceExpanded}
 			class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -103,7 +104,7 @@
 								<!-- Row 1: Nome, URL -->
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					<TextInput label="Nome" name="name" id="name" required />
-					<TextInput label="URL (Richiesto)" type="url" name="url" id="url" required />
+					<UrlInput label="URL (Richiesto)" name="url" id="url" required />
 				</div>
 
 				<!-- Row 2: Icona, Descrizione -->
@@ -150,22 +151,13 @@
 								<button type="button" onclick={() => isCreatingCategory = false} class="px-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium">X</button>
 							</div>
 						{:else}
-							<SelectInput label="Categoria" name="categoryId" bind:value={newServiceCategoryId} required onchange={(e) => { if ((e.target).value === 'new_category_trigger') { isCreatingCategory = true; newServiceCategoryId = ''; } }}>
-								<option value="" disabled selected={!newServiceCategoryId}>-- Seleziona --</option>
-								{#each localCategories as category}
-									<option value={category.id}>{category.name}</option>
-								{/each}
-								<option value="new_category_trigger" class="font-bold text-blue-600">+ Nuova...</option>
-							</SelectInput>
+							<SelectInput label="Categoria" name="categoryId" bind:value={newServiceCategoryId} required options={[{value: '', label: '-- Seleziona --'}, ...localCategories.map(c => ({value: c.id, label: c.name})), {value: 'new_category_trigger', label: '+ Nuova...', class: 'font-bold text-blue-600'}]} onchange={(val) => { if (val === 'new_category_trigger') { isCreatingCategory = true; newServiceCategoryId = ''; } }} />
 						{/if}
 					</div>
 
-					<ToggleInput label="Ping" name="pingEnabled" value="true" />
+					<ToggleInput label="Ping" name="pingEnabled" value="true" checked={true} />
 
-					<SelectInput label="Widget" name="widgetType">
-						<option value="">Nessuno</option>
-						<option value="qbittorrent">qBittorrent</option>
-					</SelectInput>
+					<SelectInput label="Widget" name="widgetType" options={[{value: '', label: 'Nessuno'}, {value: 'qbittorrent', label: 'qBittorrent'}]} />
 
 					<div>
 						<button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-xl shadow-md shadow-green-500/30 text-sm font-bold uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 hover:shadow-lg focus:outline-none transition-all h-[42px]">
@@ -183,11 +175,12 @@
 	
 	<!-- Services Grouped by Categories List -->
 	<div class="space-y-6">
-		{#each Object.keys(groupedServices) as catIdStr}
-			{@const catId = parseInt(catIdStr)}
-			{@const categoryName = localCategories.find((c: any) => c.id === catId)?.name || 'Senza Categoria'}
+		{#each localCategories as category}
+			{@const catId = category.id}
+			{@const categoryName = category.name}
+			{#if groupedServices[catId]}
 			
-			<div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+			<div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl border border-gray-100 dark:border-gray-700">
 				<div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 flex justify-between items-center">
 					<h4 class="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{categoryName}</h4>
 					<span class="text-xs font-bold text-gray-400 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-lg">{groupedServices[catId].length}</span>
@@ -215,11 +208,11 @@
 									};
 								}} class="w-full">
 									<input type="hidden" name="id" value={service.id}>
-									<div transition:slide class="space-y-4 w-full bg-white dark:bg-gray-800 p-1">
+									<div transition:slide class="space-y-4 w-full bg-white dark:bg-gray-800 p-5 mt-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-md relative"><div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-t-xl"></div>
 										<!-- Row 1: Nome, URL -->
 										<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 											<TextInput label="Nome" name="name" value={service.name} required />
-											<TextInput label="URL (Richiesto)" type="url" name="url" value={service.url} required />
+											<UrlInput label="URL (Richiesto)" name="url" value={service.url} required />
 										</div>
 										
 										<!-- Row 2: Icona, Descrizione -->
@@ -248,18 +241,11 @@
 										
 										<!-- Row 3: Categoria, Ping, Widget, Button -->
 										<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-											<SelectInput label="Categoria" name="categoryId" value={service.categoryId} required>
-												{#each localCategories as cat}
-													<option value={cat.id} selected={cat.id === service.categoryId}>{cat.name}</option>
-												{/each}
-											</SelectInput>
+											<SelectInput label="Categoria" name="categoryId" value={service.categoryId} required options={localCategories.map(c => ({value: c.id, label: c.name}))} />
 
 											<ToggleInput label="Ping" name="pingEnabled" value="true" checked={service.pingEnabled} />
 
-											<SelectInput label="Widget" name="widgetType" value={service.widgetType || ''}>
-												<option value="" selected={!service.widgetType}>Nessuno</option>
-												<option value="qbittorrent" selected={service.widgetType === 'qbittorrent'}>qBittorrent</option>
-											</SelectInput>
+											<SelectInput label="Widget" name="widgetType" value={service.widgetType || ''} options={[{value: '', label: 'Nessuno'}, {value: 'qbittorrent', label: 'qBittorrent'}]} />
 
 											<div class="flex gap-2 h-[42px]">
 												<button type="button" onclick={() => editingServiceId = null} class="flex-1 inline-flex items-center justify-center border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
@@ -320,6 +306,7 @@
 					{/each}
 				</ul>
 			</div>
+			{/if}
 		{/each}
 	</div>
 </div>

@@ -10,7 +10,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
-		const { id, name, url, icon } = await request.json();
+		const { id, name, url, icon, description, categoryId, pingEnabled, widgetType } = await request.json();
 
 		if (!id || !name || !url) {
 			return json({ error: 'Missing required fields' }, { status: 400 });
@@ -20,7 +20,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			.set({ 
 				name, 
 				url, 
-				icon: icon || null 
+				icon: icon || null,
+				description: description || null,
+				categoryId: categoryId || null,
+				pingEnabled: pingEnabled ?? true,
+				widgetType: widgetType || null
 			})
 			.where(eq(services.id, id));
 
