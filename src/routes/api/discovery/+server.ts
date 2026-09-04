@@ -21,14 +21,14 @@ export const GET: RequestHandler = async ({ locals }) => {
     const npmEmail = settings.npmEmail;
     const npmPassword = settings.npmPassword;
 
-    const discovered = await discoverAllServices(
+    const result = await discoverAllServices(
       existingUrls,
       npmUrl,
       npmEmail,
       npmPassword,
     );
 
-    return json({ services: discovered });
+    return json(result);
   } catch (error) {
     console.error("Failed to run discovery:", error);
     return json({ error: "Failed to discover services" }, { status: 500 });

@@ -21,6 +21,7 @@
 	const flipDurationMs = 200;
 	
 	let discoveredServices = $state<any[]>([]);
+	let npmError = $state<string | null>(null);
 	let isDiscovering = $state(false);
 
 	$effect(() => {
@@ -62,6 +63,7 @@
 			if (res.ok) {
 				const data = await res.json();
 				discoveredServices = data.services;
+				npmError = data.npmError;
 			}
 		} catch (e) {
 			console.error(e);
@@ -410,6 +412,13 @@
 			<div class="flex items-center justify-between">
 				<h3 class="text-xl font-bold text-gray-900 dark:text-white">Risultati Discovery</h3>
 			</div>
+
+			{#if npmError}
+				<div class="p-4 rounded-md bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800">
+					<strong>NPM Error:</strong> {npmError}
+					<p class="text-sm mt-1">Assicurati che TheView possa raggiungere questo indirizzo. Se sei in Docker, <code>localhost</code> punterà al container stesso, non all'host!</p>
+				</div>
+			{/if}
 
 			<div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
 				<ul class="divide-y divide-gray-200 dark:divide-gray-700">

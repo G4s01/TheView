@@ -132,12 +132,52 @@ export async function discoverAllServices(
   npmUrl?: string,
   npmEmail?: string,
   npmPassword?: string,
-): Promise<DiscoveredService[]> {
-  const [npm, docker] = await Promise.all([
-    getNpmServices(npmUrl, npmEmail, npmPassword),
-    getDockerServices(),
-  ]);
+): Promise<{ services: DiscoveredService[], npmError?: string }> {
+  let npmError: string | undefined = undefined;
+  
+  let npm: DiscoveredService[] = [];
+  if (npmUrl && npmEmail && npmPassword) {
+    try {
+      const tokenRes = await fetch(`${npmUrl.replace(/\/$/, "")}/api/tokens`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identity: npmEmail, secret: npmPassword }),
+      });
 
+      if (!tokenRes.ok) {
+        npmError = `Authentication failed: ${tokenRes.status} ${tokenRes.statusText}`;
+      } else {
+        const tokenData = await tokenRes.json();
+        const hostsRes = await fetch(
+          `${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`,
+          { headers: { Authorization: `Bearer ${tokenData.token}` } }
+        );
+
+        if (!hostsRes.ok) {
+          npmError = `Failed to fetch proxy hosts: ${hostsRes.status}`;
+        } else {
+          const hosts = await hostsRes.json();
+          for (const host of hosts) {
+            if (host.domain_names && host.domain_names.length > 0) {
+              const primaryDomain = host.domain_names[0];
+              const scheme = host.certificate_id && host.certificate_id !== 0 ? "https" : "http";
+              npm.push({
+                id: `npm-${host.id}`,
+                name: primaryDomain.split(".")[0],
+                url: `${scheme}://${primaryDomain}`,
+                source: "npm",
+                description: `Forward to ${host.forward_host}:${host.forward_port}`,
+              });
+            }
+          }
+        }
+      }
+    } catch (e: any) {
+      npmError = `Network error: ${e.message}`;
+    }
+  }
+
+  const docker = await getDockerServices();
   const all = [...npm, ...docker];
 
   // Filtra quelli che hanno un URL già presente nel DB
@@ -149,8 +189,8 @@ export async function discoverAllServices(
     }
   });
 
-  return all.filter((s) => {
-    if (!s.url) return true; // Mostra i container Docker senza URL
+  const filtered = all.filter((s) => {
+    if (!s.url) return true;
     try {
       const hostname = new URL(s.url).hostname.toLowerCase();
       return !normalizedExistingUrls.includes(hostname);
@@ -158,4 +198,6 @@ export async function discoverAllServices(
       return true;
     }
   });
+
+  return { services: filtered, npmError };
 }
