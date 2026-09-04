@@ -1,3 +1,4 @@
+import { rewriteUrlForDocker } from "$lib/server/dockerHost";
 import { json } from "@sveltejs/kit";
 import { env } from "$env/dynamic/private";
 

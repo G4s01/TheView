@@ -2,6 +2,7 @@ import { db } from "$lib/server/db";
 import { services, categories } from "$lib/server/db/schema";
 import { eq } from "drizzle-orm";
 import { fail } from "@sveltejs/kit";
+import { getIconDetails } from "$lib/server/icons";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async () => {
@@ -11,8 +12,15 @@ export const load: PageServerLoad = async () => {
     .from(categories)
     .orderBy(categories.position);
 
+  const servicesWithIcons = allServices.map((s) => {
+    return {
+      ...s,
+      iconDetails: s.icon ? getIconDetails(s.icon) : null,
+    };
+  });
+
   return {
-    services: allServices,
+    services: servicesWithIcons,
     categories: allCategories,
   };
 };

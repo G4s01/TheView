@@ -1,3 +1,4 @@
+import { rewriteUrlForDocker } from "$lib/server/dockerHost";
 import { env } from "$env/dynamic/private";
 import http from "http";
 
@@ -23,7 +24,7 @@ export async function getNpmServices(
 
   try {
     // 1. Get Token
-    const tokenRes = await fetch(`${npmUrl.replace(/\/$/, "")}/api/tokens`, {
+    const tokenRes = await fetch(rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/tokens`), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ identity: email, secret: password }),
@@ -39,7 +40,7 @@ export async function getNpmServices(
 
     // 2. Get Proxy Hosts
     const hostsRes = await fetch(
-      `${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`,
+      rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`),
       {
         headers: { Authorization: `Bearer ${token}` },
       },
@@ -140,7 +141,7 @@ export async function discoverAllServices(
   let npm: (DiscoveredService & { forwardHost?: string })[] = [];
   if (npmUrl && npmEmail && npmPassword) {
     try {
-      const tokenRes = await fetch(`${npmUrl.replace(/\/$/, "")}/api/tokens`, {
+      const tokenRes = await fetch(rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/tokens`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identity: npmEmail, secret: npmPassword }),
@@ -151,7 +152,7 @@ export async function discoverAllServices(
       } else {
         const tokenData = await tokenRes.json();
         const hostsRes = await fetch(
-          `${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`,
+          rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`),
           { headers: { Authorization: `Bearer ${tokenData.token}` } },
         );
 

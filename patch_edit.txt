@@ -1,0 +1,72 @@
+									<div transition:slide|local class="space-y-4">
+										<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+											<div>
+												<label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Nome</label>
+												<input type="text" name="name" value={service.name} required class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" />
+											</div>
+											<div>
+												<label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">URL</label>
+												<input type="url" name="url" value={service.url} required class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" />
+											</div>
+										</div>
+										<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+											<div>
+												<label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Categoria</label>
+												<select name="categoryId" class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white">
+													{#each localCategories as cat}
+														<option value={cat.id} selected={cat.id === service.categoryId}>{cat.name}</option>
+													{/each}
+												</select>
+											</div>
+											<div>
+												<label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Descrizione</label>
+												<input type="text" name="description" value={service.description || ''} class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" />
+											</div>
+										</div>
+										<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+											<div>
+												<label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Icona</label>
+												<div class="flex gap-2">
+													<input type="text" name="icon" id={"icon_edit_" + service.id} value={service.icon || ''} class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" />
+													<label class="cursor-pointer bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 flex items-center justify-center transition-colors shadow-sm">
+														<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+														</svg>
+														<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
+															const target = e.target as HTMLInputElement; const file = target.files?.[0];
+															if (!file) return;
+															const formData = new FormData(); formData.append('file', file);
+															const btn = target.parentElement as HTMLElement; btn.classList.add('opacity-50');
+															try {
+																const res = await fetch('/api/icons', { method: 'POST', body: formData });
+																const data = await res.json();
+																if (data.url) (document.getElementById("icon_edit_" + service.id) as HTMLInputElement).value = data.url;
+															} catch (err) { console.error(err); } finally { btn.classList.remove('opacity-50'); }
+														}} />
+													</label>
+												</div>
+											</div>
+											<div>
+												<label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Tipo Widget</label>
+												<select name="widgetType" class="block w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white">
+													<option value="" selected={!service.widgetType}>Nessuno</option>
+													<option value="qbittorrent" selected={service.widgetType === 'qbittorrent'}>qBittorrent</option>
+												</select>
+											</div>
+											<div class="pt-2 md:pt-7">
+												<label class="relative inline-flex items-center cursor-pointer">
+													<input type="checkbox" name="pingEnabled" checked={service.pingEnabled} class="sr-only peer">
+													<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+													<span class="ml-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-300">Abilita Ping</span>
+												</label>
+											</div>
+										</div>
+										<div class="mt-4 flex justify-end space-x-3 border-t border-gray-100 dark:border-gray-700 pt-4">
+											<button type="button" onclick={() => editingServiceId = null} class="px-5 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-sm font-bold uppercase tracking-wider transition-colors shadow-sm">
+												Annulla
+											</button>
+											<button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm font-bold uppercase tracking-wider transition-colors shadow-md shadow-blue-500/20">
+												Salva Modifiche
+											</button>
+										</div>
+									</div>

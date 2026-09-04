@@ -30,6 +30,7 @@ COPY --from=builder /app/package.json ./
 
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 
 EXPOSE 3001
 

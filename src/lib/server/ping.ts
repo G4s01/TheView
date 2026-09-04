@@ -1,3 +1,4 @@
+import { rewriteUrlForDocker } from "$lib/server/dockerHost";
 export async function pingService(
   url: string,
   timeoutMs: number = 3000,
@@ -8,7 +9,7 @@ export async function pingService(
   const start = Date.now();
   try {
     // Preferire richieste HEAD per risparmiare banda e risorse
-    const response = await fetch(url, {
+    const response = await fetch(rewriteUrlForDocker(url), {
       method: "HEAD",
       signal: controller.signal,
       // Su reti locali o homelab a volte ci sono problemi di certificati auto-firmati,
