@@ -15,8 +15,8 @@ Questa roadmap raccoglie gli step per implementare le nuove funzionalità richie
 
 ## 2. Gestione Avanzata Categorie e Servizi
 
-- [ ] Espandere l'interfaccia Admin (`/admin`) per supportare completamente il CRUD delle **Categorie** (Aggiungi, Rinomina, Elimina, Cambia Ordine).
-- [ ] Integrare la logica di riordino (campo `order` o `position` nel database SQLite).
+- [x] Espandere l'interfaccia Admin (`/admin`) per supportare completamente il CRUD delle **Categorie** (Aggiungi, Rinomina, Elimina, Cambia Ordine).
+- [x] Integrare la logica di riordino (campo `order` o `position` nel database SQLite).
 
 ## 3. Temi Personalizzati
 
