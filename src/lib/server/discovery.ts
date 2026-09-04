@@ -14,6 +14,7 @@ export interface DiscoveredService {
   _ips?: string[];
   _ports?: number[];
   _publicPorts?: number[];
+  _npmMatch?: string;
 }
 
 // Interroga l'API di NPM per trovare i proxy hosts
@@ -140,6 +141,12 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
               }
             }
 
+            // Estrai label per match deterministico esplicito (se presente)
+            let npmMatch = "";
+            if (container.Labels && container.Labels["theview.npm"]) {
+              npmMatch = container.Labels["theview.npm"].toLowerCase();
+            }
+
             services.push({
               id: `docker-${container.Id.substring(0, 12)}`,
               name,
@@ -150,6 +157,7 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
               _ips: ips,
               _ports: ports,
               _publicPorts: publicPorts,
+              _npmMatch: npmMatch,
             });
           }
 
@@ -243,6 +251,9 @@ export async function discoverAllServices(
   const merged: DiscoveredService[] = [];
   for (const n of npm) {
     const dIndex = docker.findIndex((d) => {
+      // 0. Match Deterministico Esplicito (via Label Docker)
+      if (d._npmMatch && d._npmMatch === nName) return true;
+
       // 1. Corrispondenza per Hostname o IP interno
       const fHost = (n.forwardHost || "").toLowerCase();
       const nName = n.name.toLowerCase();
@@ -328,15 +339,31 @@ export async function discoverAllServices(
 
   // Popola l'icona usando guess per ogni servizio
   const enriched = filtered.map((s) => {
-    // Cerchiamo di dedurre l'icona dal nome
+    // Cerchiamo di dedurre l'icona dal nome o dall'immagine docker
     let guess = s.name;
-    if (s.source === "docker" && s.description) {
+    if ((s.source === "docker" || s.source === "npm+docker") && s.description) {
       // Usa il nome dell'immagine senza tag (es. linuxserver/qbittorrent -> qbittorrent)
-      const imageParts = s.description.split(":")[0].split("/");
-      guess = imageParts[imageParts.length - 1];
+      // Se fuso, la stringa sarà "image:tag (via NPM)"
+      const rawImage = s.description.replace(" (via NPM)", "");
+      const imageParts = rawImage.split(":")[0].split("/");
+      const extracted = imageParts[imageParts.length - 1];
+      // A volte l'immagine docker è meno chiara del nome (es. 'nginx' vs 'adguard'),
+      // ma proviamo entrambe.
+      guess = extracted;
     }
-    const iconDetails = getIconDetails(guess) || getIconDetails(s.name);
-    return { ...s, iconDetails, icon: guess };
+
+    // Prova prima con l'immagine Docker (guess), poi se fallisce prova col nome dato da NPM (s.name)
+    // Rimuoviamo anche eventuali - o _ per trovare meglio su simple-icons
+    const cleanGuess = guess.replace(/[-_]/g, "");
+    const cleanName = s.name.replace(/[-_]/g, "");
+
+    const iconDetails =
+      getIconDetails(guess) ||
+      getIconDetails(cleanGuess) ||
+      getIconDetails(s.name) ||
+      getIconDetails(cleanName);
+
+    return { ...s, iconDetails, icon: iconDetails ? guess : s.name };
   });
 
   return { services: enriched, npmError };
