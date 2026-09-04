@@ -132,10 +132,10 @@ export async function discoverAllServices(
   npmUrl?: string,
   npmEmail?: string,
   npmPassword?: string,
-): Promise<{ services: DiscoveredService[], npmError?: string }> {
+): Promise<{ services: DiscoveredService[]; npmError?: string }> {
   let npmError: string | undefined = undefined;
-  
-  let npm: DiscoveredService[] = [];
+
+  let npm: (DiscoveredService & { forwardHost?: string })[] = [];
   if (npmUrl && npmEmail && npmPassword) {
     try {
       const tokenRes = await fetch(`${npmUrl.replace(/\/$/, "")}/api/tokens`, {
@@ -150,7 +150,7 @@ export async function discoverAllServices(
         const tokenData = await tokenRes.json();
         const hostsRes = await fetch(
           `${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`,
-          { headers: { Authorization: `Bearer ${tokenData.token}` } }
+          { headers: { Authorization: `Bearer ${tokenData.token}` } },
         );
 
         if (!hostsRes.ok) {
@@ -160,13 +160,17 @@ export async function discoverAllServices(
           for (const host of hosts) {
             if (host.domain_names && host.domain_names.length > 0) {
               const primaryDomain = host.domain_names[0];
-              const scheme = host.certificate_id && host.certificate_id !== 0 ? "https" : "http";
+              const scheme =
+                host.certificate_id && host.certificate_id !== 0
+                  ? "https"
+                  : "http";
               npm.push({
                 id: `npm-${host.id}`,
                 name: primaryDomain.split(".")[0],
                 url: `${scheme}://${primaryDomain}`,
                 source: "npm",
                 description: `Forward to ${host.forward_host}:${host.forward_port}`,
+                forwardHost: host.forward_host
               });
             }
           }
@@ -178,10 +182,28 @@ export async function discoverAllServices(
   }
 
   const docker = await getDockerServices();
-  const all = [...npm, ...docker];
+  
+  // Fondere NPM e Docker
+  const merged: DiscoveredService[] = [];
+  for (const n of npm) {
+    const dIndex = docker.findIndex(d => d.name === n.forwardHost || d.name === n.name);
+    if (dIndex !== -1) {
+      const d = docker[dIndex];
+      merged.push({
+        ...n,
+        source: "npm" as any, // Visualizzeremo 'NPM + Docker' nella UI se necessario
+        description: `${d.description} (via NPM)`
+      });
+      docker.splice(dIndex, 1);
+    } else {
+      merged.push(n);
+    }
+  }
 
-  // Filtra quelli che hanno un URL già presente nel DB
-  const normalizedExistingUrls = existingUrls.map((u) => {
+  const all = [...merged, ...docker];
+
+  // Filtra quelli che hanno un URL o NOME già presente nel DB
+  const normalizedExistingUrls = existingUrls.filter(Boolean).map((u) => {
     try {
       return new URL(u).hostname.toLowerCase();
     } catch {

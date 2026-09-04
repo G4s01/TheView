@@ -30,7 +30,8 @@
 		}
 	});
 
-	let npmUrl = $state('');
+	let npmScheme = $state('http://');
+	let npmHost = $state('');
 	let npmEmail = $state('');
 	let npmPassword = $state('');
 	let adminPassword = $state('');
@@ -42,7 +43,10 @@
 		if (activeTab === 'discovery' && !isSettingsLoaded) {
 			isSettingsLoaded = true;
 			fetch('/api/settings').then(r => r.json()).then(data => {
-				npmUrl = data.npmUrl || '';
+				if (data.npmUrl) {
+					if (data.npmUrl.startsWith('https://')) { npmScheme = 'https://'; npmHost = data.npmUrl.replace('https://', ''); }
+					else { npmScheme = 'http://'; npmHost = data.npmUrl.replace('http://', ''); }
+				}
 				npmEmail = data.npmEmail || '';
 				npmPassword = data.npmPassword || '';
 			});
@@ -56,7 +60,7 @@
 			await fetch('/api/settings', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ npmUrl, npmEmail, npmPassword, ...(adminPassword ? { adminPassword } : {}) })
+				body: JSON.stringify({ npmUrl: npmHost ? npmScheme + npmHost : '', npmEmail, npmPassword, ...(adminPassword ? { adminPassword } : {}) })
 			});
 
 			const res = await fetch('/api/discovery');
@@ -337,7 +341,7 @@
 							<p class="text-sm text-gray-500 dark:text-gray-400">Collega NPM per scovare automaticamente i tuoi servizi web esposti.</p>
 						</div>
 						<div class="flex-1"></div>
-						{#if npmUrl && npmEmail && npmPassword}
+						{#if npmHost && npmEmail && npmPassword}
 							<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
 								<span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
 								Configurato
@@ -352,7 +356,13 @@
 					<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
 						<div>
 							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Indirizzo NPM</label>
-							<input type="url" bind:value={npmUrl} placeholder="http://172.17.0.1:81" class="block w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white transition-all">
+							<div class="flex">
+									<select bind:value={npmScheme} class="block w-[85px] px-2 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-l-xl focus:ring-2 focus:ring-blue-500 dark:text-white border-r-0">
+										<option value="http://">http://</option>
+										<option value="https://">https://</option>
+									</select>
+									<input type="text" bind:value={npmHost} placeholder="172.17.0.1:81" class="block w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-r-xl focus:ring-2 focus:ring-blue-500 dark:text-white transition-all">
+								</div>
 						</div>
 						<div>
 							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
@@ -365,11 +375,11 @@
 					</div>
 
 					<div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-6">
-						{#if npmUrl && npmEmail && npmPassword}
+						{#if npmHost && npmEmail && npmPassword}
 							<button 
 								onclick={async () => {
-									npmUrl = ''; npmEmail = ''; npmPassword = '';
-									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl, npmEmail, npmPassword }) });
+									npmHost = ''; npmEmail = ''; npmPassword = '';
+									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: npmHost ? npmScheme + npmHost : '', npmEmail, npmPassword }) });
 								}}
 								class="text-red-500 hover:text-red-700 font-medium text-sm transition-colors flex items-center"
 							>
@@ -383,7 +393,7 @@
 						<div class="flex space-x-3">
 							<button
 								onclick={async () => {
-									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl, npmEmail, npmPassword }) });
+									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: npmHost ? npmScheme + npmHost : '', npmEmail, npmPassword }) });
 									alert('Credenziali salvate!');
 								}}
 								class="px-5 py-2.5 text-blue-700 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 font-medium rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
@@ -447,21 +457,38 @@
 									</span>
 								</div>
 							</div>
-							<div class="ml-4">
-								<form method="POST" action="?/createService" use:enhance>
-									<input type="hidden" name="name" value={ds.name}>
-									<input type="hidden" name="url" value={ds.url || ('http://' + ds.name + '.local')}>
-									<input type="hidden" name="description" value={ds.description}>
-									<!-- Default to the first category for fast insertion -->
-									<input type="hidden" name="categoryId" value={localCategories.length > 0 ? localCategories[0].id : ''}>
-									<input type="hidden" name="icon" value={ds.name}>
-									<button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-transform hover:scale-105">
-										<svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-										</svg>
-										Aggiungi
-									</button>
-								</form>
+							<div class="ml-4 flex items-center">
+								{#if ds.added}
+									<span class="inline-flex items-center px-3 py-1.5 rounded-xl text-sm font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+										<svg class="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+										Aggiunto
+									</span>
+								{:else}
+									<form method="POST" action="?/createService" use:enhance={() => {
+										return async ({ result, update }) => {
+											if (result.type === 'success') {
+												ds.added = true;
+											}
+											await update();
+										};
+									}} class="flex items-center gap-2">
+										<input type="hidden" name="name" value={ds.name}>
+										{#if !ds.url}
+											<input type="url" name="url" placeholder="URL mancante (es. https://...)" required class="block w-48 px-3 py-1.5 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 dark:text-white" />
+										{:else}
+											<input type="hidden" name="url" value={ds.url}>
+										{/if}
+										<input type="hidden" name="description" value={ds.description}>
+										<input type="hidden" name="categoryId" value={localCategories.length > 0 ? localCategories[0].id : ''}>
+										<input type="hidden" name="icon" value={ds.name}>
+										<button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-transform hover:scale-105">
+											<svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+											</svg>
+											Aggiungi
+										</button>
+									</form>
+								{/if}
 							</div>
 						</li>
 					{/each}
