@@ -27,17 +27,19 @@
 		<div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
 			<!-- Logo -->
 			<div class="flex items-center space-x-4">
-				<h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+				<a href="/" class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
 					TheView
-				</h1>
+				</a>
 			</div>
 
 			<!-- Categories Horizontal Nav (Desktop) -->
 			<nav class="hidden md:flex items-center space-x-1 flex-1 px-8 overflow-x-auto no-scrollbar">
 				{#each categories as category}
-					<a href="#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="px-3 py-1.5 text-sm font-medium rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap">
+				{#if category.count > 0 || appState.isEditMode}
+					<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="px-3 py-1.5 text-sm font-medium rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap">
 						{category.name}
 					</a>
+					{/if}
 				{/each}
 			</nav>
 
@@ -162,9 +164,11 @@
 		<!-- Categories Horizontal Nav (Mobile) - scrolls horizontally -->
 		<nav class="md:hidden flex items-center space-x-2 px-4 py-3 overflow-x-auto border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/90 no-scrollbar">
 			{#each categories as category}
-				<a href="#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="px-3 py-1 text-sm font-medium rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors whitespace-nowrap">
+				{#if category.count > 0 || appState.isEditMode}
+				<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="px-3 py-1 text-sm font-medium rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors whitespace-nowrap">
 					{category.name}
 				</a>
+				{/if}
 			{/each}
 		</nav>
 	</header>

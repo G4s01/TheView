@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { services } from '$lib/server/db/schema';
 import { discoverAllServices } from '$lib/server/discovery';
+import { getSettings } from '$lib/server/settings';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ locals }) => {
@@ -13,7 +14,12 @@ export const GET: RequestHandler = async ({ locals }) => {
 		const existingServices = await db.select({ url: services.url }).from(services);
 		const existingUrls = existingServices.map(s => s.url);
 
-		const discovered = await discoverAllServices(existingUrls);
+		const settings = getSettings();
+		const npmUrl = settings.npmUrl;
+		const npmEmail = settings.npmEmail;
+		const npmPassword = settings.npmPassword;
+
+		const discovered = await discoverAllServices(existingUrls, npmUrl, npmEmail, npmPassword);
 
 		return json({ services: discovered });
 	} catch (error) {

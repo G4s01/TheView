@@ -4,7 +4,8 @@ import { eq } from "drizzle-orm";
 import { getIconDetails } from "$lib/server/icons";
 
 export async function load() {
-  // Fetch all services joined with categories
+  const cats = await db.select().from(categories).orderBy(categories.position);
+
   const allServices = await db
     .select({
       id: services.id,
@@ -14,32 +15,36 @@ export async function load() {
       icon: services.icon,
       widgetType: services.widgetType,
       pingEnabled: services.pingEnabled,
-      category: categories.name,
+      categoryId: services.categoryId,
       position: services.position,
     })
     .from(services)
-    .innerJoin(categories, eq(services.categoryId, categories.id))
     .orderBy(services.position);
 
-  // Group and attach icon details
-  const groupedServices = allServices.reduce(
-    (acc, service) => {
-      if (!acc[service.category]) {
-        acc[service.category] = [];
+  // Group services by category name
+  const groupedServices: Record<string, any[]> = {};
+  
+  // Initialize all categories (even empty ones)
+  for (const cat of cats) {
+      groupedServices[cat.name] = [];
+  }
+
+  for (const service of allServices) {
+      if (!service.categoryId) continue;
+      const cat = cats.find(c => c.id === service.categoryId);
+      if (cat) {
+          const s = { ...service, category: cat.name } as any;
+          if (s.icon) {
+              s.iconDetails = getIconDetails(s.icon);
+          } else {
+              s.iconDetails = null;
+          }
+          groupedServices[cat.name].push(s);
       }
-
-      const iconDetails = getIconDetails(service.icon);
-
-      acc[service.category].push({
-        ...service,
-        iconDetails,
-      });
-      return acc;
-    },
-    {} as Record<string, any[]>,
-  );
+  }
 
   return {
     groupedServices,
+    categories: cats,
   };
 }

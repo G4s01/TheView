@@ -57,10 +57,12 @@
 		if (appState.isEditMode) {
 			// Save new order to DB
 			const orderedIds = localGroups[categoryName].map((s: any) => s.id);
+			const cat = data.categories.find((c: any) => c.name === categoryName);
+			
 			fetch('/api/services/reorder', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ orderedIds })
+				body: JSON.stringify({ orderedIds, categoryId: cat?.id })
 			}).catch(console.error);
 		}
 	}
@@ -77,6 +79,7 @@
 
 <div class="space-y-6">
 	{#each Object.entries(localGroups) as [categoryName, services]}
+		{#if services.length > 0 || appState.isEditMode}
 		<section id="{categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}">
 			<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
 				<span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
@@ -98,6 +101,7 @@
 				{/each}
 			</div>
 		</section>
+		{/if}
 	{/each}
 	
 	{#if Object.keys(localGroups).length === 0}

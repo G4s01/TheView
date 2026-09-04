@@ -56,7 +56,7 @@
 	<div class="flex items-start justify-between">
 		<!-- Icon -->
 		<div 
-			class="h-10 w-10 rounded-lg flex items-center justify-center shadow-sm"
+			class="relative h-10 w-10 rounded-lg flex items-center justify-center shadow-sm group/icon"
 			style="background-color: {iconBgColor || '#4B5563'}"
 		>
 			{#if service.iconDetails}
@@ -71,6 +71,38 @@
 				<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
 				</svg>
+			{/if}
+
+			{#if appState.isEditMode}
+				<label class="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/icon:opacity-100 cursor-pointer transition-opacity z-20">
+					<svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+					</svg>
+					<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
+						const target = e.target as HTMLInputElement;
+						const file = target?.files?.[0];
+						if (!file) return;
+						
+						const formData = new FormData();
+						formData.append('file', file);
+						
+						try {
+							const res = await fetch('/api/icons', { method: 'POST', body: formData });
+							const data = await res.json();
+							if (data.url) {
+								// Quick silent update of the service
+								await fetch('/api/services/quick-edit', {
+									method: 'POST',
+									headers: { 'Content-Type': 'application/json' },
+									body: JSON.stringify({ id: service.id, name: service.name, url: service.url, icon: data.url })
+								});
+								window.location.reload();
+							}
+						} catch (err) {
+							console.error(err);
+						}
+					}} />
+				</label>
 			{/if}
 		</div>
 
