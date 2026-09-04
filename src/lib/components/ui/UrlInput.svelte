@@ -17,27 +17,27 @@
     let domain = $state('');
     let isProtocolOpen = $state(false);
 
-    // Watch for external value changes (e.g. from DB)
-    $effect(() => {
-        if (value && typeof value === 'string') {
-            if (value.startsWith('http://') && domain !== value.substring(7)) {
-                protocol = 'http://';
-                domain = value.substring(7);
-            } else if (value.startsWith('https://') && domain !== value.substring(8)) {
-                protocol = 'https://';
-                domain = value.substring(8);
-            } else if (!value.startsWith('http://') && !value.startsWith('https://') && domain !== value) {
-                domain = value;
-            }
+    function syncFromValue(v: string | null | undefined) {
+        if (!v) {
+            domain = '';
+            return;
         }
-    });
-
-    // Update bound value when internal state changes
-    $effect(() => {
-        if (domain) {
-            value = protocol + domain;
+        if (v.startsWith('https://')) {
+            protocol = 'https://';
+            domain = v.substring(8);
+        } else if (v.startsWith('http://')) {
+            protocol = 'http://';
+            domain = v.substring(7);
         } else {
-            value = '';
+            domain = v;
+        }
+    }
+
+    // Watch for external value changes (e.g. from DB) without circular loops
+    $effect(() => {
+        const expected = domain ? protocol + domain : '';
+        if (value !== expected && value !== undefined) {
+            syncFromValue(value);
         }
     });
 
@@ -45,12 +45,20 @@
         let val = (e.target as HTMLInputElement).value;
         if (val.startsWith('http://')) {
             protocol = 'http://';
-            domain = val.substring(7);
+            val = val.substring(7);
         } else if (val.startsWith('https://')) {
             protocol = 'https://';
-            domain = val.substring(8);
-        } else {
-            domain = val;
+            val = val.substring(8);
+        }
+        domain = val;
+        value = domain ? protocol + domain : '';
+    }
+    
+    function changeProtocol(p: string) {
+        protocol = p;
+        isProtocolOpen = false;
+        if (domain) {
+            value = protocol + domain;
         }
     }
 </script>
@@ -75,10 +83,10 @@
             >
                 <ul class="py-1">
                     <li>
-                        <button type="button" class="w-full text-left px-4 py-2.5 text-xs hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors {protocol === 'http://' ? 'bg-blue-50/50 dark:bg-gray-700/50 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}" onclick={() => { protocol = 'http://'; isProtocolOpen = false; }}>http://</button>
+                        <button type="button" class="w-full text-left px-4 py-2.5 text-xs hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors {protocol === 'http://' ? 'bg-blue-50/50 dark:bg-gray-700/50 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}" onclick={() => changeProtocol('http://')}>http://</button>
                     </li>
                     <li>
-                        <button type="button" class="w-full text-left px-4 py-2.5 text-xs hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors {protocol === 'https://' ? 'bg-blue-50/50 dark:bg-gray-700/50 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}" onclick={() => { protocol = 'https://'; isProtocolOpen = false; }}>https://</button>
+                        <button type="button" class="w-full text-left px-4 py-2.5 text-xs hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors {protocol === 'https://' ? 'bg-blue-50/50 dark:bg-gray-700/50 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}" onclick={() => changeProtocol('https://')}>https://</button>
                     </li>
                 </ul>
             </div>

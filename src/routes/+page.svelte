@@ -120,8 +120,8 @@
 	
 	{#if Object.keys(localGroups).length === 0}
 		<div class="text-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-			<h3 class="mt-2 text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white">No services found</h3>
-			<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by adding a new service in the admin panel.</p>
+			<h3 class="mt-2 text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white">Nessun servizio trovato</h3>
+			<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Inizia aggiungendo un nuovo servizio dal pannello di amministrazione.</p>
 		</div>
 	{/if}
 </div>

@@ -23,6 +23,14 @@ export function getIconDetails(iconSlug: string | null) {
 
   const searchSlug = aliases[slug] || slug;
 
+  if (searchSlug === "theview") {
+    return {
+      hex: "#38B2AC", // Tailwind Teal
+      url: "/favicon.svg",
+      isCustomUrl: true,
+    };
+  }
+
   const matched = iconsData.icons.find(
     (i: any) =>
       (i.slug && i.slug === searchSlug) ||
