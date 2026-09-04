@@ -1,12 +1,12 @@
 node_modules
+.svelte-kit
+/build
 
 # Output
 .output
 .vercel
 .netlify
 .wrangler
-/.svelte-kit
-/build
 
 # OS
 .DS_Store
@@ -21,5 +21,20 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
-sqlite.db
+
+# Data & Settings
 data/
+sqlite.db
+sqlite.db-journal
+settings.json
+static/uploads/
+uploads/
+
+# IDE
+.vscode/
+
+# Temp files
+*.patch
+patch*.py
+patch*.txt
+patch*.cjs

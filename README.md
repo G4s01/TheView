@@ -7,6 +7,8 @@ TheView is a modern, responsive, and blazing fast homelab dashboard built with S
 - **Modern UI/UX**: Built with Svelte 5 and Tailwind CSS v4. Includes full Dark Mode support and responsive grid layouts.
 - **Dynamic Admin Panel**: Manage your services (Create, Read, Update, Delete) directly from the `/admin` web interface. No YAML editing required!
 - **Health Checks**: Built-in pinging system. Shows live online/offline status and latency (ms) for all your tracked services.
+- **Auto-Discovery**: Automatically scans your local Docker daemon and Nginx Proxy Manager to find running services and domain mappings, allowing you to add them to your dashboard in one click.
+- **Advanced Theming**: Choose from a variety of beautiful themes including Default, Dracula (Classic, Alucard, Van Helsing), and Catppuccin (Latte, Macchiato).
 - **Auto-Themed Icons**: Automatically fetches SVGs from Simple-Icons based on the service name, and intelligently tints the card background to match the brand's primary color.
 - **Advanced Widgets**: Built-in proxy API widgets for popular services (e.g., live qBittorrent download/upload speeds) directly on the cards.
 
