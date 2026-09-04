@@ -1,11 +1,8 @@
 import { json } from "@sveltejs/kit";
 import { getSettings } from "$lib/server/settings";
-import jwt from "jsonwebtoken";
-const { sign } = jwt;
 
 export async function POST({ request, cookies }) {
   const body = await request.json();
-
   const { action, password } = body;
 
   if (action === "login") {
@@ -13,13 +10,11 @@ export async function POST({ request, cookies }) {
     const correctPassword = settings.adminPassword || "admin";
 
     if (password === correctPassword) {
-      const secret = "g4s-theview-super-secret-key-123";
-      const token = sign({ role: "admin" }, secret, { expiresIn: "7d" });
-
-      cookies.set("admin_session", token, {
+      cookies.set("admin_session", "active", {
         path: "/",
         httpOnly: true,
         sameSite: "strict",
+        secure: false, // Serve a permettere il login su IP HTTP locale senza SSL
         maxAge: 60 * 60 * 24 * 7, // 1 settimana
       });
       return json({ success: true });
@@ -30,7 +25,7 @@ export async function POST({ request, cookies }) {
       );
     }
   } else if (action === "logout") {
-    cookies.delete("admin_session", { path: "/" });
+    cookies.delete("admin_session", { path: "/", secure: false });
     return json({ success: true });
   }
 
