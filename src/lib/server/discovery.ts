@@ -11,6 +11,9 @@ export interface DiscoveredService {
   description?: string;
   pingEnabled?: boolean;
   iconDetails?: any;
+  _ips?: string[];
+  _ports?: number[];
+  _publicPorts?: number[];
 }
 
 // Interroga l'API di NPM per trovare i proxy hosts
@@ -26,11 +29,14 @@ export async function getNpmServices(
 
   try {
     // 1. Get Token
-    const tokenRes = await fetch(rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/tokens`), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ identity: email, secret: password }),
-    });
+    const tokenRes = await fetch(
+      rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/tokens`),
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identity: email, secret: password }),
+      },
+    );
 
     if (!tokenRes.ok) {
       console.error("Failed to authenticate with NPM API");
@@ -42,7 +48,9 @@ export async function getNpmServices(
 
     // 2. Get Proxy Hosts
     const hostsRes = await fetch(
-      rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`),
+      rewriteUrlForDocker(
+        `${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`,
+      ),
       {
         headers: { Authorization: `Bearer ${token}` },
       },
@@ -66,7 +74,8 @@ export async function getNpmServices(
           id: `npm-${host.id}`,
           name: primaryDomain.split(".")[0],
           url: `${scheme}://${primaryDomain}`,
-          source: "npm", pingEnabled: true,
+          source: "npm",
+          pingEnabled: true,
           description: `Forward to ${host.forward_host}:${host.forward_port}`,
         });
       }
@@ -104,21 +113,30 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
           for (const container of containers) {
             let name = container.Names[0] || "";
             if (name.startsWith("/")) name = name.substring(1);
-            
+
             // Estrai tutti gli IP del container per il merging
             const ips = [];
-            if (container.NetworkSettings && container.NetworkSettings.Networks) {
-              for (const net of Object.values(container.NetworkSettings.Networks)) {
+            if (
+              container.NetworkSettings &&
+              container.NetworkSettings.Networks
+            ) {
+              for (const net of Object.values(
+                container.NetworkSettings.Networks,
+              )) {
                 if (net.IPAddress) ips.push(net.IPAddress);
               }
             }
-            
+
             // Estrai porte
             const ports = [];
+            const publicPorts = [];
             if (container.Ports) {
               for (const p of container.Ports) {
                 if (p.PrivatePort) ports.push(p.PrivatePort);
-                if (p.PublicPort) ports.push(p.PublicPort);
+                if (p.PublicPort) {
+                  ports.push(p.PublicPort);
+                  publicPorts.push(p.PublicPort);
+                }
               }
             }
 
@@ -126,10 +144,12 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
               id: `docker-${container.Id.substring(0, 12)}`,
               name,
               url: "",
-              source: "docker", pingEnabled: true,
+              source: "docker",
+              pingEnabled: true,
               description: container.Image,
               _ips: ips,
-              _ports: ports
+              _ports: ports,
+              _publicPorts: publicPorts,
             });
           }
 
@@ -162,18 +182,23 @@ export async function discoverAllServices(
   let npm: (DiscoveredService & { forwardHost?: string })[] = [];
   if (npmUrl && npmEmail && npmPassword) {
     try {
-      const tokenRes = await fetch(rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/tokens`), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identity: npmEmail, secret: npmPassword }),
-      });
+      const tokenRes = await fetch(
+        rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/tokens`),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identity: npmEmail, secret: npmPassword }),
+        },
+      );
 
       if (!tokenRes.ok) {
         npmError = `Authentication failed: ${tokenRes.status} ${tokenRes.statusText}`;
       } else {
         const tokenData = await tokenRes.json();
         const hostsRes = await fetch(
-          rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`),
+          rewriteUrlForDocker(
+            `${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`,
+          ),
           { headers: { Authorization: `Bearer ${tokenData.token}` } },
         );
 
@@ -192,7 +217,8 @@ export async function discoverAllServices(
                 id: `npm-${host.id}`,
                 name: primaryDomain.split(".")[0],
                 url: `${scheme}://${primaryDomain}`,
-                source: "npm", pingEnabled: true,
+                source: "npm",
+                pingEnabled: true,
                 description: `Forward to ${host.forward_host}:${host.forward_port}`,
                 forwardHost: host.forward_host,
                 forwardPort: host.forward_port,
@@ -202,7 +228,7 @@ export async function discoverAllServices(
         }
       }
     } catch (e: any) {
-      const cause = e.cause ? ` (Cause: ${e.cause.message || e.cause})` : '';
+      const cause = e.cause ? ` (Cause: ${e.cause.message || e.cause})` : "";
       npmError = `Network error: ${e.message}${cause}`;
       console.error("NPM Fetch Error Details:", e, e.cause);
     }
@@ -210,30 +236,62 @@ export async function discoverAllServices(
 
   const docker = await getDockerServices();
 
-    // Fondere NPM e Docker
+  // Fondere NPM e Docker
   const merged: DiscoveredService[] = [];
   for (const n of npm) {
     const dIndex = docker.findIndex((d) => {
       // 1. Corrispondenza per Hostname o IP interno
-      if (d.name === n.forwardHost || d.name === n.name) return true;
+      const fHost = (n.forwardHost || "").toLowerCase();
+      const nName = n.name.toLowerCase();
+      const dName = d.name.toLowerCase();
+      const dImage = (d.description || "").toLowerCase();
+
+      if (dName === fHost || dName === nName) return true;
       if (d._ips && d._ips.includes(n.forwardHost)) return true;
-      
-      // 2. Corrispondenza per Porta esposta (se l'IP non combacia, ad esempio proxy punta all'IP dell'host)
-      if (n.forwardPort && d._ports && d._ports.includes(parseInt(n.forwardPort as string))) {
-          // Aggiungiamo un check sul nome per evitare di fondere container diversi che usano la stessa porta internamente
-          const dName = d.name.toLowerCase();
-          const nName = n.name.toLowerCase();
-          if (dName.includes(nName) || nName.includes(dName)) return true;
-          // Se NPM punta a un dominio generico e la porta corrisponde esattamente a quella esposta pubblica, probabile match
-          return true;
+
+      // 2. Corrispondenza per Porta Pubblica Esterna (Altamente Affidabile)
+      // Se NPM sta puntando all'IP del server host anziché all'IP interno del container,
+      // la porta forwardata corrisponderà alla porta "pubblica" esposta dal container (es. 0.0.0.0:8080).
+      // Poiché su un singolo host Docker le porte pubbliche sono univoche, questo è un match forte.
+      if (
+        n.forwardPort &&
+        d._publicPorts &&
+        d._publicPorts.includes(parseInt(n.forwardPort as string))
+      ) {
+        return true;
       }
+
+      // 3. Corrispondenza per Porta Privata Interna (Richiede verifica incrociata)
+      if (
+        n.forwardPort &&
+        d._ports &&
+        d._ports.includes(parseInt(n.forwardPort as string))
+      ) {
+        // Se la porta corrisponde (es. la classica 80 interna), dobbiamo assicurarci che ci sia almeno
+        // una somiglianza nel nome, nell'immagine o nell'host per evitare falsi positivi.
+        if (
+          dName.includes(nName) ||
+          nName.includes(dName) ||
+          dName.includes(fHost) ||
+          fHost.includes(dName) ||
+          dImage.includes(nName) ||
+          nName.includes(dImage)
+        ) {
+          return true;
+        }
+      }
+
+      // 4. Somiglianza forte (fallback finale se IP/Porta non matchano ma i nomi sono molto simili)
+      if (dName === `${nName}-1` || dName === `${nName}_1`) return true;
+
       return false;
     });
     if (dIndex !== -1) {
       const d = docker[dIndex];
       merged.push({
         ...n,
-        source: "npm+docker" as any, pingEnabled: true,
+        source: "npm+docker" as any,
+        pingEnabled: true,
         description: `${d.description} (via NPM)`,
       });
       docker.splice(dIndex, 1);
@@ -265,12 +323,12 @@ export async function discoverAllServices(
   });
 
   // Popola l'icona usando guess per ogni servizio
-  const enriched = filtered.map(s => {
+  const enriched = filtered.map((s) => {
     // Cerchiamo di dedurre l'icona dal nome
     let guess = s.name;
     if (s.source === "docker" && s.description) {
       // Usa il nome dell'immagine senza tag (es. linuxserver/qbittorrent -> qbittorrent)
-      const imageParts = s.description.split(':')[0].split('/');
+      const imageParts = s.description.split(":")[0].split("/");
       guess = imageParts[imageParts.length - 1];
     }
     const iconDetails = getIconDetails(guess) || getIconDetails(s.name);
