@@ -256,7 +256,16 @@
 					</div>
 					
 					{#if !ds.added && expandedId === ds.id}
-						<form method="POST" action="?/createService" onclick={(e) => e.stopPropagation()} use:enhance={() => {
+						<form novalidate method="POST" action="?/createService" onclick={(e) => e.stopPropagation()} oninput={(e) => e.currentTarget.classList.remove('show-errors')} onchange={(e) => e.currentTarget.classList.remove('show-errors')} onsubmit={(e) => {
+							const form = e.currentTarget;
+							form.classList.remove('show-errors');
+							if (!form.checkValidity()) {
+								e.preventDefault();
+								void form.offsetWidth; // trigger reflow
+								form.classList.add('show-errors');
+								return;
+							}
+						}} use:enhance={() => {
 							return async ({ result, update }) => {
 								if (result.type === 'success') {
 									ds.added = true;
@@ -315,13 +324,16 @@
 																localCategories = [...localCategories, data.category];
 																ds.categoryId = data.category.id;
 																ds.isCreatingCategory = false;
+															} else {
+																const data = await res.json();
+																alert(data.error || 'Errore durante la creazione della categoria');
 															}
 														} catch(e) { console.error(e); }
 													}} class="px-3 bg-green-600 text-white rounded-xl hover:bg-green-700 text-sm font-medium">Ok</button>
 													<button type="button" onclick={() => ds.isCreatingCategory = false} class="px-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium">X</button>
 												</div>
 											{:else}
-												<SelectInput label="Categoria" name="categoryId" bind:value={ds.categoryId} options={[{value: '', label: '-- Seleziona --'}, ...localCategories.map(c => ({value: c.id, label: c.name})), {value: 'new_category_trigger', label: '+ Nuova...', class: 'font-bold text-blue-600'}]} onchange={(val) => { if (val === 'new_category_trigger') { ds.isCreatingCategory = true; ds.categoryId = ''; } }} />
+												<SelectInput label="Categoria" name="categoryId" bind:value={ds.categoryId} required options={[{value: '', label: '-- Seleziona --'}, ...localCategories.map(c => ({value: c.id, label: c.name})), {value: 'new_category_trigger', label: '+ Nuova...', class: 'font-bold text-blue-600'}]} onchange={(val) => { if (val === 'new_category_trigger') { ds.isCreatingCategory = true; ds.categoryId = ''; } }} />
 											{/if}
 										</div>
 

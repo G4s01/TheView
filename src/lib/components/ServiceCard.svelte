@@ -44,9 +44,16 @@
 
 	async function saveEdit(e: Event) {
 		e.preventDefault();
+		const form = e.currentTarget as HTMLFormElement;
+		form.classList.remove('show-errors');
+		if (!form.checkValidity()) {
+			void form.offsetWidth;
+			form.classList.add('show-errors');
+			return;
+		}
 		isSaving = true;
 		try {
-			await fetch('/api/services/quick-edit', {
+			const res = await fetch('/api/services/quick-edit', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -116,7 +123,7 @@
 	onclick={(e) => { if (appState.isEditMode) e.preventDefault(); }}
 >
 	{#if isExpanded}
-		<form onsubmit={saveEdit} class="flex flex-col gap-4 w-full h-full justify-between" onclick={(e) => e.stopPropagation()}>
+		<form novalidate onsubmit={saveEdit} oninput={(e) => e.currentTarget.classList.remove('show-errors')} onchange={(e) => e.currentTarget.classList.remove('show-errors')} class="flex flex-col gap-4 w-full h-full justify-between" onclick={(e) => e.stopPropagation()}>
 			<div class="space-y-4">
 				<TextInput label="Nome" bind:value={editName} required />
 				<UrlInput label="URL" bind:value={editUrl} required />
@@ -144,7 +151,7 @@
 				
 				<TextInput label="Descrizione" bind:value={editDesc} />
 				
-				<SelectInput label="Categoria" bind:value={editCat} required options={categories.map(c => ({value: c.id, label: c.name}))} />
+				<SelectInput name="categoryId" label="Categoria" bind:value={editCat} required options={categories.map(c => ({value: c.id, label: c.name}))} />
 				
 				<div class="flex gap-4">
 					<div class="flex-1">

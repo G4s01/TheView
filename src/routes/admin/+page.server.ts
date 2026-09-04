@@ -30,23 +30,13 @@ export const actions: Actions = {
     const data = await request.formData();
     const name = data.get("name")?.toString();
     const url = data.get("url")?.toString();
-    let categoryIdStr = data.get("categoryId")?.toString();
+    const categoryIdStr = data.get("categoryId")?.toString();
 
-    if (!name || !url) {
-      return fail(400, { error: "Missing required fields" });
+    if (!name || !url || !categoryIdStr) {
+      return fail(400);
     }
 
-    let categoryId: number;
-    if (!categoryIdStr) {
-      const [newCat] = await db
-        .insert(categories)
-        .values({ name: "Generale" })
-        .returning();
-      categoryId = newCat.id;
-    } else {
-      categoryId = parseInt(categoryIdStr);
-    }
-
+    const categoryId = parseInt(categoryIdStr);
     const icon = data.get("icon")?.toString() || null;
     const description = data.get("description")?.toString() || null;
     const widgetType = data.get("widgetType")?.toString() || null;
@@ -73,23 +63,13 @@ export const actions: Actions = {
     const id = data.get("id")?.toString();
     const name = data.get("name")?.toString();
     const url = data.get("url")?.toString();
-    let categoryIdStr = data.get("categoryId")?.toString();
+    const categoryIdStr = data.get("categoryId")?.toString();
 
-    if (!id || !name || !url) {
-      return fail(400, { error: "Missing required fields" });
+    if (!id || !name || !url || !categoryIdStr) {
+      return fail(400);
     }
 
-    let categoryId: number;
-    if (!categoryIdStr) {
-      const [newCat] = await db
-        .insert(categories)
-        .values({ name: "Generale" })
-        .returning();
-      categoryId = newCat.id;
-    } else {
-      categoryId = parseInt(categoryIdStr);
-    }
-
+    const categoryId = parseInt(categoryIdStr);
     const icon = data.get("icon")?.toString() || null;
     const description = data.get("description")?.toString() || null;
     const widgetType = data.get("widgetType")?.toString() || null;
@@ -135,6 +115,11 @@ export const actions: Actions = {
     if (!name) return fail(400, { error: "Nome categoria mancante" });
 
     try {
+      const allCats = await db.select().from(categories);
+      if (allCats.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
+        return fail(400, { error: "Esiste già una categoria con questo nome" });
+      }
+
       const [newCat] = await db.insert(categories).values({ name }).returning();
       return { success: true, category: newCat };
     } catch (error) {
@@ -152,6 +137,17 @@ export const actions: Actions = {
     if (!id || !name) return fail(400, { error: "Dati mancanti" });
 
     try {
+      const allCats = await db.select().from(categories);
+      if (
+        allCats.some(
+          (c) =>
+            c.name.toLowerCase() === name.toLowerCase() &&
+            c.id !== parseInt(id),
+        )
+      ) {
+        return fail(400, { error: "Esiste già una categoria con questo nome" });
+      }
+
       await db
         .update(categories)
         .set({ name })

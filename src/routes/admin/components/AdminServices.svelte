@@ -100,7 +100,16 @@
 		
 		{#if isAddServiceExpanded}
 		<div transition:slide|local class="px-5 pb-6 border-t border-gray-100 dark:border-gray-700 pt-5">
-			<form method="POST" action="?/createService" use:enhance class="space-y-5">
+			<form novalidate method="POST" action="?/createService" use:enhance oninput={(e) => e.currentTarget.classList.remove('show-errors')} onchange={(e) => e.currentTarget.classList.remove('show-errors')} onsubmit={(e) => {
+				const form = e.currentTarget;
+				form.classList.remove('show-errors');
+				if (!form.checkValidity()) {
+					e.preventDefault();
+					void form.offsetWidth;
+					form.classList.add('show-errors');
+					return;
+				}
+			}} class="space-y-5">
 								<!-- Row 1: Nome, URL -->
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					<TextInput label="Nome" name="name" id="name" required />
@@ -145,6 +154,9 @@
 											localCategories = [...localCategories, data.category];
 											newServiceCategoryId = data.category.id;
 											isCreatingCategory = false;
+										} else {
+											const data = await res.json();
+											alert(data.error || 'Errore durante la creazione della categoria');
 										}
 									} catch(e) { console.error(e); }
 								}} class="px-3 bg-green-600 text-white rounded-xl hover:bg-green-700 text-sm font-medium whitespace-nowrap">Ok</button>
@@ -201,7 +213,16 @@
 					{#each groupedServices[catId] as service (service.id)}
 						<li animate:flip={{duration: flipDurationMs}} class="px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors bg-white dark:bg-gray-800 cursor-move">
 							{#if editingServiceId === service.id}
-								<form method="POST" action="?/updateService" use:enhance={() => {
+								<form novalidate method="POST" action="?/updateService" oninput={(e) => e.currentTarget.classList.remove('show-errors')} onchange={(e) => e.currentTarget.classList.remove('show-errors')} onsubmit={(e) => {
+									const form = e.currentTarget;
+									form.classList.remove('show-errors');
+									if (!form.checkValidity()) {
+										e.preventDefault();
+										void form.offsetWidth;
+										form.classList.add('show-errors');
+										return;
+									}
+								}} use:enhance={() => {
 									return async ({ update }) => {
 										editingServiceId = null;
 										await update();

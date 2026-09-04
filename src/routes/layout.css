@@ -303,3 +303,14 @@ html:not(.dark) {
     @apply bg-white text-gray-900 dark:bg-gray-800 dark:text-white;
   }
 }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+form.show-errors input:invalid, form.show-errors select:invalid, form.show-errors input:invalid ~ button, form.show-errors input:invalid ~ div > button {
+  border-color: var(--color-red-500) !important;
+  animation: shake 0.4s ease-in-out;
+}
