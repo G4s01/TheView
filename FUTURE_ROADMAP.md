@@ -26,6 +26,6 @@ Questa roadmap raccoglie gli step per implementare le nuove funzionalità richie
 
 ## 4. Integrazione Nginx Proxy Manager (NPM) e Docker
 
-- [ ] Sviluppare un servizio in background (cron o task) in Node.js che interroghi le API di Nginx Proxy Manager (o legga i suoi file SQLite) per scoprire nuovi host proxy configurati.
-- [ ] Sviluppare un'interrogazione al socket Docker (già montato in compose) per leggere quali container sono attivi e avere metadati.
-- [ ] Creare una tab "Discovery" nell'Admin Panel per vedere i servizi non ancora in dashboard e permettere di aggiungerli con 1 click.
+- [x] Sviluppare un servizio in background (cron o task) in Node.js che interroghi le API di Nginx Proxy Manager (o legga i suoi file SQLite) per scoprire nuovi host proxy configurati.
+- [x] Sviluppare un'interrogazione al socket Docker (già montato in compose) per leggere quali container sono attivi e avere metadati.
+- [x] Creare una tab "Discovery" nell'Admin Panel per vedere i servizi non ancora in dashboard e permettere di aggiungerli con 1 click.

@@ -20,6 +20,30 @@
 
 	const flipDurationMs = 200;
 	
+	let discoveredServices = $state<any[]>([]);
+	let isDiscovering = $state(false);
+
+	$effect(() => {
+		if (activeTab === 'discovery' && discoveredServices.length === 0 && !isDiscovering) {
+			fetchDiscovery();
+		}
+	});
+
+	async function fetchDiscovery() {
+		isDiscovering = true;
+		try {
+			const res = await fetch('/api/discovery');
+			if (res.ok) {
+				const data = await res.json();
+				discoveredServices = data.services;
+			}
+		} catch (e) {
+			console.error(e);
+		} finally {
+			isDiscovering = false;
+		}
+	}
+	
 	function handleDndConsider(e: CustomEvent) {
 		localCategories = e.detail.items;
 	}
@@ -47,7 +71,6 @@
 		<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage your homelab services and categories.</p>
 	</div>
 
-	<!-- Tabs -->
 	<div class="border-b border-gray-200 dark:border-gray-700">
 		<nav class="-mb-px flex space-x-8">
 			<button
@@ -61,6 +84,12 @@
 				class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm {activeTab === 'categories' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'}"
 			>
 				Categorie
+			</button>
+			<button
+				onclick={() => activeTab = 'discovery'}
+				class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm {activeTab === 'discovery' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'}"
+			>
+				Discovery
 			</button>
 		</nav>
 	</div>
@@ -146,7 +175,7 @@
 				</ul>
 			</div>
 		</div>
-	{:else}
+	{:else if activeTab === 'categories'}
 		<!-- Categories Tab -->
 		<div class="space-y-8">
 			<!-- Add New Category -->
@@ -206,5 +235,64 @@
 				</ul>
 			</div>
 		</div>
+		{:else if activeTab === 'discovery'}
+		<div class="space-y-6">
+			<div class="flex items-center justify-between">
+				<p class="text-sm text-gray-500 dark:text-gray-400">
+					Questi servizi sono stati trovati su Docker o Nginx Proxy Manager ma non sono ancora in dashboard.
+				</p>
+				<button 
+					onclick={fetchDiscovery}
+					disabled={isDiscovering}
+					class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+				>
+					{isDiscovering ? 'Scansione...' : 'Aggiorna'}
+				</button>
+			</div>
+
+			<div class="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<ul class="divide-y divide-gray-200 dark:divide-gray-700">
+					{#if isDiscovering}
+						<li class="px-4 py-8 text-center text-sm text-gray-500">Ricerca in corso...</li>
+					{:else if discoveredServices.length === 0}
+						<li class="px-4 py-8 text-center text-sm text-gray-500">Nessun nuovo servizio trovato.</li>
+					{/if}
+
+					{#each discoveredServices as ds}
+						<li class="px-4 py-4 sm:px-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50">
+							<div>
+								<div class="flex items-center space-x-2">
+									<p class="text-sm font-medium text-gray-900 dark:text-white truncate">{ds.name}</p>
+									<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {ds.source === 'npm' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+										{ds.source}
+									</span>
+								</div>
+								{#if ds.url}
+									<p class="text-sm text-blue-600 dark:text-blue-400 truncate mt-1">{ds.url}</p>
+								{/if}
+								{#if ds.description}
+									<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{ds.description}</p>
+								{/if}
+							</div>
+							
+							<div class="ml-4">
+								<form method="POST" action="?/createService" use:enhance class="flex items-center space-x-2">
+									<input type="hidden" name="name" value={ds.name}>
+									<input type="hidden" name="url" value={ds.url || 'http://'}>
+									<!-- Default to the first category for fast insertion -->
+									<input type="hidden" name="categoryId" value={categories.length > 0 ? categories[0].id : ''}>
+									<input type="hidden" name="icon" value={ds.name}>
+									<button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700">
+										Aggiungi
+									</button>
+								</form>
+							</div>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		</div>
 	{/if}
+
 </div>
+

@@ -6,16 +6,20 @@
     <meta name="text-scale" content="scale" />
     <script>
       // Prevent FOUC for dark mode and themes
-      const savedScheme = localStorage.getItem('theview-color-scheme');
-      if (savedScheme === 'dark' || (!savedScheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
+      const savedScheme = localStorage.getItem("theview-color-scheme");
+      if (
+        savedScheme === "dark" ||
+        (!savedScheme &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        document.documentElement.classList.add("dark");
       } else {
-        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.remove("dark");
       }
 
-      const savedTheme = localStorage.getItem('theview-theme');
-      if (savedTheme && savedTheme !== 'default') {
-        document.documentElement.setAttribute('data-theme', savedTheme);
+      const savedTheme = localStorage.getItem("theview-theme");
+      if (savedTheme && savedTheme !== "default") {
+        document.documentElement.setAttribute("data-theme", savedTheme);
       }
     </script>
     %sveltekit.head%
