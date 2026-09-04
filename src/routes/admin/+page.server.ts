@@ -30,7 +30,10 @@ export const actions: Actions = {
 
     let categoryId: number;
     if (!categoryIdStr) {
-      const [newCat] = await db.insert(categories).values({ name: "Generale" }).returning();
+      const [newCat] = await db
+        .insert(categories)
+        .values({ name: "Generale" })
+        .returning();
       categoryId = newCat.id;
     } else {
       categoryId = parseInt(categoryIdStr);
