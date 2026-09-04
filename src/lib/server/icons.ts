@@ -14,17 +14,26 @@ export function getIconDetails(iconSlug: string | null) {
 
   const slug = iconSlug.toLowerCase();
 
+  // Aliases for known docker containers that have different names in simple-icons
+  const aliases: Record<string, string> = {
+    "wg-easy": "wireguard",
+    adguardhome: "adguard",
+    qbittorrent: "qbittorrent",
+  };
+
+  const searchSlug = aliases[slug] || slug;
+
   const matched = iconsData.icons.find(
     (i: any) =>
-      (i.slug && i.slug === slug) ||
-      computeSlug(i.title) === slug ||
-      i.title.toLowerCase() === slug,
+      (i.slug && i.slug === searchSlug) ||
+      computeSlug(i.title) === searchSlug ||
+      i.title.toLowerCase() === searchSlug,
   );
 
   if (matched) {
     return {
       hex: "#" + matched.hex,
-      url: `https://cdn.simpleicons.org/${slug}/white`,
+      url: `https://cdn.simpleicons.org/${searchSlug}/white`,
     };
   }
 
@@ -37,5 +46,10 @@ export function getIconDetails(iconSlug: string | null) {
     };
   }
 
-  return null;
+  // Fallback to walkxcode/dashboard-icons for services not in simple-icons (like filebrowser)
+  return {
+    hex: "#6B7280",
+    url: `https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/${slug}.png`,
+    isCustomUrl: true,
+  };
 }

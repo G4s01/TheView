@@ -15,6 +15,7 @@ export interface DiscoveredService {
   _ports?: number[];
   _publicPorts?: number[];
   _npmMatch?: string;
+  _iconOverride?: string;
 }
 
 // Interroga l'API di NPM per trovare i proxy hosts
@@ -143,8 +144,12 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
 
             // Estrai label per match deterministico esplicito (se presente)
             let npmMatch = "";
-            if (container.Labels && container.Labels["theview.npm"]) {
-              npmMatch = container.Labels["theview.npm"].toLowerCase();
+            let iconOverride = "";
+            if (container.Labels) {
+              if (container.Labels["theview.npm"])
+                npmMatch = container.Labels["theview.npm"].toLowerCase();
+              if (container.Labels["theview.icon"])
+                iconOverride = container.Labels["theview.icon"].toLowerCase();
             }
 
             services.push({
@@ -158,6 +163,7 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
               _ports: ports,
               _publicPorts: publicPorts,
               _npmMatch: npmMatch,
+              _iconOverride: iconOverride,
             });
           }
 
@@ -296,7 +302,21 @@ export async function discoverAllServices(
         }
       }
 
-      // 4. Somiglianza forte (fallback finale se IP/Porta non matchano ma i nomi sono molto simili)
+      // 4. Fallback intelligente per network_mode: host
+      // Se il container non ha alcuna porta mappata internamente (spesso accade con network: host),
+      // non possiamo fare il match per porta. Ci affidiamo a una somiglianza molto forte del nome.
+      if (!d._ports || d._ports.length === 0) {
+        if (
+          dName.includes(nName) ||
+          nName.includes(dName) ||
+          dImage.includes(nName)
+        ) {
+          // Evitiamo falsi positivi su nomi troppo corti
+          if (nName.length >= 4) return true;
+        }
+      }
+
+      // 5. Somiglianza forte finale
       if (dName === `${nName}-1` || dName === `${nName}_1`) return true;
 
       return false;
@@ -308,6 +328,7 @@ export async function discoverAllServices(
         source: "npm+docker" as any,
         pingEnabled: true,
         description: `${d.description} (via NPM)`,
+        _iconOverride: d._iconOverride,
       });
       docker.splice(dIndex, 1);
     } else {
@@ -358,12 +379,17 @@ export async function discoverAllServices(
     const cleanName = s.name.replace(/[-_]/g, "");
 
     const iconDetails =
+      (s._iconOverride ? getIconDetails(s._iconOverride) : null) ||
       getIconDetails(guess) ||
       getIconDetails(cleanGuess) ||
       getIconDetails(s.name) ||
       getIconDetails(cleanName);
 
-    return { ...s, iconDetails, icon: iconDetails ? guess : s.name };
+    return {
+      ...s,
+      iconDetails,
+      icon: s._iconOverride || (iconDetails ? guess : s.name),
+    };
   });
 
   return { services: enriched, npmError };
