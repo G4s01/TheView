@@ -2,6 +2,7 @@
 	import './layout.css';
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import { appState } from '$lib/client/state.svelte';
+	import { themeStore, themes } from '$lib/client/themeStore.svelte';
 	import { onMount } from 'svelte';
 	
 	let { children, data } = $props();
@@ -12,6 +13,8 @@
 	let showLogin = $state(false);
 
 	onMount(() => {
+		themeStore.init();
+		
 		if (data.isAdmin) {
 			appState.isEditMode = true;
 		}
@@ -127,16 +130,32 @@
 					{/if}
 				</div>
 
-				<!-- Theme Toggle -->
-				<button 
-					class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-					onclick={() => document.documentElement.classList.toggle('dark')}
-					title="Tema Chiaro/Scuro"
-				>
-					<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-					</svg>
-				</button>
+				<!-- Theme Dropdown & Dark Mode Toggle Group -->
+				<div class="flex items-center space-x-1">
+					<select 
+						value={themeStore.theme}
+						onchange={(e) => themeStore.setTheme(e.currentTarget.value)}
+						class="bg-transparent text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border-none focus:ring-0 cursor-pointer appearance-none px-2 py-1"
+					>
+						{#each themes as theme}
+							<option value={theme.id} class="text-gray-900 bg-white">{theme.name}</option>
+						{/each}
+					</select>
+
+					<!-- Theme Toggle (Dark/Light) -->
+					<button 
+						class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+						onclick={() => {
+							const isDark = document.documentElement.classList.toggle('dark');
+							localStorage.setItem('theview-color-scheme', isDark ? 'dark' : 'light');
+						}}
+						title="Tema Chiaro/Scuro"
+					>
+						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+						</svg>
+					</button>
+				</div>
 			</div>
 		</div>
 		

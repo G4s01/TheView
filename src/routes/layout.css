@@ -1,3 +1,90 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Dracula Theme */
+:root[data-theme="dracula"] {
+  --color-gray-50: #f8f8f2;
+  --color-gray-100: #f8f8f2;
+  --color-gray-200: #e2e2dc;
+  --color-gray-300: #6272a4;
+  --color-gray-400: #6272a4;
+  --color-gray-500: #6272a4;
+  --color-gray-600: #6272a4;
+  --color-gray-700: #44475a;
+  --color-gray-800: #282a36;
+  --color-gray-900: #282a36;
+
+  --color-blue-400: #8be9fd;
+  --color-blue-500: #8be9fd;
+  --color-blue-600: #bd93f9;
+  --color-blue-700: #bd93f9;
+  --color-blue-800: #6272a4;
+  --color-blue-900: #44475a;
+  
+  --color-red-400: #ff5555;
+  --color-red-600: #ff5555;
+}
+
+/* Nord Theme */
+:root[data-theme="nord"] {
+  --color-gray-50: #eceff4;
+  --color-gray-100: #e5e9f0;
+  --color-gray-200: #d8dee9;
+  --color-gray-300: #4c566a;
+  --color-gray-400: #434c5e;
+  --color-gray-500: #434c5e;
+  --color-gray-600: #3b4252;
+  --color-gray-700: #3b4252;
+  --color-gray-800: #2e3440;
+  --color-gray-900: #2e3440;
+
+  --color-blue-400: #88c0d0;
+  --color-blue-500: #81a1c1;
+  --color-blue-600: #5e81ac;
+  --color-blue-700: #5e81ac;
+  --color-blue-800: #434c5e;
+  --color-blue-900: #3b4252;
+
+  --color-red-400: #bf616a;
+  --color-red-600: #bf616a;
+}
+
+/* Catppuccin Mocha */
+:root[data-theme="catppuccin"] {
+  --color-gray-50: #cdd6f4;
+  --color-gray-100: #bac2de;
+  --color-gray-200: #a6adc8;
+  --color-gray-300: #585b70;
+  --color-gray-400: #45475a;
+  --color-gray-500: #45475a;
+  --color-gray-600: #313244;
+  --color-gray-700: #313244;
+  --color-gray-800: #1e1e2e;
+  --color-gray-900: #181825;
+
+  --color-blue-400: #89b4fa;
+  --color-blue-500: #89b4fa;
+  --color-blue-600: #cba6f7;
+  --color-blue-700: #cba6f7;
+  --color-blue-800: #313244;
+  --color-blue-900: #1e1e2e;
+
+  --color-red-400: #f38ba8;
+  --color-red-600: #f38ba8;
+}
+
+body {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Open Sans",
+    "Helvetica Neue",
+    sans-serif;
+}

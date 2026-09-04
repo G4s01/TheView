@@ -6,7 +6,10 @@ import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async () => {
   const allServices = await db.select().from(services);
-  const allCategories = await db.select().from(categories).orderBy(categories.position);
+  const allCategories = await db
+    .select()
+    .from(categories)
+    .orderBy(categories.position);
 
   return {
     services: allServices,
@@ -70,7 +73,9 @@ export const actions: Actions = {
       await db.insert(categories).values({ name });
       return { success: true };
     } catch (error) {
-      return fail(500, { error: "Errore durante la creazione della categoria" });
+      return fail(500, {
+        error: "Errore durante la creazione della categoria",
+      });
     }
   },
 
@@ -82,10 +87,15 @@ export const actions: Actions = {
     if (!id || !name) return fail(400, { error: "Dati mancanti" });
 
     try {
-      await db.update(categories).set({ name }).where(eq(categories.id, parseInt(id)));
+      await db
+        .update(categories)
+        .set({ name })
+        .where(eq(categories.id, parseInt(id)));
       return { success: true };
     } catch (error) {
-      return fail(500, { error: "Errore durante l'aggiornamento della categoria" });
+      return fail(500, {
+        error: "Errore durante l'aggiornamento della categoria",
+      });
     }
   },
 
@@ -103,7 +113,9 @@ export const actions: Actions = {
       await db.delete(categories).where(eq(categories.id, parseInt(id)));
       return { success: true };
     } catch (error) {
-      return fail(500, { error: "Errore durante l'eliminazione della categoria" });
+      return fail(500, {
+        error: "Errore durante l'eliminazione della categoria",
+      });
     }
-  }
+  },
 };

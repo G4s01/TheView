@@ -20,9 +20,9 @@ Questa roadmap raccoglie gli step per implementare le nuove funzionalità richie
 
 ## 3. Temi Personalizzati
 
-- [ ] Creare un sistema per caricare combinazioni di colori o temi CSS (es. Dracula Theme, Nord, Catppuccin).
-- [ ] Salvare la preferenza di tema dell'utente nel `localStorage` o nei Cookie in modo che sia persistente.
-- [ ] Aggiungere un menu a tendina o una finestra modale per la selezione rapida del tema.
+- [x] Creare un sistema per caricare combinazioni di colori o temi CSS (es. Dracula Theme, Nord, Catppuccin).
+- [x] Salvare la preferenza di tema dell'utente nel `localStorage` o nei Cookie in modo che sia persistente.
+- [x] Aggiungere un menu a tendina o una finestra modale per la selezione rapida del tema.
 
 ## 4. Integrazione Nginx Proxy Manager (NPM) e Docker
 
