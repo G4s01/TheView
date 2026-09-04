@@ -392,5 +392,11 @@ export async function discoverAllServices(
     };
   });
 
+  // Ordina i risultati come richiesto: npm+docker (1), npm (2), docker (3)
+  enriched.sort((a, b) => {
+    const order: { [key: string]: number } = { "npm+docker": 1, "npm": 2, "docker": 3 };
+    return order[a.source] - order[b.source];
+  });
+
   return { services: enriched, npmError };
 }
