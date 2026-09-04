@@ -81,8 +81,8 @@ export const actions: Actions = {
     if (!name) return fail(400, { error: "Nome categoria mancante" });
 
     try {
-      await db.insert(categories).values({ name });
-      return { success: true };
+      const [newCat] = await db.insert(categories).values({ name }).returning();
+      return { success: true, category: newCat };
     } catch (error) {
       return fail(500, {
         error: "Errore durante la creazione della categoria",
