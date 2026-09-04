@@ -2,6 +2,7 @@
 	import './layout.css';
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import { appState } from '$lib/client/state.svelte';
+	import { onMount } from 'svelte';
 	
 	let { children, data } = $props();
 
@@ -9,6 +10,12 @@
 	// data.categories will be populated by +layout.server.ts later
 	let categories = $derived(data.categories || []);
 	let showLogin = $state(false);
+
+	onMount(() => {
+		if (data.isAdmin) {
+			appState.isEditMode = true;
+		}
+	});
 </script>
 
 <div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
