@@ -1,6 +1,7 @@
 import { json } from "@sveltejs/kit";
 import { getSettings } from "$lib/server/settings";
-import { sign } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+const { sign } = jwt;
 
 export async function POST({ request, cookies }) {
   const body = await request.json();
