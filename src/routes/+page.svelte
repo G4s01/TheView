@@ -76,9 +76,11 @@
 		{#if services.length > 0 || appState.isEditMode}
 		<section id="{categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="scroll-mt-24">
 			<h2 class="text-lg font-bold uppercase tracking-wider text-gray-900 dark:text-white mb-3 flex items-center">
+				{#if data.showCategoryCounts}
 				<span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
 					{services.length}
 				</span>
+				{/if}
 				{#if appState.isEditMode}
 					<input 
 						type="text" 
@@ -110,7 +112,7 @@
 			>
 				{#each services as service (service.id)}
 					<div animate:flip={{duration: flipDurationMs}} class="transition-all duration-300 {editingServiceId === service.id ? 'col-span-full sm:col-span-2 lg:col-span-2 xl:col-span-2 2xl:col-span-2' : ''}">
-						<ServiceCard {service} liveStatus={statuses[service.id]} categories={data.categories || []} isExpanded={editingServiceId === service.id} onExpandToggle={(val) => editingServiceId = val ? service.id : null} />
+						<ServiceCard {service} liveStatus={statuses[service.id]} categories={data.categories || []} isExpanded={editingServiceId === service.id} onExpandToggle={(val) => editingServiceId = val ? service.id : null} showDescription={data.showServiceDescriptions} iconStyle={data.iconStyle} />
 					</div>
 				{/each}
 			</div>

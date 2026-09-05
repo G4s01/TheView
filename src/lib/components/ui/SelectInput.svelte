@@ -17,6 +17,8 @@
 		bgClass?: string;
 		required?: boolean;
 		class?: string;
+		placeholder?: string;
+		hideLabelWhenEmpty?: boolean;
 		onchange?: (value: string | number) => void;
 	}
 
@@ -29,12 +31,15 @@
 		bgClass = 'bg-white dark:bg-gray-800', 
 		required,
 		class: className = '',
+		placeholder = '-- Seleziona --',
+		hideLabelWhenEmpty = false,
 		onchange
 	}: Props = $props();
 
 	let isOpen = $state(false);
 
-	let selectedLabel = $derived(options.find(o => String(o.value) === String(value))?.label || '-- Seleziona --');
+	let isSelected = $derived(!!options.find(o => String(o.value) === String(value)));
+	let selectedLabel = $derived(options.find(o => String(o.value) === String(value))?.label || placeholder);
 
 	function handleSelect(val: string | number) {
 		value = val;
@@ -66,18 +71,20 @@
 		class="flex items-center justify-between px-4 pb-2 pt-2.5 w-full h-full text-sm text-left text-gray-900 bg-transparent rounded-xl border border-gray-200 dark:text-white dark:border-gray-700 focus:outline-none focus:ring-1 focus:border-blue-600 peer transition-colors {className}"
 		onclick={(e) => { e.preventDefault(); isOpen = !isOpen; }}
 	>
-		<span class="truncate {!value && !options.find(o=>o.value==='') ? 'text-gray-400' : ''}">{selectedLabel}</span>
+		<span class="truncate {!isSelected ? 'text-gray-500 font-medium' : ''}">{selectedLabel}</span>
 		<svg class="h-4 w-4 text-gray-500 dark:text-gray-400 shrink-0 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
 	</button>
 	
+	{#if !hideLabelWhenEmpty || isSelected || isOpen}
 	<label 
 		for={id} 
 		class="absolute text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-[21px] top-2.5 z-10 origin-[0] {bgClass} px-1.5 peer-focus:px-1.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-focus:top-2.5 peer-focus:-translate-y-[21px] start-3 pointer-events-none"
 	>
 		{label}
 	</label>
+	{/if}
 
 	{#if isOpen}
 		<div 

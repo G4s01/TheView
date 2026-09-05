@@ -9,10 +9,43 @@
 	
 	let { children, data } = $props();
 
+	let hasInitializedEditMode = false;
+	$effect(() => {
+		if (data.isAdmin && !hasInitializedEditMode) {
+			appState.isEditMode = true;
+			hasInitializedEditMode = true;
+		}
+	});
+
 	// We'll pass categories down to the sidebar
 	// data.categories will be populated by +layout.server.ts later
 	let categories = $derived(data.categories || []);
 	let showLogin = $state(false);
+	
+	let isNavbarHidden = $state(false);
+	let lastScrollY = $state(0);
+
+	$effect(() => {
+		if ($page.url.pathname.startsWith('/admin') || data.stickyNavbar) {
+			isNavbarHidden = false;
+		} else {
+			isNavbarHidden = true;
+		}
+	});
+
+	function handleScroll() {
+		if (data.stickyNavbar || $page.url.pathname.startsWith('/admin')) {
+			isNavbarHidden = false;
+			return;
+		}
+		const currentScrollY = window.scrollY;
+		if (currentScrollY > lastScrollY && currentScrollY > 10) {
+			isNavbarHidden = true; // Scrolling down
+		} else if (currentScrollY < lastScrollY) {
+			isNavbarHidden = false; // Scrolling up
+		}
+		lastScrollY = currentScrollY;
+	}
 
 	onMount(() => {
 		themeStore.init();
@@ -23,10 +56,25 @@
 	});
 </script>
 
+<svelte:window onscroll={handleScroll} />
+
 <div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
 	{#if $page.url.pathname !== '/setup'}
 	<!-- Topbar Header -->
-	<header class="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+	{#if isNavbarHidden}
+	<!-- Hover trigger area to reveal navbar -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div 
+		class="fixed top-0 left-0 w-full h-4 z-50 bg-transparent"
+		onmouseenter={() => isNavbarHidden = false}
+	></div>
+	{/if}
+	
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<header 
+		class="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-transform duration-300 {isNavbarHidden ? '-translate-y-full' : 'translate-y-0'}"
+		onmouseleave={() => { if (!data.stickyNavbar && !$page.url.pathname.startsWith('/admin')) isNavbarHidden = true; }}
+	>
 		<div class="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16 max-w-[1920px] mx-auto">
 			
 			<!-- Left Column (Logo & Back) -->
@@ -89,32 +137,28 @@
 						<a href="/admin" class="p-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors" title="Pannello Amministrazione">
 							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
 						</a>
+						{#if data.showEditButton && $page.url.pathname === '/'}
 						<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
 						<button class="p-1.5 transition-colors {appState.isEditMode ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}" onclick={() => appState.isEditMode = !appState.isEditMode} title={appState.isEditMode ? "Chiudi Modalità Modifica" : "Modalità Modifica"}>
 							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
 						</button>
+						{/if}
 						<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-						<button class="p-1.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors" onclick={async () => { await fetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); window.location.reload(); }} title="Esci dalla sessione">
-							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+						<button class="p-1.5 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors" onclick={async () => { await fetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); window.location.reload(); }} title="Esci dalla sessione">
+							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
 						</button>
 					{:else}
-						<button class="p-1.5 text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors" onclick={() => data.needsSetup ? goto('/setup') : showLogin = true} title="Sblocca per Amministrazione">
-							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-						</button>
-						<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-						<button class="p-1.5 text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors" onclick={() => data.needsSetup ? goto('/setup') : showLogin = true} title="Sblocca per Modificare">
-							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-						</button>
-						<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-						<button class="p-1.5 text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors" onclick={() => data.needsSetup ? goto('/setup') : showLogin = true} title="Sblocca Pannello">
-							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+						<button class="p-1.5 text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400 transition-colors" onclick={() => data.needsSetup ? goto('/setup') : showLogin = true} title="Accedi">
+							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
 						</button>
 					{/if}
 				</div>
 				<div class="flex items-center space-x-1">
+					{#if themes.find(t => t.id === themeStore.theme)?.type === 'both'}
 					<button class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" onclick={() => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('theview-color-scheme', isDark ? 'dark' : 'light'); }} title="Tema Chiaro/Scuro">
 						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
 					</button>
+					{/if}
 				</div>
 			</div>
 		</div>

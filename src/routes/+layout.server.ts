@@ -32,5 +32,10 @@ export async function load({ locals }) {
       settings.customNavbarTitleDesktop || settings.customNavbarTitle || "",
     customNavbarTitleMobile:
       settings.customNavbarTitleMobile || settings.customNavbarTitle || "",
+    showCategoryCounts: settings.showCategoryCounts !== false,
+    showServiceDescriptions: settings.showServiceDescriptions !== false,
+    iconStyle: settings.iconStyle || "rounded-xl",
+    stickyNavbar: settings.stickyNavbar !== false,
+    showEditButton: settings.showEditButton !== false,
   };
 }

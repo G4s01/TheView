@@ -2,6 +2,7 @@
 	import TextInput from '$lib/components/ui/TextInput.svelte';
 	import UrlInput from '$lib/components/ui/UrlInput.svelte';
 	import ToggleInput from '$lib/components/ui/ToggleInput.svelte';
+	import SelectInput from '$lib/components/ui/SelectInput.svelte';
 	import { invalidateAll } from '$app/navigation';
 
 	import { slide } from 'svelte/transition';
@@ -18,6 +19,11 @@
 	let showCategoriesMobile = $state(true);
 	let customNavbarTitleDesktop = $state('');
 	let customNavbarTitleMobile = $state('');
+	let showCategoryCounts = $state(true);
+	let showServiceDescriptions = $state(true);
+	let iconStyle = $state('rounded-xl');
+	let stickyNavbar = $state(true);
+	let showEditButton = $state(true);
 	let isSavingAppearance = $state(false);
 
 	onMount(async () => {
@@ -34,6 +40,12 @@
 				// Migration from old customNavbarTitle
 				customNavbarTitleDesktop = data.customNavbarTitleDesktop || data.customNavbarTitle || '';
 				customNavbarTitleMobile = data.customNavbarTitleMobile || data.customNavbarTitle || '';
+				
+				showCategoryCounts = data.showCategoryCounts !== false;
+				showServiceDescriptions = data.showServiceDescriptions !== false;
+				iconStyle = data.iconStyle || 'rounded-xl';
+				stickyNavbar = data.stickyNavbar !== false;
+				showEditButton = data.showEditButton !== false;
 			}
 		} catch (e) {
 			console.error(e);
@@ -63,7 +75,7 @@
 			const res = await fetch('/api/settings', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ showCategoriesDesktop, showCategoriesMobile, customNavbarTitleDesktop, customNavbarTitleMobile })
+				body: JSON.stringify({ showCategoriesDesktop, showCategoriesMobile, customNavbarTitleDesktop, customNavbarTitleMobile, showCategoryCounts, showServiceDescriptions, iconStyle, stickyNavbar, showEditButton })
 			});
 			if (res.ok) {
 				await invalidateAll();
@@ -87,7 +99,7 @@
 	        name: "Sistema",
 	        options: [
 	            themes.find(t => t.id === 'default')
-	        ].filter(Boolean) as {id: string, name: string}[]
+	        ].filter(Boolean) as {id: string, name: string, type: string}[]
 	    },
 	    {
 	        name: "Dracula",
@@ -97,7 +109,7 @@
 	            themes.find(t => t.id === 'dracula'),
 	            themes.find(t => t.id === 'dracula-soft'),
 	            themes.find(t => t.id === 'dracula-alucard')
-	        ].filter(Boolean) as {id: string, name: string}[]
+	        ].filter(Boolean) as {id: string, name: string, type: string}[]
 	    },
 	    {
 	        name: "Catppuccin",
@@ -106,7 +118,7 @@
 	            themes.find(t => t.id === 'catppuccin-macchiato'),
 	            themes.find(t => t.id === 'catppuccin-frappe'),
 	            themes.find(t => t.id === 'catppuccin-latte')
-	        ].filter(Boolean) as {id: string, name: string}[]
+	        ].filter(Boolean) as {id: string, name: string, type: string}[]
 	    }
 	];
 </script>
@@ -119,28 +131,25 @@
 				<div class="p-2 bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 rounded-lg">
 					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
 				</div>
-				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Aspetto e Tema</h3>
+				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">TEMA</h3>
 			</div>
 			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Personalizza l'aspetto di TheView. Scegli tra le varie famiglie di temi supportate.</p>
 			
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
 				{#each themeFamilies as family}
-					<div class="space-y-3">
-						<h4 class="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2">{family.name}</h4>
-						<div class="flex flex-col gap-2">
-							{#each family.options as themeOption}
-								<button 
-									onclick={() => themeStore.setTheme(themeOption.id)}
-									class="flex items-center justify-between w-full px-4 py-3 rounded-xl border text-left transition-all {themeStore.theme === themeOption.id ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 shadow-sm' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-gray-50 dark:hover:bg-gray-800'}"
-								>
-									<span class="text-sm font-medium {themeStore.theme === themeOption.id ? 'text-blue-700 dark:text-blue-400 font-bold' : 'text-gray-700 dark:text-gray-300'}">{themeOption.name}</span>
-									{#if themeStore.theme === themeOption.id}
-										<svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-									{/if}
-								</button>
-							{/each}
-						</div>
-					</div>
+					{@const isSelected = family.options.some(t => t.id === themeStore.theme)}
+					<SelectInput 
+						label={family.name}
+						placeholder={family.name.toUpperCase()}
+						hideLabelWhenEmpty={true}
+						value={themeStore.theme}
+						class={isSelected ? 'ring-2 ring-blue-500 border-transparent bg-blue-50/50 dark:bg-blue-900/20' : ''}
+						options={family.options.map(t => ({
+							value: t.id, 
+							label: `${t.name} ${t.type === 'both' ? '☀️/🌙' : t.type === 'dark' ? '🌙' : '☀️'}`
+						}))}
+						onchange={(val) => themeStore.setTheme(val as string)}
+					/>
 				{/each}
 			</div>
 		</div>
@@ -153,10 +162,10 @@
 				<div class="p-2 bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 rounded-lg">
 					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
 				</div>
-				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Aspetto e Navigazione</h3>
+				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Home</h3>
 			</div>
 			
-			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Personalizza l'aspetto della navbar e della barra di navigazione.</p>
+			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Personalizza l'aspetto della tua schermata principale.</p>
 			
 			<div class="space-y-6">
 				<h4 class="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2">Home Navbar</h4>
@@ -197,6 +206,67 @@
 						/>
 					</div>
 				{/if}
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+							<div>
+								<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Navbar Fissa</h4>
+								<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">La navbar rimarrà fissa in alto scorrendo la pagina</p>
+							</div>
+							<ToggleInput bind:checked={stickyNavbar} />
+						</div>
+						<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+							<div>
+								<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Tasto Modifica Rapida</h4>
+								<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Mostra la matita di modifica quando si è loggati</p>
+							</div>
+							<ToggleInput bind:checked={showEditButton} />
+						</div>
+					</div>
+
+				<h4 class="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2 pt-4">Home</h4>
+				
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+						<div>
+							<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Conteggio Servizi</h4>
+							<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Mostra il numero di servizi accanto a ogni categoria</p>
+						</div>
+						<ToggleInput bind:checked={showCategoryCounts} />
+					</div>
+					
+					<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+						<div>
+							<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Descrizioni</h4>
+							<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Mostra la descrizione sotto al nome di ogni servizio</p>
+						</div>
+						<ToggleInput bind:checked={showServiceDescriptions} />
+					</div>
+				</div>
+				
+				<div class="flex flex-col space-y-3 pt-4">
+						<label class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Stile Icone Servizi</label>
+						<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+							<button type="button" onclick={() => iconStyle = 'rounded-xl'} class="flex flex-col items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border {iconStyle === 'rounded-xl' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-gray-200 dark:border-gray-700'} hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+								<div class="w-12 h-12 bg-purple-500 rounded-xl shadow-sm flex items-center justify-center">
+									<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+								</div>
+								<span class="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Arrotondato</span>
+							</button>
+							<button type="button" onclick={() => iconStyle = 'rounded-full'} class="flex flex-col items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border {iconStyle === 'rounded-full' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-gray-200 dark:border-gray-700'} hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+								<div class="w-12 h-12 bg-purple-500 rounded-full shadow-sm flex items-center justify-center">
+									<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+								</div>
+								<span class="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Circolare</span>
+							</button>
+							<button type="button" onclick={() => iconStyle = 'rounded-none'} class="flex flex-col items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border {iconStyle === 'rounded-none' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-gray-200 dark:border-gray-700'} hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+								<div class="w-12 h-12 bg-purple-500 rounded-none shadow-sm flex items-center justify-center">
+									<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+								</div>
+								<span class="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Quadrato</span>
+							</button>
+						</div>
+					</div>
 				
 				<div class="flex justify-end pt-2">
 					<button 
