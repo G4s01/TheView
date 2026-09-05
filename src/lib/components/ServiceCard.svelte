@@ -159,7 +159,7 @@
 	href={appState.isEditMode ? undefined : service.url} 
 	target={appState.isEditMode ? '_self' : '_blank'} 
 	rel="noopener noreferrer"
-	class="flex flex-col bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-colors duration-200"
+	class="flex flex-col relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-colors duration-200"
 	style="background-color: {bgColor}; border-color: {borderColor};"
 	onclick={(e: Event) => { if (appState.isEditMode && !isExpanded) e.preventDefault(); }}
 	onsubmit={(e: Event) => { if (appState.isEditMode && isExpanded) saveEdit(e); }}

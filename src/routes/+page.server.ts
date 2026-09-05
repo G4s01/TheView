@@ -16,6 +16,7 @@ export async function load() {
       widgetType: services.widgetType,
       pingEnabled: services.pingEnabled,
       categoryId: services.categoryId,
+      containerId: services.containerId,
       position: services.position,
     })
     .from(services)
@@ -23,24 +24,24 @@ export async function load() {
 
   // Group services by category name
   const groupedServices: Record<string, any[]> = {};
-  
+
   // Initialize all categories (even empty ones)
   for (const cat of cats) {
-      groupedServices[cat.name] = [];
+    groupedServices[cat.name] = [];
   }
 
   for (const service of allServices) {
-      if (!service.categoryId) continue;
-      const cat = cats.find(c => c.id === service.categoryId);
-      if (cat) {
-          const s = { ...service, category: cat.name } as any;
-          if (s.icon) {
-              s.iconDetails = getIconDetails(s.icon);
-          } else {
-              s.iconDetails = null;
-          }
-          groupedServices[cat.name].push(s);
+    if (!service.categoryId) continue;
+    const cat = cats.find((c) => c.id === service.categoryId);
+    if (cat) {
+      const s = { ...service, category: cat.name } as any;
+      if (s.icon) {
+        s.iconDetails = getIconDetails(s.icon);
+      } else {
+        s.iconDetails = null;
       }
+      groupedServices[cat.name].push(s);
+    }
   }
 
   return {
