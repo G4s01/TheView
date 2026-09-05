@@ -33,8 +33,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     fs.writeFileSync(path.join(uploadDir, filename), buffer);
 
     return json({ url: `/api/icons/${filename}` });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to upload icon:", error);
-    return json({ error: "Failed to upload icon" }, { status: 500 });
+    const status = error.status || 500;
+    return json(
+      {
+        error: "Failed to upload icon",
+        details: error.message || String(error),
+      },
+      { status },
+    );
   }
 };
