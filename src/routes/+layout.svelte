@@ -21,6 +21,7 @@
 	// data.categories will be populated by +layout.server.ts later
 	let categories = $derived(data.categories || []);
 	let showLogin = $state(false);
+	let versionInfo = $state<{currentVersion?: string, latestVersion?: string, url?: string}>({});
 	
 	let isNavbarHidden = $state(false);
 	let lastScrollY = $state(0);
@@ -53,6 +54,8 @@
 		if (data.isAdmin) {
 			appState.isEditMode = true;
 		}
+
+		fetch('/api/version').then(r => r.json()).then(v => versionInfo = v).catch(() => {});
 	});
 </script>
 
@@ -78,7 +81,7 @@
 		<div class="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16 max-w-[1920px] mx-auto">
 			
 			<!-- Left Column (Logo & Back) -->
-			<div class="flex-1 flex items-center justify-start min-w-[200px]">
+			<div class="flex-1 flex items-center justify-start min-w-50">
 				<div class="flex items-center space-x-3">
 					{#if $page.url.pathname.startsWith('/admin')}
 						<a href="/" class="flex items-center justify-center p-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors shadow-sm" title="Torna alla Dashboard">
@@ -87,13 +90,13 @@
 					{/if}
 					<a href="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
 						<img src="/favicon.svg" alt="TheView Logo" class="w-8 h-8" />
-						<span class="hidden sm:inline text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">TheView</span>
+						<span class="hidden sm:inline text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-500 to-purple-500">TheView</span>
 					</a>
 				</div>
 			</div>
 
 			<!-- Center Column (Nav Tabs) -->
-			<div class="hidden md:flex w-full max-w-7xl flex-shrink-1 px-4">
+			<div class="hidden md:flex w-full max-w-7xl shrink px-4">
 				{#if $page.url.pathname.startsWith('/admin')}
 					<nav class="flex items-center w-full space-x-3">
 						<button onclick={() => appState.adminTab = 'services'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'services' ? 'border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}">
@@ -131,11 +134,16 @@
 			</div>
 
 			<!-- Right Column (Actions) -->
-			<div class="flex-1 flex items-center justify-end min-w-[150px] space-x-2 sm:space-x-4">
+			<div class="flex-1 flex items-center justify-end min-w-37.5 space-x-2 sm:space-x-4">
 				<div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700 transition-colors {data.isAdmin && appState.isEditMode ? 'ring-2 ring-blue-500 border-blue-500' : ''}">
 					{#if data.isAdmin}
-						<a href="/admin" class="p-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors" title="Pannello Amministrazione">
+						<a href="/admin" class="relative p-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors" title="Pannello Amministrazione">
 							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+							{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
+								<div class="absolute -top-1 -right-1 bg-red-500 rounded-full text-white p-0.5 animate-bounce shadow-sm ring-1 ring-white dark:ring-gray-800" title="Nuova versione disponibile!">
+									<svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg>
+								</div>
+							{/if}
 						</a>
 						{#if data.showEditButton && $page.url.pathname === '/'}
 						<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
@@ -208,10 +216,22 @@
 	{/if}
 
 	<!-- Main Page Content -->
-	<main class="flex-1 w-full max-w-7xl mx-auto focus:outline-none">
-		<div class="py-6 px-4 sm:px-6 lg:px-8">
+	<main class="flex-1 w-full max-w-7xl mx-auto focus:outline-none flex flex-col">
+		<div class="py-6 px-4 sm:px-6 lg:px-8 flex-1">
 			{@render children()}
 		</div>
+		<footer class="w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-end items-center mt-auto">
+			{#if versionInfo.currentVersion}
+			<div class="flex items-center space-x-1 text-xs font-medium text-gray-400 dark:text-gray-500">
+				<span>v{versionInfo.currentVersion}</span>
+				{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
+				<a href={versionInfo.url || 'https://github.com/g4s01/TheView/releases'} target="_blank" rel="noopener noreferrer" class="text-red-500 hover:text-red-600 transition-colors animate-pulse flex items-center" title="Nuova versione {versionInfo.latestVersion} disponibile su GitHub!">
+					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg>
+				</a>
+				{/if}
+			</div>
+			{/if}
+		</footer>
 	</main>
 </div>
 

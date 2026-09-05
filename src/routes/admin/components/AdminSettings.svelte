@@ -26,7 +26,23 @@
 	let showEditButton = $state(true);
 	let isSavingAppearance = $state(false);
 
+	let versionInfo = $state<any>({});
+	let isCheckingVersion = $state(false);
+	let showChangelog = $state(false);
+
+	async function checkVersion(force = false) {
+		isCheckingVersion = true;
+		try {
+			const res = await fetch(`/api/version${force ? '?force=1' : ''}`);
+			if (res.ok) {
+				versionInfo = await res.json();
+			}
+		} catch (e) {}
+		isCheckingVersion = false;
+	}
+
 	onMount(async () => {
+		checkVersion();
 		try {
 			const res = await fetch('/api/settings');
 			if (res.ok) {
@@ -322,11 +338,11 @@
 						<div class="flex-1 min-w-0">
 							<UrlInput label="Indirizzo Base (es. 172.17.0.1:8080)" bind:value={qbit_url} />
 						</div>
-						<div class="w-full sm:w-[140px] shrink-0">
+						<div class="w-full sm:w-35 shrink-0">
 							<button 
 								onclick={saveQbitSettings}
 								disabled={isSavingQbit}
-								class="w-full h-[42px] inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-md shadow-green-500/30 text-sm font-bold uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-all disabled:opacity-50"
+								class="w-full h-10.5 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-md shadow-green-500/30 text-sm font-bold uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-all disabled:opacity-50"
 							>
 								{#if isSavingQbit}
 									...
@@ -409,4 +425,76 @@
 			{/if}
 		</div>
 	</div>
+
+	<!-- System & Version Section -->
+	<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
+		<div class="p-6 bg-white dark:bg-gray-800 rounded-2xl">
+			<div class="flex items-center space-x-3 mb-6">
+				<div class="p-2 bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 rounded-lg">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+				</div>
+				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Sistema & Aggiornamenti</h3>
+			</div>
+
+			<div class="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+				<div class="space-y-1">
+					<div class="flex items-center space-x-2">
+						<span class="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Versione Attuale:</span>
+						<span class="text-base font-bold text-gray-900 dark:text-white">v{versionInfo.currentVersion || '...'}</span>
+					</div>
+					{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
+						<div class="flex items-center space-x-2 text-red-500 dark:text-red-400">
+							<svg class="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg>
+							<span class="text-sm font-bold uppercase tracking-wider">Nuova versione disponibile: v{versionInfo.latestVersion}</span>
+						</div>
+					{:else if versionInfo.latestVersion === versionInfo.currentVersion}
+						<div class="flex items-center space-x-2 text-green-600 dark:text-green-500">
+							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+							<span class="text-xs font-bold uppercase tracking-wider">Il sistema è aggiornato</span>
+						</div>
+					{/if}
+				</div>
+
+				<div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+					{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion && versionInfo.url}
+						<button 
+							type="button"
+							onclick={() => showChangelog = !showChangelog}
+							class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors"
+						>
+							{showChangelog ? 'Nascondi Changelog' : 'Vedi Changelog'}
+						</button>
+					{/if}
+					<button 
+						type="button"
+						onclick={() => checkVersion(true)}
+						disabled={isCheckingVersion}
+						class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 text-sm font-bold uppercase tracking-wider rounded-lg transition-colors"
+					>
+						{#if isCheckingVersion}
+							<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+							Controllo...
+						{:else}
+							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+							Controlla
+						{/if}
+					</button>
+				</div>
+			</div>
+			
+			{#if showChangelog && versionInfo.releaseNotes && versionInfo.latestVersion !== versionInfo.currentVersion}
+			<div transition:slide class="mt-4 p-5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-inner">
+				<div class="flex items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+					<h4 class="text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">Note di Rilascio v{versionInfo.latestVersion}</h4>
+					<a href={versionInfo.url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-3 py-1.5 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
+						<svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+						Apri su GitHub
+					</a>
+				</div>
+				<div class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap font-mono max-h-64 overflow-y-auto pr-2 custom-scrollbar leading-relaxed">{versionInfo.releaseNotes}</div>
+			</div>
+			{/if}
+		</div>
+	</div>
+
 </div>

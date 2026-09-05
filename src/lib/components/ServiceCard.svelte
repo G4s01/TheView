@@ -248,7 +248,7 @@
 		{#if !isExpanded}
 			<div transition:slide|local={{ duration: 250 }}>
 				{#if showDescription}
-				<p class="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[40px]">
+				<p class="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-10">
 					{service.description || service.url}
 				</p>
 				{/if}
@@ -266,9 +266,9 @@
 			<div role="presentation" transition:slide|local={{ duration: 250 }} class="flex flex-col gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700" onclick={(e) => e.stopPropagation()}>
 				<UrlInput label="URL" bind:value={editUrl} required />
 				
-				<div class="flex gap-2 h-[42px] items-center">
+				<div class="flex gap-2 h-10.5 items-center">
 					<div class="flex-1 min-w-0">
-						<TextInput label="ICONA (Es. server)" bind:value={editIcon} />
+						<TextInput label="ICONA (ES. SIMPLE-ICONS o URL)" bind:value={editIcon} />
 					</div>
 					<label class="cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl px-4 flex items-center justify-center transition-colors shadow-sm shrink-0 h-full">
 						<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>

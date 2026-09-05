@@ -25,7 +25,7 @@
 
 - 🖥️ **100% Web UI Driven**: Forget editing YAML files. Add, edit, remove, and reorder services using an intuitive drag-and-drop web interface.
 - 🔍 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click.
-- 🎨 **Smart Brand Icons & Glassmorphism**: Automatically fetches SVG icons from *Simple-Icons* based on the service name. It extracts the brand's primary color and applies a beautiful tinted glassmorphism background to the card.
+- 🎨 **Smart Brand Icons & Glassmorphism**: Automatically fetches SVG icons from _Simple-Icons_ based on the service name. It extracts the brand's primary color and applies a beautiful tinted glassmorphism background to the card.
 - 📡 **Live Health Checks (Ping)**: Built-in pinging system. Shows live online/offline status and latency (ms) for all your tracked services with smooth pulsing indicators.
 - ⚡ **In-Place Quick Edit**: Click the gear icon on any service card, and it seamlessly expands into a fully functional form directly on the grid, without annoying popups.
 - 🔌 **Interactive Widgets**: Rich integrations for your favorite services (e.g., live qBittorrent download/upload speeds) directly visible on the service cards.
@@ -83,9 +83,10 @@ services:
 ```
 
 ### First Access & Admin Setup
+
 1. Launch the container: `docker compose up -d`
 2. Navigate to `http://your-homelab-ip:3001` (or your configured `ORIGIN`).
-3. Click the unlock icon 🔓 in the top right corner of the navbar to access the **Admin Panel**.
+3. Click the login icon ➜] in the top right corner of the navbar to access the **Admin Panel**.
 4. By default, there is no password. You will be prompted to set your secure **Admin Password** on your first login.
 
 ---
@@ -95,14 +96,18 @@ services:
 TheView stores all state (Categories, Services, uploaded Icons, and UI Settings) in a local SQLite database inside the `/app/data` volume. This means your dashboard is entirely portable just by backing up the `data/` folder!
 
 ### Nginx Proxy Manager Discovery
+
 To enable automatic discovery of your Nginx Proxy Manager hosts:
+
 1. Go to **Settings** in the Admin panel.
 2. Enter your NPM instance URL (e.g., `http://192.168.1.100:81`).
 3. Enter your NPM Email and Password.
 4. Navigate to the **Discovery** tab to see your proxy hosts merged with your Docker containers!
 
 ### qBittorrent Widget Integration
+
 To enable live torrent stats (download/upload speeds, active torrents) directly on a service card:
+
 1. Go to **Settings** in the Admin panel and open the **Widget Integrations** section.
 2. Add your qBittorrent credentials (URL, Username, Password).
 3. In the Home dashboard, edit or create a service and select `qBittorrent` from the Widget dropdown.
@@ -130,6 +135,7 @@ npm run dev
 ```
 
 To update the database schema after making changes to `src/lib/server/db/schema.ts`:
+
 ```bash
 npx drizzle-kit push
 ```

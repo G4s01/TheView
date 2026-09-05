@@ -112,13 +112,13 @@
 						<div class="flex-1 min-w-0">
 							<UrlInput label="Indirizzo NPM (es. 192.168.1.100:81)" bind:value={npmUrlCombined} />
 						</div>
-						<div class="w-full sm:w-[140px] shrink-0">
+						<div class="w-full sm:w-35 shrink-0">
 							<button 
 								onclick={async () => {
 									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: npmUrlCombined, npmEmail, npmPassword }) });
 									isNpmEditing = false;
 								}}
-								class="w-full h-[42px] inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-md shadow-blue-500/30 text-sm font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-all"
+								class="w-full h-10.5 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-md shadow-blue-500/30 text-sm font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-all"
 							>
 								<svg class="-ml-1 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
 								Salva
@@ -210,7 +210,7 @@
 				<li class="px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex flex-col gap-4 cursor-pointer" onclick={() => { expandedId = expandedId === ds.id ? null : ds.id; }}>
 					<div class="flex items-center justify-between w-full">
 						<div class="flex items-center space-x-4 flex-1 min-w-0 mr-4">
-							<div class="flex-shrink-0">
+							<div class="shrink-0">
 								{#if ds.iconDetails}
 									<div class="h-10 w-10 rounded-xl flex items-center justify-center shadow-sm border border-gray-200 dark:border-gray-700" style="background-color: {ds.iconDetails.hex || '#4B5563'};">
 										{#if ds.iconDetails.isCustomUrl}
@@ -220,7 +220,7 @@
 										{/if}
 									</div>
 								{:else}
-									<span class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold uppercase shadow-sm">
+									<span class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 text-white font-bold uppercase shadow-sm">
 										{ds.name.charAt(0)}
 									</span>
 								{/if}
@@ -256,7 +256,10 @@
 									{#if expandedId === ds.id}
 										<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
 									{:else}
-										<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+										<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 16v6m3-3h-6" />
+										</svg>
 									{/if}
 								</button>
 							{/if}
@@ -286,7 +289,7 @@
 						}} class="w-full mt-2">
 							<div class="space-y-4 p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 relative">
 								<!-- Decoration line -->
-								<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-t-xl"></div>
+								<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-blue-500 to-indigo-600 rounded-t-xl"></div>
 
 								<div class="space-y-4 relative w-full pt-2">
 									<!-- Row 1: Nome, URL -->
@@ -298,8 +301,8 @@
 									<!-- Row 2: Icona, Descrizione -->
 									<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
 										<div class="flex gap-2 items-center">
-											<TextInput label="Icona" name="icon" id={"icon_dsc_" + ds.id} value={ds.icon || ds.name} />
-											<label class="cursor-pointer border border-gray-200 dark:border-gray-700 rounded-xl w-[42px] h-[42px] flex items-center justify-center transition-colors shadow-sm shrink-0">
+											<TextInput label="Icona (ES. SIMPLE-ICONS o URL)" name="icon" id={"icon_dsc_" + ds.id} value={ds.icon || ds.name} />
+											<label class="cursor-pointer border border-gray-200 dark:border-gray-700 rounded-xl w-10.5 h-10.5 flex items-center justify-center transition-colors shadow-sm shrink-0">
 												<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
 												</svg>
@@ -323,7 +326,7 @@
 									<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
 										<div class="flex flex-col gap-2">
 											{#if ds.isCreatingCategory}
-												<div class="flex gap-2 h-[42px]" >
+												<div class="flex gap-2 h-10.5" >
 													<TextInput label="Nome" bind:value={ds.newCategoryName} />
 													<button type="button" onclick={async () => {
 														if (!ds.newCategoryName) { ds.isCreatingCategory = false; return; }
@@ -352,7 +355,7 @@
 										<SelectInput label="Widget" name="widgetType" bind:value={ds.widgetType} options={[{value: '', label: 'Nessuno'}, {value: 'qbittorrent', label: 'qBittorrent'}]} />
 
 										<div>
-											<button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-xl shadow-md shadow-green-500/30 text-sm font-bold uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 hover:shadow-lg focus:outline-none transition-all h-[42px]">
+											<button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-xl shadow-md shadow-green-500/30 text-sm font-bold uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 hover:shadow-lg focus:outline-none transition-all h-10.5">
 												<svg class="-ml-1 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 												</svg>
