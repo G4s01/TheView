@@ -15,6 +15,7 @@ export const services = sqliteTable("services", {
   description: text("description"),
   url: text("url").notNull(),
   icon: text("icon"),
+  containerId: text("container_id"),
   widgetType: text("widget_type"),
   pingEnabled: integer("ping_enabled", { mode: "boolean" })
     .default(true)

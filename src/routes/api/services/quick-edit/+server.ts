@@ -19,6 +19,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       categoryId,
       pingEnabled,
       widgetType,
+      containerId,
     } = await request.json();
 
     if (!id || !name || !url || !categoryId) {
@@ -40,6 +41,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         categoryId,
         pingEnabled: pingEnabled ?? true,
         widgetType: widgetType || null,
+        containerId: containerId !== undefined ? containerId : undefined,
       })
       .where(eq(services.id, id));
 

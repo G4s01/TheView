@@ -292,10 +292,11 @@
 								<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-blue-500 to-indigo-600 rounded-t-xl"></div>
 
 								<div class="space-y-4 relative w-full pt-2">
-									<!-- Row 1: Nome, URL -->
-									<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<!-- Row 1: Nome, URL, Container ID -->
+									<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 										<TextInput label="Nome" name="name" bind:value={ds.name} required />
 										<UrlInput label="URL (Richiesto)" name="url" bind:value={ds.url} required />
+										<TextInput label="Container ID (Opz.)" name="containerId" value={ds._containerId || ''} placeholder="es. abc123def..." />
 									</div>
 									
 									<!-- Row 2: Icona, Descrizione -->

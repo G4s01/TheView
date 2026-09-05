@@ -16,6 +16,7 @@ export interface DiscoveredService {
   _publicPorts?: number[];
   _npmMatch?: string;
   _iconOverride?: string;
+  _containerId?: string;
 }
 
 // Interroga l'API di NPM per trovare i proxy hosts
@@ -164,6 +165,7 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
               _publicPorts: publicPorts,
               _npmMatch: npmMatch,
               _iconOverride: iconOverride,
+              _containerId: container.Id.substring(0, 12),
             });
           }
 
@@ -329,6 +331,7 @@ export async function discoverAllServices(
         pingEnabled: true,
         description: `${d.description} (via NPM)`,
         _iconOverride: d._iconOverride,
+        _containerId: d.id.replace("docker-", ""),
       });
       docker.splice(dIndex, 1);
     } else {

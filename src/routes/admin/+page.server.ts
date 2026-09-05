@@ -39,10 +39,13 @@ export const actions: Actions = {
     const categoryId = parseInt(categoryIdStr);
     const icon = data.get("icon")?.toString() || null;
     let iconToSave = icon;
-    if (iconToSave && iconToSave.startsWith("/http")) { iconToSave = iconToSave.substring(1); }
+    if (iconToSave && iconToSave.startsWith("/http")) {
+      iconToSave = iconToSave.substring(1);
+    }
     const description = data.get("description")?.toString() || null;
     const widgetType = data.get("widgetType")?.toString() || null;
     const pingEnabled = data.get("pingEnabled") === "on";
+    const containerId = data.get("containerId")?.toString() || null;
 
     try {
       await db.insert(services).values({
@@ -53,6 +56,7 @@ export const actions: Actions = {
         description,
         widgetType,
         pingEnabled,
+        containerId,
       });
       return { success: true };
     } catch (error) {
@@ -74,10 +78,13 @@ export const actions: Actions = {
     const categoryId = parseInt(categoryIdStr);
     const icon = data.get("icon")?.toString() || null;
     let iconToSave = icon;
-    if (iconToSave && iconToSave.startsWith("/http")) { iconToSave = iconToSave.substring(1); }
+    if (iconToSave && iconToSave.startsWith("/http")) {
+      iconToSave = iconToSave.substring(1);
+    }
     const description = data.get("description")?.toString() || null;
     const widgetType = data.get("widgetType")?.toString() || null;
     const pingEnabled = data.get("pingEnabled") === "on";
+    const containerId = data.get("containerId")?.toString() || null;
 
     try {
       await db
@@ -90,6 +97,7 @@ export const actions: Actions = {
           description,
           widgetType,
           pingEnabled,
+          containerId,
         })
         .where(eq(services.id, parseInt(id)));
       return { success: true };

@@ -141,7 +141,7 @@
 				</div>
 
 				<!-- Row 3: Categoria, Ping, Widget, Button -->
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end mt-4">
+				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end mt-4">
 					<div class="flex flex-col gap-2">
 						{#if isCreatingCategory}
 							<div class="flex gap-2 h-10.5">
@@ -168,6 +168,7 @@
 						{/if}
 					</div>
 
+					<TextInput label="Container ID (Opz.)" name="containerId" placeholder="es. abc123def..." />
 					<ToggleInput label="Ping" name="pingEnabled" value="true" checked={true} />
 
 					<SelectInput label="Widget" name="widgetType" options={[{value: '', label: 'Nessuno'}, {value: 'qbittorrent', label: 'qBittorrent'}]} />
@@ -261,13 +262,14 @@
 											<TextInput label="Descrizione" name="description" value={service.description || ''} />
 										</div>
 										
-										<!-- Row 3: Categoria, Ping, Widget, Button -->
-										<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+										<!-- Row 3: Categoria, Container ID, Widget, Ping, Buttons -->
+										<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
 											<SelectInput label="Categoria" name="categoryId" value={service.categoryId} required options={localCategories.map((c: any) => ({value: c.id, label: c.name}))} />
-
-											<ToggleInput label="Ping" name="pingEnabled" value="true" checked={service.pingEnabled} />
-
+											<TextInput label="Container ID (Opz.)" name="containerId" value={service.containerId || ''} placeholder="es. abc123def..." />
 											<SelectInput label="Widget" name="widgetType" value={service.widgetType || ''} options={[{value: '', label: 'Nessuno'}, {value: 'qbittorrent', label: 'qBittorrent'}]} />
+											<div class="flex items-center h-10.5 pl-2">
+												<ToggleInput label="Ping" name="pingEnabled" value="true" checked={service.pingEnabled} />
+											</div>
 
 											<div class="flex gap-2 h-10.5">
 												<button type="button" onclick={() => editingServiceId = null} class="flex-1 inline-flex items-center justify-center border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
