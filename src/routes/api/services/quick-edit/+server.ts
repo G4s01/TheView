@@ -25,12 +25,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       return json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    let iconToSave = icon || null;
+    if (iconToSave && iconToSave.startsWith("/http")) {
+      iconToSave = iconToSave.substring(1);
+    }
+
     await db
       .update(services)
       .set({
         name,
         url,
-        icon: icon || null,
+        icon: iconToSave,
         description: description || null,
         categoryId,
         pingEnabled: pingEnabled ?? true,

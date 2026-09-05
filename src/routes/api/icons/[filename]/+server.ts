@@ -1,6 +1,7 @@
 import type { RequestHandler } from "./$types";
 import fs from "fs";
 import path from "path";
+import { env } from "$env/dynamic/private";
 
 export const GET: RequestHandler = async ({ params }) => {
   const filename = params.filename;
@@ -9,7 +10,9 @@ export const GET: RequestHandler = async ({ params }) => {
   }
 
   const safeFilename = path.basename(filename);
-  const filePath = path.resolve("data/icons", safeFilename);
+  const dbPath = env.DB_PATH || "data/sqlite.db";
+  const dbDir = path.resolve(path.dirname(dbPath));
+  const filePath = path.join(dbDir, "icons", safeFilename);
 
   if (!fs.existsSync(filePath)) {
     return new Response("Not found", { status: 404 });

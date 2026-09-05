@@ -38,6 +38,8 @@ export const actions: Actions = {
 
     const categoryId = parseInt(categoryIdStr);
     const icon = data.get("icon")?.toString() || null;
+    let iconToSave = icon;
+    if (iconToSave && iconToSave.startsWith("/http")) { iconToSave = iconToSave.substring(1); }
     const description = data.get("description")?.toString() || null;
     const widgetType = data.get("widgetType")?.toString() || null;
     const pingEnabled = data.get("pingEnabled") === "on";
@@ -47,7 +49,7 @@ export const actions: Actions = {
         name,
         url,
         categoryId,
-        icon,
+        icon: iconToSave,
         description,
         widgetType,
         pingEnabled,
@@ -71,6 +73,8 @@ export const actions: Actions = {
 
     const categoryId = parseInt(categoryIdStr);
     const icon = data.get("icon")?.toString() || null;
+    let iconToSave = icon;
+    if (iconToSave && iconToSave.startsWith("/http")) { iconToSave = iconToSave.substring(1); }
     const description = data.get("description")?.toString() || null;
     const widgetType = data.get("widgetType")?.toString() || null;
     const pingEnabled = data.get("pingEnabled") === "on";
@@ -82,7 +86,7 @@ export const actions: Actions = {
           name,
           url,
           categoryId,
-          icon,
+          icon: iconToSave,
           description,
           widgetType,
           pingEnabled,
