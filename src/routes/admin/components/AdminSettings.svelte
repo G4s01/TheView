@@ -5,7 +5,9 @@
 	import SelectInput from '$lib/components/ui/SelectInput.svelte';
 	import { invalidateAll } from '$app/navigation';
 
-	import { slide } from 'svelte/transition';
+	import { slide } from "svelte/transition";
+	import { marked } from "marked";
+	import DOMPurify from "isomorphic-dompurify";
 	import { themeStore, themes } from '$lib/client/themeStore.svelte';
 
 		import { onMount } from 'svelte';
@@ -491,7 +493,9 @@
 						Apri su GitHub
 					</a>
 				</div>
-				<div class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap font-mono max-h-64 overflow-y-auto pr-2 custom-scrollbar leading-relaxed">{versionInfo.releaseNotes}</div>
+				<div class="prose prose-sm dark:prose-invert max-w-none max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+					{@html DOMPurify.sanitize(marked.parse(versionInfo.releaseNotes) as string)}
+				</div>
 			</div>
 			{/if}
 		</div>

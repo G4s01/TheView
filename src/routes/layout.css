@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -64,7 +65,6 @@
   --color-red-600: #df4e4e;
 }
 
-
 /* Catppuccin Mocha */
 :root[data-theme="catppuccin"] {
   color-scheme: dark;
@@ -109,30 +109,30 @@ body {
 :root[data-theme="dracula-pro"] {
   color-scheme: dark;
   --color-gray-50: #ffffff;
-  --color-gray-100: #F8F8F2;
+  --color-gray-100: #f8f8f2;
   --color-gray-200: #e2e2dc;
   --color-gray-300: #bfbfbf;
-  --color-gray-400: #7970A9;
-  --color-gray-500: #7970A9;
-  --color-gray-600: #7970A9;
+  --color-gray-400: #7970a9;
+  --color-gray-500: #7970a9;
+  --color-gray-600: #7970a9;
   --color-gray-700: #454158;
   --color-gray-800: #302d41;
-  --color-gray-900: #22212C;
+  --color-gray-900: #22212c;
 
-  --color-blue-400: #80FFEA;
-  --color-blue-500: #80FFEA;
-  --color-blue-600: #9580FF;
+  --color-blue-400: #80ffea;
+  --color-blue-500: #80ffea;
+  --color-blue-600: #9580ff;
   --color-blue-700: #806ae6;
-  --color-blue-800: #7970A9;
+  --color-blue-800: #7970a9;
   --color-blue-900: #454158;
 
-  --color-green-400: #8AFF80;
-  --color-green-500: #8AFF80;
+  --color-green-400: #8aff80;
+  --color-green-500: #8aff80;
   --color-green-600: #70e666;
   --color-green-700: #57cd4d;
 
-  --color-red-400: #FF9580;
-  --color-red-500: #FF9580;
+  --color-red-400: #ff9580;
+  --color-red-500: #ff9580;
   --color-red-600: #e67c66;
 }
 
@@ -171,30 +171,30 @@ body {
 :root[data-theme="dracula-van-helsing"] {
   color-scheme: dark;
   --color-gray-50: #ffffff;
-  --color-gray-100: #F8F8F2;
+  --color-gray-100: #f8f8f2;
   --color-gray-200: #e2e2dc;
   --color-gray-300: #bfbfbf;
-  --color-gray-400: #6272A4;
-  --color-gray-500: #6272A4;
-  --color-gray-600: #6272A4;
+  --color-gray-400: #6272a4;
+  --color-gray-500: #6272a4;
+  --color-gray-600: #6272a4;
   --color-gray-700: #333342;
   --color-gray-800: #1e1f29;
-  --color-gray-900: #0B0D17;
+  --color-gray-900: #0b0d17;
 
-  --color-blue-400: #8BE9FD;
-  --color-blue-500: #8BE9FD;
-  --color-blue-600: #BD93F9;
+  --color-blue-400: #8be9fd;
+  --color-blue-500: #8be9fd;
+  --color-blue-600: #bd93f9;
   --color-blue-700: #9d73d9;
-  --color-blue-800: #6272A4;
+  --color-blue-800: #6272a4;
   --color-blue-900: #333342;
 
-  --color-green-400: #50FA7B;
-  --color-green-500: #50FA7B;
+  --color-green-400: #50fa7b;
+  --color-green-500: #50fa7b;
   --color-green-600: #3ee869;
   --color-green-700: #2dce55;
 
-  --color-red-400: #FF5555;
-  --color-red-500: #FF5555;
+  --color-red-400: #ff5555;
+  --color-red-500: #ff5555;
   --color-red-600: #e64040;
 }
 
@@ -305,12 +305,22 @@ html:not(.dark) {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
 
-form.show-errors input:invalid, form.show-errors select:invalid, form.show-errors input:invalid ~ button, form.show-errors input:invalid ~ div > button {
+form.show-errors input:invalid,
+form.show-errors select:invalid,
+form.show-errors input:invalid ~ button,
+form.show-errors input:invalid ~ div > button {
   border-color: var(--color-red-500) !important;
   animation: shake 0.4s ease-in-out;
 }

@@ -185,7 +185,7 @@
 								await fetch('/api/services/quick-edit', {
 									method: 'POST',
 									headers: { 'Content-Type': 'application/json' },
-									body: JSON.stringify({ id: service.id, name: service.name, url: service.url, icon: data.url })
+									body: JSON.stringify({ id: service.id, name: service.name, url: service.url, categoryId: service.categoryId, icon: data.url })
 								});
 								window.location.reload();
 							}
@@ -231,7 +231,7 @@
 							await fetch('/api/services/quick-edit', { 
 								method: 'POST', 
 								headers: { 'Content-Type': 'application/json' },
-								body: JSON.stringify({ id: service.id, name: target.value.trim(), url: service.url, icon: service.icon }) 
+								body: JSON.stringify({ id: service.id, name: target.value.trim(), url: service.url, categoryId: service.categoryId, icon: service.icon }) 
 							});
 							window.location.reload();
 						} catch (err) { console.error(err); }
