@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { appState } from '$lib/client/state.svelte';
-	import { ArrowUpCircle, Box, GripHorizontal, Settings, Upload, Trash2, Eye } from "@lucide/svelte";
+	import { ArrowUpCircle, Box, GripHorizontal, Pencil, Upload, Trash2 } from "@lucide/svelte";
 	import QBittorrentWidget from './widgets/QBittorrentWidget.svelte';
 	import TextInput from './ui/TextInput.svelte';
 	import UrlInput from './ui/UrlInput.svelte';
@@ -138,7 +138,7 @@
 	{#if appState.isEditMode && !isExpanded}
 		<div class="absolute top-2 right-2 flex space-x-1.5 z-20">
 			<button onclick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(); }} class="p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm transition-colors text-gray-600 dark:text-gray-300" title="Impostazioni Servizio">
-				<Eye class="w-4 h-4" strokeWidth={1.5} />
+				<Pencil class="w-4 h-4" strokeWidth={1.5} />
 			</button>
 			<div class="p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm transition-colors text-gray-600 dark:text-gray-300 cursor-move" title="Trascina per spostare">
 				<GripHorizontal class="w-4 h-4 pointer-events-none" strokeWidth={1.5} />

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Eye, Moon, Link, LogOut, ArrowUp, LogIn } from "@lucide/svelte";
+	import { Settings, Moon, Link, LogOut, ArrowUp, LogIn } from "@lucide/svelte";
 	import './layout.css';
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import { appState } from '$lib/client/state.svelte';
@@ -139,7 +139,7 @@
 				<div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700 transition-colors {data.isAdmin && appState.isEditMode ? 'ring-2 ring-blue-500 border-blue-500' : ''}">
 					{#if data.isAdmin}
 						<a href="/admin" class="relative p-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors" title="Pannello Amministrazione">
-							<Eye class="h-5 w-5" strokeWidth={1.5} />
+							<Settings class="h-5 w-5" strokeWidth={1.5} />
 							{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
 								<div class="absolute -top-1 -right-1 bg-red-500 rounded-full text-white p-0.5 animate-bounce shadow-sm ring-1 ring-white dark:ring-gray-800" title="Nuova versione disponibile!">
 									<ArrowUp class="w-2.5 h-2.5" strokeWidth={1.5} />

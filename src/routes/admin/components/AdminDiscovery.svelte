@@ -7,7 +7,7 @@
 	import { slide } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
-import { Box, Loader2, AlertTriangle, Eye, X, Search, Upload, Check, Trash2, EyeOff, Link } from "@lucide/svelte";
+import { Pencil, Plus, Box, Loader2, AlertTriangle, Eye, X, Search, Upload, Check, Trash2, EyeOff, Link } from "@lucide/svelte";
 	
 	let { localCategories = $bindable() } = $props();
 
@@ -257,12 +257,15 @@ import { Box, Loader2, AlertTriangle, Eye, X, Search, Upload, Check, Trash2, Eye
 									Aggiunto
 								</span>
 							{:else}
-								<button type="button" onclick={(e: Event) => { e.stopPropagation(); expandedId = expandedId === ds.id ? null : ds.id; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-transform hover:scale-110">
-									{#if expandedId === ds.id}
-										<X class="w-5 h-5" strokeWidth={1.5} />
-									{:else}
-										<Link class="w-5 h-5" strokeWidth={1.5} />
-									{/if}
+								<button type="button" onclick={(e: Event) => { e.stopPropagation(); expandedId = expandedId === ds.id ? null : ds.id; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm text-white transition-all duration-300 {expandedId === ds.id ? 'bg-gray-500 hover:bg-gray-600' : 'bg-blue-600 hover:bg-blue-700'} focus:outline-none hover:scale-110">
+									<div class="relative w-5 h-5">
+										<Pencil class="absolute top-0 left-0 w-4 h-4 transition-all duration-300 {expandedId === ds.id ? 'opacity-60' : ''}" strokeWidth={2.5} />
+										{#if expandedId === ds.id}
+											<X class="absolute -bottom-1 -right-1 w-3.5 h-3.5 text-white shadow-sm" strokeWidth={3} />
+										{:else}
+											<Plus class="absolute -bottom-1 -right-1 w-3.5 h-3.5 text-white shadow-sm" strokeWidth={3} />
+										{/if}
+									</div>
 								</button>
 							{/if}
 						</div>
