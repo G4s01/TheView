@@ -10,7 +10,7 @@
 	import { flip } from 'svelte/animate';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { ArrowUpCircle } from '@lucide/svelte';
+	import { ArrowUpCircle, Box } from '@lucide/svelte';
 
 	let { services, localCategories } = $props();
 
@@ -329,11 +329,11 @@
 											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
 										</svg>
 										{#if service.iconDetails}
-											<div class="h-8 w-8 rounded-lg flex items-center justify-center mr-3 shadow-sm border border-gray-200 dark:border-gray-700" style="background-color: {service.iconDetails.hex || '#4B5563'};">
-												{#if service.iconDetails.isCustomUrl}
-													<img src={service.iconDetails.url} alt={service.name} class="h-8 w-8 rounded-lg object-contain bg-white dark:bg-gray-800 p-0.5" />
+											<div class="h-8 w-8 rounded-lg flex items-center justify-center mr-3 shadow-sm border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
+												{#if service.iconDetails.type === 'custom' || service.iconDetails.type === 'brand'}
+													<img src={service.iconDetails.value} alt={service.name} class="h-5 w-5 object-contain" />
 												{:else}
-													<img src={service.iconDetails.url} alt={service.name} class="h-5 w-5" />
+													<Box class="h-5 w-5 text-gray-400" strokeWidth={1.5} />
 												{/if}
 											</div>
 										{:else if service.icon}
@@ -342,7 +342,7 @@
 											</div>
 										{:else}
 											<div class="h-8 w-8 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center mr-3 text-gray-500 dark:text-gray-400">
-												<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+												<Box class="w-5 h-5" strokeWidth={1.5} />
 											</div>
 										{/if}
 										<div>

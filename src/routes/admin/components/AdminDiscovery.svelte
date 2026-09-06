@@ -7,6 +7,7 @@
 	import { slide } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
+import { Box } from "@lucide/svelte";
 	
 	let { localCategories = $bindable() } = $props();
 
@@ -212,17 +213,21 @@
 						<div class="flex items-center space-x-4 flex-1 min-w-0 mr-4">
 							<div class="shrink-0">
 								{#if ds.iconDetails}
-									<div class="h-10 w-10 rounded-xl flex items-center justify-center shadow-sm border border-gray-200 dark:border-gray-700" style="background-color: {ds.iconDetails.hex || '#4B5563'};">
-										{#if ds.iconDetails.isCustomUrl}
-											<img src={ds.iconDetails.url} alt={ds.name} class="h-10 w-10 rounded-xl object-contain bg-white dark:bg-gray-800 p-0.5" />
+									<div class="h-10 w-10 rounded-xl flex items-center justify-center shadow-sm border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
+										{#if ds.iconDetails.type === 'custom' || ds.iconDetails.type === 'brand'}
+											<img src={ds.iconDetails.value} alt={ds.name} class="h-6 w-6 object-contain" />
 										{:else}
-											<img src={ds.iconDetails.url} alt={ds.name} class="h-6 w-6" />
+											<Box class="h-6 w-6 text-gray-400" strokeWidth={1.5} />
 										{/if}
 									</div>
+								{:else if ds.icon}
+									<div class="h-10 w-10 bg-gray-600 rounded-xl flex items-center justify-center mr-3 text-white font-bold text-lg uppercase shadow-sm">
+										{ds.icon.charAt(0)}
+									</div>
 								{:else}
-									<span class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 text-white font-bold uppercase shadow-sm">
-										{ds.name.charAt(0)}
-									</span>
+									<div class="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center mr-3 shadow-sm border border-gray-200 dark:border-gray-700">
+										<Box class="h-5 w-5 text-gray-500 dark:text-gray-400" strokeWidth={1.5} />
+									</div>
 								{/if}
 							</div>
 							<div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 flex-1 min-w-0">

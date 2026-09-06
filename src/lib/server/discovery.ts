@@ -1,4 +1,4 @@
-import { getIconDetails } from "$lib/server/icons";
+import { resolveIcon } from "$lib/server/iconResolver";
 import { rewriteUrlForDocker } from "$lib/server/dockerHost";
 import { env } from "$env/dynamic/private";
 import http from "http";
@@ -364,41 +364,19 @@ export async function discoverAllServices(
 
   // Popola l'icona usando guess per ogni servizio
   const enriched = filtered.map((s) => {
-    // Cerchiamo di dedurre l'icona dal nome o dall'immagine docker
-    let guess = s.name;
-    if ((s.source === "docker" || s.source === "npm+docker") && s.description) {
-      // Usa il nome dell'immagine senza tag (es. linuxserver/qbittorrent -> qbittorrent)
-      // Se fuso, la stringa sarà "image:tag (via NPM)"
-      const rawImage = s.description.replace(" (via NPM)", "");
-      const imageParts = rawImage.split(":")[0].split("/");
-      const extracted = imageParts[imageParts.length - 1];
-      // A volte l'immagine docker è meno chiara del nome (es. 'nginx' vs 'adguard'),
-      // ma proviamo entrambe.
-      guess = extracted;
-    }
+    let iconDetails = resolveIcon(
+      s._iconOverride,
+      s._dockerImage,
+      s.name,
+      s.url
+    );
 
-    // Prova prima con l'immagine Docker (guess), poi se fallisce prova col nome dato da NPM (s.name)
-    // Rimuoviamo anche eventuali - o _ per trovare meglio su simple-icons
-    const cleanGuess = guess.replace(/[-_]/g, "");
-    const cleanName = s.name.replace(/[-_]/g, "");
-
-    let iconDetails =
-      (s._iconOverride ? getIconDetails(s._iconOverride) : null) ||
-      getIconDetails(guess, false) ||
-      getIconDetails(cleanGuess, false) ||
-      getIconDetails(s.name, false) ||
-      getIconDetails(cleanName, false);
-
-    if (!iconDetails) {
-      iconDetails = getIconDetails(guess, true);
-    }
-
+    // Se l'icona trovata è tramite override, teniamo quello come valore salvabile,
+    // altrimenti vuoto per farlo dedurre a runtime, o possiamo salvare il nome
     return {
       ...s,
       iconDetails,
-      icon:
-        s._iconOverride ||
-        (iconDetails && !iconDetails.isFallback ? guess : s.name),
+      icon: s._iconOverride || null,
     };
   });
 

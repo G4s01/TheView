@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { appState } from '$lib/client/state.svelte';
-	import { ArrowUpCircle } from '@lucide/svelte';
+	import { ArrowUpCircle, Box, GripHorizontal, Settings, Upload, Trash2 } from '@lucide/svelte';
 	import QBittorrentWidget from './widgets/QBittorrentWidget.svelte';
 	import TextInput from './ui/TextInput.svelte';
 	import UrlInput from './ui/UrlInput.svelte';
@@ -18,7 +18,7 @@
 			widgetType: string | null;
 			categoryId?: number;
 			dockerImage?: string | null;
-			iconDetails?: { hex: string, url: string, isCustomUrl?: boolean } | null;
+			iconDetails?: { type: 'custom' | 'brand' | 'lucide', value: string } | null;
 		};
 		liveStatus?: { isOnline: boolean; latencyMs?: number } | null;
 		categories?: { id: number; name: string }[];
@@ -129,17 +129,9 @@
 		: 'Checking...'
 	);
 
-	function hexToRgba(hex: string | undefined, alpha: number) {
-		if (!hex) return '';
-		const r = parseInt(hex.slice(1, 3), 16);
-		const g = parseInt(hex.slice(3, 5), 16);
-		const b = parseInt(hex.slice(5, 7), 16);
-		return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-	}
-
-	let bgColor = $derived(service.iconDetails ? hexToRgba(service.iconDetails.hex, 0.1) : '');
-	let borderColor = $derived(service.iconDetails ? hexToRgba(service.iconDetails.hex, 0.3) : '');
-	let iconBgColor = $derived(service.iconDetails ? service.iconDetails.hex : '');
+	let bgColor = $derived('');
+	let borderColor = $derived('');
+	let iconBgColor = $derived('');
 </script>
 
 <div class="relative h-full group">
@@ -173,17 +165,13 @@
 				style="background-color: {iconBgColor || '#4B5563'}"
 			>
 				{#if service.iconDetails}
-					{#if service.iconDetails.isCustomUrl}
-						<img src={service.iconDetails.url} alt={service.name} class="h-8 w-8 object-contain {iconStyle === 'rounded-full' ? 'rounded-full' : (iconStyle === 'rounded-xl' ? 'rounded' : 'rounded-none')}" />
+					{#if service.iconDetails.type === 'custom' || service.iconDetails.type === 'brand'}
+						<img src={service.iconDetails.value} alt={service.name} class="h-6 w-6 object-contain {iconStyle === 'rounded-full' ? 'rounded-full' : (iconStyle === 'rounded-xl' ? 'rounded' : 'rounded-none')}" />
 					{:else}
-						<img src={service.iconDetails.url} alt={service.name} class="h-6 w-6" style="filter: brightness(0) invert(1);" />
+						<Box class="h-6 w-6 text-white" strokeWidth={1.5} />
 					{/if}
-				{:else if service.icon}
-					<span class="text-lg font-bold uppercase text-white">{service.icon.charAt(0)}</span>
 				{:else}
-					<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-					</svg>
+					<Box class="h-6 w-6 text-white" strokeWidth={1.5} />
 				{/if}
 			</div>
 
