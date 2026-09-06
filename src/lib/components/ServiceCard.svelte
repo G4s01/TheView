@@ -214,6 +214,25 @@
 					}} />
 				</label>
 			{/if}
+
+			{#if dockerVersionInfo && dockerVersionInfo.updateAvailable && !appState.isEditMode}
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div 
+					class="absolute -top-1.5 -right-1.5 flex items-center justify-center z-20 cursor-pointer text-red-500 hover:text-red-600 transition-colors bg-white dark:bg-gray-800 rounded-full shadow-sm" 
+					title="Aggiornamento disponibile online! Clicca per vedere la release."
+					onclick={(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						if (dockerVersionInfo?.updateUrl) {
+							window.open(dockerVersionInfo.updateUrl, '_blank');
+						}
+					}}
+				>
+					<span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-40 animate-ping"></span>
+					<ArrowUpCircle class="w-4 h-4 animate-pulse relative" />
+				</div>
+			{/if}
 		</div>
 
 		<!-- Status Indicator (top right) -->
@@ -349,23 +368,5 @@
 		{/if}
 	</div>
 	
-	{#if dockerVersionInfo && dockerVersionInfo.updateAvailable && !isExpanded && !appState.isEditMode}
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div 
-			class="absolute bottom-2 right-2 flex items-center justify-center z-10 cursor-pointer text-red-500 hover:text-red-600 transition-colors" 
-			title="Aggiornamento disponibile online! Clicca per vedere la release."
-			onclick={(e) => {
-				e.preventDefault();
-				e.stopPropagation();
-				if (dockerVersionInfo?.updateUrl) {
-					window.open(dockerVersionInfo.updateUrl, '_blank');
-				}
-			}}
-		>
-			<span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-40 animate-ping"></span>
-			<ArrowUpCircle class="w-5 h-5 animate-pulse relative bg-white dark:bg-gray-800 rounded-full" />
-		</div>
-	{/if}
 </svelte:element>
 </div>
