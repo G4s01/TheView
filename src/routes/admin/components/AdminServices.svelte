@@ -9,8 +9,27 @@
 	import { dndzone } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
 	import { invalidateAll } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { ArrowUpCircle } from 'lucide-svelte';
 
 	let { services, localCategories } = $props();
+
+	let updateStatuses = $state<Record<number, { updateAvailable: boolean, updateUrl?: string }>>({});
+
+	onMount(() => {
+		services.forEach((s: any) => {
+			if (s.dockerImage) {
+				fetch(`/api/docker/version?image=${encodeURIComponent(s.dockerImage)}`)
+					.then(r => r.json())
+					.then(d => {
+						if (d.updateAvailable) {
+							updateStatuses[s.id] = { updateAvailable: d.updateAvailable, updateUrl: d.updateUrl };
+						}
+					})
+					.catch(() => {});
+			}
+		});
+	});
 
 	let editingServiceId = $state<number | null>(null);
 	let deletingServiceId = $state<number | null>(null);
@@ -168,7 +187,7 @@
 						{/if}
 					</div>
 
-					<TextInput label="Container ID (Opz.)" name="containerId" placeholder="es. abc123def..." />
+					<TextInput label="Immagine Docker (es. linuxserver/radarr:latest)" name="dockerImage" placeholder="es. ghcr.io/user/repo:latest" />
 					<ToggleInput label="Ping" name="pingEnabled" value="true" checked={true} />
 
 					<SelectInput label="Widget" name="widgetType" options={[{value: '', label: 'Nessuno'}, {value: 'qbittorrent', label: 'qBittorrent'}]} />
@@ -265,7 +284,7 @@
 										<!-- Row 3: Categoria, Container ID, Widget, Ping, Buttons -->
 										<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
 											<SelectInput label="Categoria" name="categoryId" value={service.categoryId} required options={localCategories.map((c: any) => ({value: c.id, label: c.name}))} />
-											<TextInput label="Container ID (Opz.)" name="containerId" value={service.containerId || ''} placeholder="es. abc123def..." />
+											<TextInput label="Immagine Docker (es. linuxserver/radarr:latest)" name="dockerImage" value={service.dockerImage || ''} placeholder="es. ghcr.io/user/repo:latest" />
 											<SelectInput label="Widget" name="widgetType" value={service.widgetType || ''} options={[{value: '', label: 'Nessuno'}, {value: 'qbittorrent', label: 'qBittorrent'}]} />
 											<div class="flex items-center h-10.5 pl-2">
 												<ToggleInput label="Ping" name="pingEnabled" value="true" checked={service.pingEnabled} />
@@ -332,6 +351,12 @@
 										</div>
 									</div>
 									<div class="flex items-center space-x-2">
+										{#if updateStatuses[service.id]?.updateAvailable}
+											<a href={updateStatuses[service.id].updateUrl} target="_blank" rel="noopener noreferrer" class="p-2 text-red-500 hover:text-red-600 transition-colors relative" title="Aggiornamento Disponibile!">
+												<span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-40 animate-ping"></span>
+												<ArrowUpCircle class="w-5 h-5 animate-pulse relative" />
+											</a>
+										{/if}
 										<button type="button" onclick={() => editingServiceId = service.id} class="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-lg shadow-sm" title="Modifica Servizio">
 											<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
 										</button>

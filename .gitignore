@@ -42,6 +42,7 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+TheView.code-workspace
 
 # Agent Workspace & Temp Files
 .gemini/

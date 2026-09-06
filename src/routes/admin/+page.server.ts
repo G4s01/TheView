@@ -45,7 +45,7 @@ export const actions: Actions = {
     const description = data.get("description")?.toString() || null;
     const widgetType = data.get("widgetType")?.toString() || null;
     const pingEnabled = data.get("pingEnabled") === "on";
-    const containerId = data.get("containerId")?.toString() || null;
+    const dockerImage = data.get("dockerImage")?.toString() || null;
 
     try {
       await db.insert(services).values({
@@ -56,7 +56,7 @@ export const actions: Actions = {
         description,
         widgetType,
         pingEnabled,
-        containerId,
+        dockerImage,
       });
       return { success: true };
     } catch (error) {
@@ -84,7 +84,7 @@ export const actions: Actions = {
     const description = data.get("description")?.toString() || null;
     const widgetType = data.get("widgetType")?.toString() || null;
     const pingEnabled = data.get("pingEnabled") === "on";
-    const containerId = data.get("containerId")?.toString() || null;
+    const dockerImage = data.get("dockerImage")?.toString() || null;
 
     try {
       await db
@@ -97,7 +97,7 @@ export const actions: Actions = {
           description,
           widgetType,
           pingEnabled,
-          containerId,
+          dockerImage,
         })
         .where(eq(services.id, parseInt(id)));
       return { success: true };

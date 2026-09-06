@@ -36,84 +36,107 @@ function dockerRequest(path: string): Promise<any> {
   });
 }
 
-export const GET: RequestHandler = async ({ url, locals }) => {
-  const containerId = url.searchParams.get("containerId");
-  if (!containerId) {
-    return json({ error: "Missing containerId" }, { status: 400 });
+export const GET: RequestHandler = async ({ url }) => {
+  const image = url.searchParams.get("image");
+  if (!image) {
+    return json({ error: "Missing image" }, { status: 400 });
   }
 
-  // Fetch container details
-  const container = await dockerRequest(`/containers/${containerId}/json`);
-  if (!container) {
-    return json({ error: "Container not found" }, { status: 404 });
+  // We need the local image digest to compare
+  const imageInfo = await dockerRequest(`/images/${image}/json`);
+  let localDigest = "";
+  if (imageInfo && imageInfo.RepoDigests && imageInfo.RepoDigests.length > 0) {
+    // e.g. "linuxserver/qbittorrent@sha256:abcd..."
+    const digestPart = imageInfo.RepoDigests[0].split("@")[1];
+    if (digestPart) localDigest = digestPart;
   }
 
-  // Extract version from labels
-  const labels = container.Config?.Labels || {};
-  let version = "";
-  if (labels["build_version"]) {
-    // linuxserver convention (often contains version-...)
-    const vMatch = labels["build_version"].match(/version-([^ ]+)/);
-    version = vMatch ? vMatch[1] : labels["build_version"];
-  } else if (labels["org.opencontainers.image.version"]) {
-    version = labels["org.opencontainers.image.version"];
-  } else if (labels["version"]) {
-    version = labels["version"];
+  if (!localDigest) {
+    return json({ updateAvailable: false, error: "Local digest not found" });
   }
 
-  if (version && version.length > 20) {
-    version = version.substring(0, 20) + "..."; // prevent huge strings
-  }
-
-  const imageNameWithTag = container.Config?.Image || "";
   let updateAvailable = false;
-  
-  // Attempt to check for updates on Docker Hub
-  if (imageNameWithTag && !imageNameWithTag.includes("ghcr.io") && !imageNameWithTag.includes("quay.io")) {
+  let updateUrl = "";
+  let remoteDigest = "";
+
+  let repo = image;
+  let tag = "latest";
+
+  if (repo.includes(":")) {
+    const parts = repo.split(":");
+    repo = parts[0];
+    tag = parts[1];
+  }
+
+  if (repo.startsWith("ghcr.io/")) {
+    const ghcrRepo = repo.replace("ghcr.io/", "");
+    updateUrl = `https://github.com/${ghcrRepo.split("/")[0]}/${ghcrRepo.split("/")[1] || ghcrRepo}`;
+
     try {
-      let repo = imageNameWithTag;
-      let tag = "latest";
-      
-      if (repo.includes(":")) {
-        const parts = repo.split(":");
-        repo = parts[0];
-        tag = parts[1];
-      }
-      
-      // If it's an official image like "nginx", it becomes "library/nginx"
-      if (!repo.includes("/")) {
-        repo = `library/${repo}`;
-      }
-
-      // We need the local image digest to compare
-      const imageInfo = await dockerRequest(`/images/${imageNameWithTag}/json`);
-      let localDigest = "";
-      if (imageInfo && imageInfo.RepoDigests && imageInfo.RepoDigests.length > 0) {
-        // e.g. "linuxserver/qbittorrent@sha256:abcd..."
-        const digestPart = imageInfo.RepoDigests[0].split("@")[1];
-        if (digestPart) localDigest = digestPart;
-      }
-
-      if (localDigest) {
-        // Fetch remote digest from Docker Hub
-        const hubRes = await fetch(`https://hub.docker.com/v2/repositories/${repo}/tags/${tag}`);
-        if (hubRes.ok) {
-          const hubData = await hubRes.json();
-          const remoteDigest = hubData.digest;
-          if (remoteDigest && remoteDigest !== localDigest) {
-            updateAvailable = true;
-          }
+      const tokenRes = await fetch(
+        `https://ghcr.io/token?scope=repository:${ghcrRepo}:pull`,
+      );
+      if (tokenRes.ok) {
+        const tokenData = await tokenRes.json();
+        const manifestRes = await fetch(
+          `https://ghcr.io/v2/${ghcrRepo}/manifests/${tag}`,
+          {
+            headers: {
+              Authorization: `Bearer ${tokenData.token}`,
+              Accept:
+                "application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.index.v1+json",
+            },
+          },
+        );
+        if (manifestRes.ok) {
+          remoteDigest = manifestRes.headers.get("docker-content-digest") || "";
         }
       }
     } catch (e) {
-      console.error("Failed to check remote update:", e);
+      console.error("GHCR fetch error", e);
+    }
+  } else {
+    // Docker Hub
+    let dhRepo = repo;
+    if (!dhRepo.includes("/")) {
+      dhRepo = `library/${dhRepo}`;
+    }
+    updateUrl = `https://hub.docker.com/r/${dhRepo.replace("library/", "")}`;
+
+    try {
+      const tokenRes = await fetch(
+        `https://auth.docker.io/token?service=registry.docker.io&scope=repository:${dhRepo}:pull`,
+      );
+      if (tokenRes.ok) {
+        const tokenData = await tokenRes.json();
+        const manifestRes = await fetch(
+          `https://registry-1.docker.io/v2/${dhRepo}/manifests/${tag}`,
+          {
+            headers: {
+              Authorization: `Bearer ${tokenData.token}`,
+              Accept:
+                "application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.index.v1+json",
+            },
+          },
+        );
+        if (manifestRes.ok) {
+          remoteDigest = manifestRes.headers.get("docker-content-digest") || "";
+        }
+      }
+    } catch (e) {
+      console.error("Docker Hub fetch error", e);
     }
   }
 
+  if (remoteDigest && remoteDigest !== localDigest) {
+    updateAvailable = true;
+  }
+
   return json({
-    containerId,
-    version: version || "Sconosciuta",
+    image,
     updateAvailable,
-    image: imageNameWithTag
+    updateUrl,
+    localDigest,
+    remoteDigest,
   });
 };

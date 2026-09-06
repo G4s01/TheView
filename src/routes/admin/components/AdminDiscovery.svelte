@@ -296,7 +296,7 @@
 									<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 										<TextInput label="Nome" name="name" bind:value={ds.name} required />
 										<UrlInput label="URL (Richiesto)" name="url" bind:value={ds.url} required />
-										<TextInput label="Container ID (Opz.)" name="containerId" value={ds._containerId || ''} placeholder="es. abc123def..." />
+										<TextInput label="Immagine Docker (es. linuxserver/radarr:latest)" name="dockerImage" value={ds._dockerImage || ''} placeholder="es. ghcr.io/user/repo:latest" />
 									</div>
 									
 									<!-- Row 2: Icona, Descrizione -->

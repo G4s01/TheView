@@ -16,7 +16,6 @@ export async function load() {
       widgetType: services.widgetType,
       pingEnabled: services.pingEnabled,
       categoryId: services.categoryId,
-      containerId: services.containerId,
       position: services.position,
     })
     .from(services)

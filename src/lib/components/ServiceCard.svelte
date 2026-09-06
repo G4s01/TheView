@@ -1,5 +1,6 @@
 <script lang="ts">
-		import { appState } from '$lib/client/state.svelte';
+	import { appState } from '$lib/client/state.svelte';
+	import { ArrowUpCircle } from 'lucide-svelte';
 	import QBittorrentWidget from './widgets/QBittorrentWidget.svelte';
 	import TextInput from './ui/TextInput.svelte';
 	import UrlInput from './ui/UrlInput.svelte';
@@ -16,7 +17,7 @@
 			pingEnabled: boolean;
 			widgetType: string | null;
 			categoryId?: number;
-			containerId?: string | null;
+			dockerImage?: string | null;
 			iconDetails?: { hex: string, url: string, isCustomUrl?: boolean } | null;
 		};
 		liveStatus?: { isOnline: boolean; latencyMs?: number } | null;
@@ -33,21 +34,21 @@
 	let editCat = $state<number | null>(null);
 	let editPing = $state(false);
 	let editWidget = $state('');
-	let editContainerId = $state('');
+	let editDockerImage = $state('');
 	
 	let showDeleteConfirm = $state(false);
 	let isSaving = $state(false);
 
-	let dockerVersionInfo = $state<{ version: string; updateAvailable: boolean } | null>(null);
+	let dockerVersionInfo = $state<{ version: string; updateAvailable: boolean; updateUrl?: string } | null>(null);
 
 	import { onMount } from 'svelte';
 	onMount(() => {
-		if (service.containerId) {
-			fetch(`/api/docker/version?containerId=${service.containerId}`)
+		if (service.dockerImage) {
+			fetch(`/api/docker/version?image=${service.dockerImage}`)
 				.then(res => res.json())
 				.then(data => {
 					if (!data.error) {
-						dockerVersionInfo = { version: data.version, updateAvailable: data.updateAvailable };
+						dockerVersionInfo = { version: data.version, updateAvailable: data.updateAvailable, updateUrl: data.updateUrl };
 					}
 				})
 				.catch(e => console.error(e));
@@ -62,7 +63,7 @@
 		editCat = service.categoryId || null;
 		editPing = service.pingEnabled ?? true;
 		editWidget = service.widgetType || '';
-		editContainerId = service.containerId || '';
+		editDockerImage = service.dockerImage || '';
 		if (onExpandToggle) onExpandToggle(true);
 	}
 
@@ -103,7 +104,7 @@
 					categoryId: editCat,
 					pingEnabled: editPing,
 					widgetType: editWidget,
-					containerId: editContainerId
+					dockerImage: editDockerImage
 				})
 			});
 			window.location.reload();
@@ -205,7 +206,7 @@
 								await fetch('/api/services/quick-edit', {
 									method: 'POST',
 									headers: { 'Content-Type': 'application/json' },
-									body: JSON.stringify({ id: service.id, name: service.name, url: service.url, categoryId: service.categoryId, icon: data.url, containerId: service.containerId })
+									body: JSON.stringify({ id: service.id, name: service.name, url: service.url, categoryId: service.categoryId, icon: data.url, dockerImage: service.dockerImage })
 								});
 								window.location.reload();
 							}
@@ -251,7 +252,7 @@
 							await fetch('/api/services/quick-edit', { 
 								method: 'POST', 
 								headers: { 'Content-Type': 'application/json' },
-								body: JSON.stringify({ id: service.id, name: target.value.trim(), url: service.url, categoryId: service.categoryId, icon: service.icon, containerId: service.containerId }) 
+								body: JSON.stringify({ id: service.id, name: target.value.trim(), url: service.url, categoryId: service.categoryId, icon: service.icon, dockerImage: service.dockerImage }) 
 							});
 							window.location.reload();
 						} catch (err) { console.error(err); }
@@ -286,7 +287,7 @@
 			<div role="presentation" transition:slide|local={{ duration: 250 }} class="flex flex-col gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700" onclick={(e) => e.stopPropagation()}>
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					<UrlInput label="URL" bind:value={editUrl} required />
-					<TextInput label="Container ID (Opz.)" bind:value={editContainerId} placeholder="es. abc123def..." />
+					<TextInput label="Immagine Docker (es. linuxserver/radarr:latest)" bind:value={editDockerImage} placeholder="es. ghcr.io/user/repo:latest" />
 				</div>
 				
 				<div class="flex gap-2 h-10.5 items-center">
@@ -348,17 +349,22 @@
 		{/if}
 	</div>
 	
-	{#if dockerVersionInfo && !isExpanded && !appState.isEditMode}
-		<div class="absolute bottom-1.5 right-2 flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity z-10" title="Docker Container Version">
-			<span class="text-[10px] font-mono text-gray-400 dark:text-gray-500 font-bold tracking-wider">{dockerVersionInfo.version}</span>
-			{#if dockerVersionInfo.updateAvailable}
-				<div class="relative flex items-center justify-center w-3.5 h-3.5 ml-1 cursor-help" title="Aggiornamento disponibile online!">
-					<span class="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-30 animate-ping"></span>
-					<svg class="w-3 h-3 text-red-500 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-					</svg>
-				</div>
-			{/if}
+	{#if dockerVersionInfo && dockerVersionInfo.updateAvailable && !isExpanded && !appState.isEditMode}
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div 
+			class="absolute bottom-2 right-2 flex items-center justify-center z-10 cursor-pointer text-red-500 hover:text-red-600 transition-colors" 
+			title="Aggiornamento disponibile online! Clicca per vedere la release."
+			onclick={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				if (dockerVersionInfo?.updateUrl) {
+					window.open(dockerVersionInfo.updateUrl, '_blank');
+				}
+			}}
+		>
+			<span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-40 animate-ping"></span>
+			<ArrowUpCircle class="w-5 h-5 animate-pulse relative bg-white dark:bg-gray-800 rounded-full" />
 		</div>
 	{/if}
 </svelte:element>
