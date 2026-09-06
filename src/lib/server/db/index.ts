@@ -28,18 +28,31 @@ sqlite.exec(`
     description TEXT,
     url TEXT NOT NULL,
     icon TEXT,
-    container_id TEXT,
+    docker_image TEXT,
     widget_type TEXT,
     ping_enabled INTEGER DEFAULT 1 NOT NULL,
     position INTEGER DEFAULT 0
   );
 `);
 
-// Eseguiamo la migrazione in modo sicuro se la colonna non esiste
+// Eseguiamo la migrazione in modo sicuro per rinominare la colonna
 try {
-  sqlite.exec(`ALTER TABLE services ADD COLUMN container_id TEXT;`);
+  // Check if container_id exists and docker_image doesn't
+  const columns = sqlite.prepare(`PRAGMA table_info(services);`).all() as {
+    name: string;
+  }[];
+  const hasContainerId = columns.some((c) => c.name === "container_id");
+  const hasDockerImage = columns.some((c) => c.name === "docker_image");
+
+  if (hasContainerId && !hasDockerImage) {
+    sqlite.exec(
+      `ALTER TABLE services RENAME COLUMN container_id TO docker_image;`,
+    );
+  } else if (!hasContainerId && !hasDockerImage) {
+    sqlite.exec(`ALTER TABLE services ADD COLUMN docker_image TEXT;`);
+  }
 } catch (e: any) {
-  // Ignora se la colonna esiste già (errore "duplicate column name")
+  console.error("Migration error:", e.message);
 }
 
 export const db = drizzle(sqlite, { schema });
