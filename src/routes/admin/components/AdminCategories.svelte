@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Loader2, GripHorizontal, Plus, AlertTriangle, Check, Trash2 } from "@lucide/svelte";
 	import TextInput from '$lib/components/ui/TextInput.svelte';
 	import { dndzone } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
@@ -87,7 +88,7 @@
 				<p class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Trascina per riordinare, modifica i nomi e salva tutto in un colpo solo.</p>
 			</div>
 			<button onclick={addCategory} class="inline-flex justify-center items-center rounded-xl border border-transparent bg-blue-100 dark:bg-blue-900/30 py-2.5 px-5 text-sm font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800/40 focus:outline-none uppercase tracking-wider transition-colors">
-				<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+				<Plus class="w-5 h-5 mr-2" strokeWidth={1.5} />
 				Aggiungi
 			</button>
 		</div>
@@ -106,9 +107,7 @@
 					class="px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white dark:bg-gray-800 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors w-full gap-4"
 				>
 					<div class="flex items-center flex-1 w-full gap-4">
-						<svg class="h-6 w-6 text-gray-400 shrink-0 cursor-grab active:cursor-grabbing hover:text-gray-600 dark:hover:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-						</svg>
+						<GripHorizontal class="h-6 w-6 text-gray-400 shrink-0 cursor-grab active:cursor-grabbing hover:text-gray-600 dark:hover:text-gray-300" strokeWidth={1.5} />
 						
 						<div class="w-full sm:max-w-md">
 							<TextInput label="Nome Categoria" bind:value={category.name} />
@@ -133,7 +132,7 @@
 						</div>
 
 						<button onclick={() => deleteCategory(category.id)} class="text-sm font-bold uppercase tracking-wider text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors p-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/30" title="Elimina Categoria">
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+							<Trash2 class="w-5 h-5" strokeWidth={1.5} />
 						</button>
 					</div>
 				</li>
@@ -150,10 +149,10 @@
 		<div class="px-6 py-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 flex justify-end">
 			<button onclick={saveAll} disabled={isSaving} class="inline-flex justify-center items-center rounded-xl border border-transparent bg-green-600 py-3 px-8 text-sm font-bold text-white shadow-md hover:bg-green-700 focus:outline-none uppercase tracking-wider transition-colors hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
 				{#if isSaving}
-					<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+					<Loader2 class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" strokeWidth={2} />
 					Salvataggio...
 				{:else}
-					<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+					<Check class="w-5 h-5 mr-2" strokeWidth={2} />
 					Salva Tutte Le Modifiche
 				{/if}
 			</button>
@@ -166,7 +165,7 @@
 	<div class="fixed inset-0 bg-gray-900/50 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
 		<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-sm w-full overflow-hidden transform transition-all border border-gray-100 dark:border-gray-700 p-6" role="dialog" aria-modal="true">
 			<div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
-				<svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+				<AlertTriangle class="w-6 h-6 text-red-600 dark:text-red-400" strokeWidth={1.5} />
 			</div>
 			
 			<h3 class="text-lg font-bold text-center text-gray-900 dark:text-white mb-2">

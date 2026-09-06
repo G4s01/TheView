@@ -7,7 +7,7 @@
 	import { slide } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
-import { Box } from "@lucide/svelte";
+import { Box, Loader2, AlertTriangle, Eye, X, Search, Upload, Check, Trash2, EyeOff, Link } from "@lucide/svelte";
 	
 	let { localCategories = $bindable() } = $props();
 
@@ -100,9 +100,9 @@ import { Box } from "@lucide/svelte";
 						<TextInput label="Password" type={showNpmPassword ? "text" : "password"} bind:value={npmPassword} class="pr-10">
 							<button type="button" onclick={() => showNpmPassword = !showNpmPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
 								{#if showNpmPassword}
-									<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+									<EyeOff class="h-5 w-5" strokeWidth={1.5} />
 								{:else}
-									<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+									<Eye class="h-5 w-5" strokeWidth={1.5} />
 								{/if}
 							</button>
 						</TextInput>
@@ -121,7 +121,7 @@ import { Box } from "@lucide/svelte";
 								}}
 								class="w-full h-10.5 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-md shadow-blue-500/30 text-sm font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-all"
 							>
-								<svg class="-ml-1 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+								<Check class="-ml-1 mr-1.5 h-4 w-4" strokeWidth={2} />
 								Salva
 							</button>
 						</div>
@@ -146,7 +146,7 @@ import { Box } from "@lucide/svelte";
 							onclick={() => showNpmDisconnectModal = true} 
 							class="text-red-500 hover:text-red-600 dark:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
 						>
-							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+							<Trash2 class="w-5 h-5" strokeWidth={1.5} />
 						</button>
 						<button onclick={() => isNpmEditing = true} class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm font-bold uppercase tracking-wider rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
 							Modifica
@@ -163,7 +163,7 @@ import { Box } from "@lucide/svelte";
 		<div class="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
 			<div class="flex items-center space-x-3">
 				<div class="p-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg">
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+					<Search class="w-6 h-6" strokeWidth={1.5} />
 				</div>
 				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Risultati Discovery</h3>
 			</div>
@@ -174,10 +174,10 @@ import { Box } from "@lucide/svelte";
 					class="inline-flex items-center justify-center w-full md:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold uppercase tracking-wider rounded-xl transition-all shadow-md shadow-blue-500/20 disabled:opacity-50"
 				>
 					{#if isDiscovering}
-						<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+						<Loader2 class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" strokeWidth={2} />
 						Ricerca in corso...
 					{:else}
-						<svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+						<Search class="-ml-1 mr-2 h-4 w-4" strokeWidth={1.5} />
 						Esegui Discovery
 					{/if}
 				</button>
@@ -200,7 +200,7 @@ import { Box } from "@lucide/svelte";
 				<li class="px-6 py-12 text-center text-sm text-gray-500">Ricerca in corso su Docker e NPM...</li>
 			{:else if discoveredServices.length === 0}
 				<li class="px-6 py-12 text-center text-sm text-gray-500">
-					<svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+					<Search class="mx-auto h-12 w-12 text-gray-400 mb-3" strokeWidth={1.5} />
 					Nessun nuovo servizio trovato. Clicca "Esegui Discovery".
 				</li>
 			{/if}
@@ -236,12 +236,12 @@ import { Box } from "@lucide/svelte";
 									<div class="flex items-center gap-1">
 										{#if ds.source === 'npm' || ds.source === 'npm+docker'}
 											<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" title="Trovato via Nginx Proxy Manager">
-												<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l-12 5.5v13l12 5.5 12-5.5v-13l-12-5.5zM12 21.5L2.5 17V7.5L12 3.1l9.5 4.4v9.5L12 21.5zM7.5 12.5v-3H9v3.5l3.5-3.5h2L11 13v3H9.5V12.5h-2z"/></svg>
+												<Box class="w-3.5 h-3.5" strokeWidth={1.5} />
 											</span>
 										{/if}
 										{#if ds.source === 'docker' || ds.source === 'npm+docker'}
 											<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" title="Trovato via Docker">
-												<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.186.186 0 00-.185.186v1.886c0 .102.083.185.185.185zm-2.95 0h2.119a.186.186 0 00.185-.185V9.006a.186.186 0 00-.185-.186h-2.119a.186.186 0 00-.185.186v1.886c0 .102.082.185.185.185zm-2.949 0h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186H8.084a.186.186 0 00-.186.186v1.886c0 .102.083.185.186.185zm-2.95 0h2.119a.186.186 0 00.185-.185V9.006a.186.186 0 00-.185-.186H5.135a.186.186 0 00-.186.186v1.886c0 .102.083.185.186.185zm-2.95 0h2.12a.186.186 0 00.185-.185V9.006a.186.186 0 00-.185-.186h-2.12a.186.186 0 00-.185.186v1.886c0 .102.082.185.185.185zm11.799-2.95h2.119a.186.186 0 00.186-.185V6.057a.186.186 0 00-.186-.186h-2.119a.186.186 0 00-.185.186v1.886c0 .102.083.185.185.185zm-2.95 0h2.119a.186.186 0 00.185-.185V6.057a.186.186 0 00-.185-.186h-2.119a.186.186 0 00-.185.186v1.886c0 .102.082.185.185.185zm-2.949 0h2.119a.186.186 0 00.186-.185V6.057a.186.186 0 00-.186-.186H8.084a.186.186 0 00-.186.186v1.886c0 .102.083.185.186.185zm-2.95 0h2.119a.186.186 0 00.185-.185V6.057a.186.186 0 00-.185-.186H5.135a.186.186 0 00-.186.186v1.886c0 .102.083.185.186.185zm14.498 2.502h-1.637l-1.077-1.127a.18.18 0 00-.135-.054h-1.28c-.048 0-.092.019-.135.054l-1.077 1.127H1.942a.185.185 0 00-.185.185v4.526c0 .102.082.185.185.185h19.539a.186.186 0 00.186-.185v-4.526a.186.186 0 00-.186-.185z"/></svg>
+												<Box class="w-3.5 h-3.5" strokeWidth={1.5} />
 											</span>
 										{/if}
 									</div>
@@ -253,18 +253,15 @@ import { Box } from "@lucide/svelte";
 						<div>
 							{#if ds.added}
 								<span class="inline-flex items-center px-3 py-1.5 rounded-xl text-sm font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
-									<svg class="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+									<Check class="mr-1.5 h-4 w-4" strokeWidth={2} />
 									Aggiunto
 								</span>
 							{:else}
 								<button type="button" onclick={(e: Event) => { e.stopPropagation(); expandedId = expandedId === ds.id ? null : ds.id; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-transform hover:scale-110">
 									{#if expandedId === ds.id}
-										<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+										<X class="w-5 h-5" strokeWidth={1.5} />
 									{:else}
-										<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 16v6m3-3h-6" />
-										</svg>
+										<Link class="w-5 h-5" strokeWidth={1.5} />
 									{/if}
 								</button>
 							{/if}
@@ -309,9 +306,7 @@ import { Box } from "@lucide/svelte";
 										<div class="flex gap-2 items-center">
 											<TextInput label="Icona (ES. SIMPLE-ICONS o URL)" name="icon" id={"icon_dsc_" + ds.id} value={ds.icon || ds.name} />
 											<label class="cursor-pointer border border-gray-200 dark:border-gray-700 rounded-xl w-10.5 h-10.5 flex items-center justify-center transition-colors shadow-sm shrink-0">
-												<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-												</svg>
+												<Upload class="h-5 w-5 text-gray-500 dark:text-gray-400" strokeWidth={1.5} />
 												<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
 													const target = e.target as HTMLInputElement; const file = target.files?.[0];
 													if (!file) return;
@@ -362,9 +357,7 @@ import { Box } from "@lucide/svelte";
 
 										<div>
 											<button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-xl shadow-md shadow-green-500/30 text-sm font-bold uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 hover:shadow-lg focus:outline-none transition-all h-10.5">
-												<svg class="-ml-1 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-												</svg>
+												<Check class="-ml-1 mr-1.5 h-4 w-4" strokeWidth={2} />
 												Aggiungi
 											</button>
 										</div>
@@ -386,7 +379,7 @@ import { Box } from "@lucide/svelte";
 	<div class="fixed inset-0 bg-gray-900/50 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
 		<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-sm w-full overflow-hidden transform transition-all border border-gray-100 dark:border-gray-700 p-6" role="dialog" aria-modal="true">
 			<div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
-				<svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+				<AlertTriangle class="w-6 h-6 text-red-600 dark:text-red-400" strokeWidth={1.5} />
 			</div>
 			
 			<h3 class="text-lg font-bold text-center text-gray-900 dark:text-white mb-2">

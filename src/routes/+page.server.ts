@@ -39,7 +39,7 @@ export async function load() {
         s.icon,
         s.dockerImage,
         s.name, // we use service name as containerName fallback
-        s.url
+        s.url,
       );
       groupedServices[cat.name].push(s);
     }

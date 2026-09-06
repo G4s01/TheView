@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ArrowDown, ArrowUp } from "@lucide/svelte";
 	import { onMount, onDestroy } from 'svelte';
 	
 	let data = $state<{ dl_info_speed: number, up_info_speed: number } | null>(null);
@@ -45,16 +46,12 @@
 		<div class="flex items-center justify-between text-xs font-medium">
 			<div class="flex items-center text-emerald-600 dark:text-emerald-400">
 				<!-- Down arrow -->
-				<svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-				</svg>
+				<ArrowDown class="w-3 h-3 mr-1" strokeWidth={2.5} />
 				{formatBytes(data.dl_info_speed)}
 			</div>
 			<div class="flex items-center text-blue-600 dark:text-blue-400">
 				<!-- Up arrow -->
-				<svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-				</svg>
+				<ArrowUp class="w-3 h-3 mr-1" strokeWidth={2.5} />
 				{formatBytes(data.up_info_speed)}
 			</div>
 		</div>

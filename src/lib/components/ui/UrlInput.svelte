@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ChevronDown } from "@lucide/svelte";
     import type { HTMLInputAttributes } from 'svelte/elements';
     import { clickOutside } from '$lib/actions/clickOutside';
     import { scale } from 'svelte/transition';
@@ -71,9 +72,7 @@
             onclick={(e) => { e.preventDefault(); isProtocolOpen = !isProtocolOpen; }}
         >
             <span>{protocol}</span>
-            <svg class="h-4 w-4 text-gray-500 transition-transform duration-200 {isProtocolOpen ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
+            <ChevronDown class="h-4 w-4 text-gray-500 transition-transform duration-200 {isProtocolOpen ? 'rotate-180' : ''}" strokeWidth={1.5} />
         </button>
         
         {#if isProtocolOpen}

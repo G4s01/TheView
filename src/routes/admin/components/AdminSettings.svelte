@@ -10,7 +10,7 @@
 	import DOMPurify from "isomorphic-dompurify";
 	import { themeStore, themes } from '$lib/client/themeStore.svelte';
 
-	import { Download, Upload, DatabaseBackup } from '@lucide/svelte';
+	import { Download, Upload, DatabaseBackup, Loader2, RefreshCw, Plus, Eye, Check, EyeOff, ArrowUp, ExternalLink } from "@lucide/svelte";
 	let isUploadingBackup = $state(false);
 
 	async function handleBackupUpload(e: Event) {
@@ -348,7 +348,7 @@
 						class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 border border-transparent rounded-xl shadow-md shadow-purple-500/30 text-sm font-bold uppercase tracking-wider text-white bg-purple-600 hover:bg-purple-700 focus:outline-none transition-all disabled:opacity-50"
 					>
 						{#if isSavingAppearance}
-							<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+							<Loader2 class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" strokeWidth={2} />
 							Salvataggio...
 						{:else}
 							Salva Impostazioni Aspetto
@@ -382,9 +382,9 @@
 						<TextInput label="Password (es. adminadmin)" type={showQbitPassword ? "text" : "password"} bind:value={qbit_password} class="pr-10">
 							<button type="button" onclick={() => showQbitPassword = !showQbitPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
 								{#if showQbitPassword}
-									<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+									<EyeOff class="h-5 w-5" strokeWidth={1.5} />
 								{:else}
-									<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+									<Eye class="h-5 w-5" strokeWidth={1.5} />
 								{/if}
 							</button>
 						</TextInput>
@@ -404,9 +404,7 @@
 								{#if isSavingQbit}
 									...
 								{:else}
-									<svg class="-ml-1 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-									</svg>
+									<Plus class="-ml-1 mr-1.5 h-4 w-4" strokeWidth={1.5} />
 									Salva
 								{/if}
 							</button>
@@ -443,9 +441,9 @@
 					<TextInput label="Nuova Password Admin" type={showAdminPassword ? "text" : "password"} bind:value={adminPassword} class="pr-10">
 						<button type="button" onclick={() => showAdminPassword = !showAdminPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
 							{#if showAdminPassword}
-								<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+								<EyeOff class="h-5 w-5" strokeWidth={1.5} />
 							{:else}
-								<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+								<Eye class="h-5 w-5" strokeWidth={1.5} />
 							{/if}
 						</button>
 					</TextInput>
@@ -508,7 +506,7 @@
 				
 				<label class="relative inline-flex items-center justify-center px-4 py-2.5 bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-700 dark:text-red-400 text-sm font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer disabled:opacity-50 {isUploadingBackup ? 'opacity-50 pointer-events-none' : ''}">
 					{#if isUploadingBackup}
-						<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+						<Loader2 class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" strokeWidth={2} />
 						Ripristino in corso...
 					{:else}
 						<Upload class="w-4 h-4 mr-2" />
@@ -544,12 +542,12 @@
 					</div>
 					{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
 						<div class="flex items-center space-x-2 text-red-500 dark:text-red-400">
-							<svg class="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg>
+							<ArrowUp class="w-4 h-4 animate-bounce" strokeWidth={1.5} />
 							<span class="text-sm font-bold uppercase tracking-wider">Nuova versione disponibile: v{versionInfo.latestVersion}</span>
 						</div>
 					{:else if versionInfo.latestVersion === versionInfo.currentVersion}
 						<div class="flex items-center space-x-2 text-green-600 dark:text-green-500">
-							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+							<Check class="w-4 h-4" strokeWidth={2} />
 							<span class="text-xs font-bold uppercase tracking-wider">Il sistema è aggiornato</span>
 						</div>
 					{/if}
@@ -572,10 +570,10 @@
 						class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 text-sm font-bold uppercase tracking-wider rounded-lg transition-colors"
 					>
 						{#if isCheckingVersion}
-							<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+							<Loader2 class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" strokeWidth={2} />
 							Controllo...
 						{:else}
-							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+							<RefreshCw class="w-4 h-4 mr-2" strokeWidth={1.5} />
 							Controlla
 						{/if}
 					</button>
@@ -587,7 +585,7 @@
 				<div class="flex items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
 					<h4 class="text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">Note di Rilascio v{versionInfo.latestVersion}</h4>
 					<a href={versionInfo.url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-3 py-1.5 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
-						<svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+						<ExternalLink class="w-4 h-4 mr-1.5" strokeWidth={1.5} />
 						Apri su GitHub
 					</a>
 				</div>

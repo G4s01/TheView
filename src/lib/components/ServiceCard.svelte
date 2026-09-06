@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { appState } from '$lib/client/state.svelte';
-	import { ArrowUpCircle, Box, GripHorizontal, Settings, Upload, Trash2 } from '@lucide/svelte';
+	import { ArrowUpCircle, Box, GripHorizontal, Settings, Upload, Trash2, Eye } from "@lucide/svelte";
 	import QBittorrentWidget from './widgets/QBittorrentWidget.svelte';
 	import TextInput from './ui/TextInput.svelte';
 	import UrlInput from './ui/UrlInput.svelte';
@@ -138,10 +138,10 @@
 	{#if appState.isEditMode && !isExpanded}
 		<div class="absolute top-2 right-2 flex space-x-1.5 z-20">
 			<button onclick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(); }} class="p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm transition-colors text-gray-600 dark:text-gray-300" title="Impostazioni Servizio">
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+				<Eye class="w-4 h-4" strokeWidth={1.5} />
 			</button>
 			<div class="p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm transition-colors text-gray-600 dark:text-gray-300 cursor-move" title="Trascina per spostare">
-				<svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+				<GripHorizontal class="w-4 h-4 pointer-events-none" strokeWidth={1.5} />
 			</div>
 		</div>
 	{/if}
@@ -179,9 +179,7 @@
 				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 					<!-- svelte-ignore a11y_click_events_have_key_events -->
 					<label class="absolute -bottom-1.5 -right-1.5 bg-blue-600 text-white p-1 rounded-full shadow cursor-pointer hover:bg-blue-700 z-20 border-2 border-white dark:border-gray-800" title="Cambia Icona (Upload)" onclick={(e) => e.stopPropagation()}>
-					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-					</svg>
+					<Upload class="w-3 h-3" strokeWidth={1.5} />
 					<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
 						const target = e.target as HTMLInputElement;
 						const file = target?.files?.[0];
@@ -302,7 +300,7 @@
 						<TextInput label="ICONA (ES. SIMPLE-ICONS o URL)" bind:value={editIcon} />
 					</div>
 					<label class="cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl px-4 flex items-center justify-center transition-colors shadow-sm shrink-0 h-full">
-						<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+						<Upload class="h-5 w-5 text-gray-500 dark:text-gray-400" strokeWidth={1.5} />
 						<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e) => {
 							const target = e.target as HTMLInputElement;
 							const file = target?.files?.[0];
@@ -340,7 +338,7 @@
 						</div>
 					{:else}
 						<button type="button" onclick={() => showDeleteConfirm = true} class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-colors shrink-0" title="Elimina Servizio">
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+							<Trash2 class="w-5 h-5" strokeWidth={1.5} />
 						</button>
 					{/if}
 					<div class="flex space-x-2 shrink-0">

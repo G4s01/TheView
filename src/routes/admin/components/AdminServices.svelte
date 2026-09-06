@@ -10,7 +10,7 @@
 	import { flip } from 'svelte/animate';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { ArrowUpCircle, Box } from '@lucide/svelte';
+	import { ArrowUpCircle, Box, GripHorizontal, Plus, AlertTriangle, Upload, Check, Trash2 } from "@lucide/svelte";
 
 	let { services, localCategories } = $props();
 
@@ -106,13 +106,7 @@
 		>
 			<div class="flex items-center space-x-3">
 				<div class="p-1.5 bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 rounded-lg">
-					<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						{#if isAddServiceExpanded}
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-						{:else}
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-						{/if}
-					</svg>
+					<Plus class="h-5 w-5" strokeWidth={1.5} />
 				</div>
 				<h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Aggiungi Servizio</h3>
 			</div>
@@ -141,9 +135,7 @@
 					<div class="flex gap-2 items-center">
 						<TextInput label="Icona (ES. SIMPLE-ICONS o URL)" name="icon" id="icon" placeholder="Nome o carica ->" />
 						<label class="cursor-pointer border border-gray-200 dark:border-gray-700 rounded-xl w-10.5 h-10.5 flex items-center justify-center transition-colors bg-white dark:bg-gray-800 shadow-sm shrink-0 hover:bg-gray-50 dark:hover:bg-gray-700">
-							<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-							</svg>
+							<Upload class="h-5 w-5 text-gray-500 dark:text-gray-400" strokeWidth={1.5} />
 							<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e: Event) => {
 								const target = e.target as HTMLInputElement; const file = target?.files?.[0]; if (!file) return;
 								const formData = new FormData(); formData.append('file', file);
@@ -194,9 +186,7 @@
 
 					<div>
 						<button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-xl shadow-md shadow-green-500/30 text-sm font-bold uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 hover:shadow-lg focus:outline-none transition-all h-10.5">
-							<svg class="-ml-1 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-							</svg>
+							<Plus class="-ml-1 mr-1.5 h-4 w-4" strokeWidth={1.5} />
 							Salva
 						</button>
 					</div>
@@ -262,9 +252,7 @@
 											<div class="flex gap-2 items-center">
 												<TextInput label="Icona (ES. SIMPLE-ICONS o URL)" name="icon" id={"icon_edit_" + service.id} value={service.icon || ''} />
 												<label class="cursor-pointer border border-gray-200 dark:border-gray-700 rounded-xl w-10.5 h-10.5 flex items-center justify-center transition-colors bg-white dark:bg-gray-800 shadow-sm shrink-0 hover:bg-gray-50 dark:hover:bg-gray-700">
-													<svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-													</svg>
+													<Upload class="h-5 w-5 text-gray-500 dark:text-gray-400" strokeWidth={1.5} />
 													<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e: Event) => {
 														const target = e.target as HTMLInputElement; const file = target?.files?.[0];
 														if (!file) return;
@@ -295,9 +283,7 @@
 													X
 												</button>
 												<button type="submit" class="flex-2 inline-flex items-center justify-center border border-transparent rounded-xl shadow-sm text-sm font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-colors">
-													<svg class="-ml-1 mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-													</svg>
+													<Check class="-ml-1 mr-1 h-4 w-4" strokeWidth={2} />
 													Salva
 												</button>
 											</div>
@@ -307,7 +293,7 @@
 							{:else if deletingServiceId === service.id}
 								<div transition:slide class="flex items-center justify-between w-full bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-200 dark:border-red-800">
 									<div class="flex items-center text-red-800 dark:text-red-400">
-										<svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+										<AlertTriangle class="h-5 w-5 mr-2" strokeWidth={1.5} />
 										<span class="text-sm font-bold uppercase tracking-wider">Eliminare {service.name}?</span>
 									</div>
 									<div class="flex items-center space-x-2">
@@ -325,9 +311,7 @@
 							{:else}
 								<div class="flex items-center justify-between w-full">
 									<div class="flex items-center">
-										<svg class="h-5 w-5 text-gray-400 mr-3 hidden sm:block cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-										</svg>
+										<GripHorizontal class="h-5 w-5 text-gray-400 mr-3 hidden sm:block cursor-grab" strokeWidth={1.5} />
 										{#if service.iconDetails}
 											<div class="h-8 w-8 rounded-lg flex items-center justify-center mr-3 shadow-sm border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
 												{#if service.iconDetails.type === 'custom' || service.iconDetails.type === 'brand'}
@@ -361,7 +345,7 @@
 											<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
 										</button>
 										<button type="button" onclick={() => deletingServiceId = service.id} class="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg shadow-sm" title="Elimina Servizio">
-											<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+											<Trash2 class="w-5 h-5" strokeWidth={1.5} />
 										</button>
 									</div>
 								</div>

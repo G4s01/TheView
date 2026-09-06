@@ -368,7 +368,7 @@ export async function discoverAllServices(
       s._iconOverride,
       s._dockerImage,
       s.name,
-      s.url
+      s.url,
     );
 
     // Se l'icona trovata è tramite override, teniamo quello come valore salvabile,

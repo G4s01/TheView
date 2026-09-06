@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Eye, Moon, Link, LogOut, ArrowUp, LogIn } from "@lucide/svelte";
 	import './layout.css';
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import { appState } from '$lib/client/state.svelte';
@@ -138,33 +139,33 @@
 				<div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700 transition-colors {data.isAdmin && appState.isEditMode ? 'ring-2 ring-blue-500 border-blue-500' : ''}">
 					{#if data.isAdmin}
 						<a href="/admin" class="relative p-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors" title="Pannello Amministrazione">
-							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+							<Eye class="h-5 w-5" strokeWidth={1.5} />
 							{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
 								<div class="absolute -top-1 -right-1 bg-red-500 rounded-full text-white p-0.5 animate-bounce shadow-sm ring-1 ring-white dark:ring-gray-800" title="Nuova versione disponibile!">
-									<svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg>
+									<ArrowUp class="w-2.5 h-2.5" strokeWidth={1.5} />
 								</div>
 							{/if}
 						</a>
 						{#if data.showEditButton && $page.url.pathname === '/'}
 						<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
 						<button class="p-1.5 transition-colors {appState.isEditMode ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}" onclick={() => appState.isEditMode = !appState.isEditMode} title={appState.isEditMode ? "Chiudi Modalità Modifica" : "Modalità Modifica"}>
-							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+							<Link class="h-5 w-5" strokeWidth={1.5} />
 						</button>
 						{/if}
 						<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
 						<button class="p-1.5 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors" onclick={async () => { await fetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); window.location.reload(); }} title="Esci dalla sessione">
-							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+							<LogOut class="h-5 w-5" strokeWidth={1.5} />
 						</button>
 					{:else}
 						<button class="p-1.5 text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400 transition-colors" onclick={() => data.needsSetup ? goto('/setup') : showLogin = true} title="Accedi">
-							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+							<LogIn class="h-5 w-5" strokeWidth={1.5} />
 						</button>
 					{/if}
 				</div>
 				<div class="flex items-center space-x-1">
 					{#if themes.find(t => t.id === themeStore.theme)?.type === 'both'}
 					<button class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" onclick={() => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('theview-color-scheme', isDark ? 'dark' : 'light'); }} title="Tema Chiaro/Scuro">
-						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+						<Moon class="h-5 w-5" strokeWidth={1.5} />
 					</button>
 					{/if}
 				</div>
@@ -226,7 +227,7 @@
 				<span>v{versionInfo.currentVersion}</span>
 				{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
 				<a href={versionInfo.url || 'https://github.com/g4s01/TheView/releases'} target="_blank" rel="noopener noreferrer" class="text-red-500 hover:text-red-600 transition-colors animate-pulse flex items-center" title="Nuova versione {versionInfo.latestVersion} disponibile su GitHub!">
-					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg>
+					<ArrowUp class="w-4 h-4" strokeWidth={1.5} />
 				</a>
 				{/if}
 			</div>
