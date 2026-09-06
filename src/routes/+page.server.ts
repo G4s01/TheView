@@ -17,6 +17,7 @@ export async function load() {
       pingEnabled: services.pingEnabled,
       categoryId: services.categoryId,
       position: services.position,
+      dockerImage: services.dockerImage,
     })
     .from(services)
     .orderBy(services.position);

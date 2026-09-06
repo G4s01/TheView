@@ -44,7 +44,7 @@
 	import { onMount } from 'svelte';
 	onMount(() => {
 		if (service.dockerImage) {
-			fetch(`/api/docker/version?image=${service.dockerImage}`)
+			fetch(`/api/docker/version?image=${encodeURIComponent(service.dockerImage)}`)
 				.then(res => res.json())
 				.then(data => {
 					if (!data.error) {
