@@ -19,7 +19,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     event.locals.isAdmin = false;
   }
 
-  const settings = getSettings();
+  const settings = await getSettings();
   const needsSetup =
     !settings.adminPassword || settings.adminPassword === "admin";
 

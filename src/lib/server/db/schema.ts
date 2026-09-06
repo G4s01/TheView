@@ -22,3 +22,8 @@ export const services = sqliteTable("services", {
     .notNull(),
   position: integer("position").default(0),
 });
+
+export const settings = sqliteTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+});

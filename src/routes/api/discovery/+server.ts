@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({ locals }) => {
     const existingUrls = existingServices.map((s) => s.url);
     const existingNames = existingServices.map((s) => s.name.toLowerCase());
 
-    const settings = getSettings();
+    const settings = await getSettings();
     const npmUrl = settings.npmUrl;
     const npmEmail = settings.npmEmail;
     const npmPassword = settings.npmPassword;

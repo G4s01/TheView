@@ -33,7 +33,40 @@ sqlite.exec(`
     ping_enabled INTEGER DEFAULT 1 NOT NULL,
     position INTEGER DEFAULT 0
   );
+
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
 `);
+
+// Eseguiamo la migrazione da settings.json a database se esiste ancora il file
+try {
+  const jsonSettingsPath = path.resolve(path.dirname(dbPath), "settings.json");
+  if (fs.existsSync(jsonSettingsPath)) {
+    console.log("Migrazione di settings.json verso SQLite...");
+    const data = JSON.parse(fs.readFileSync(jsonSettingsPath, "utf-8"));
+    const insertStmt = sqlite.prepare(
+      "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)",
+    );
+
+    // Migra e cifra le password scoperte - rimosso require non esm, decrittazione supporta fallback
+
+    for (const [key, val] of Object.entries(data)) {
+      if (val !== undefined && val !== null) {
+        insertStmt.run(
+          key,
+          typeof val === "string" ? val : JSON.stringify(val),
+        );
+      }
+    }
+    // Rinomina il file per non ripetere la migrazione
+    fs.renameSync(jsonSettingsPath, jsonSettingsPath + ".bak");
+    console.log("Migrazione settings completata.");
+  }
+} catch (e: any) {
+  console.error("Errore durante la migrazione da JSON a SQLite:", e.message);
+}
 
 // Eseguiamo la migrazione in modo sicuro per rinominare la colonna
 try {

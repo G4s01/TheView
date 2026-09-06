@@ -1,33 +1,45 @@
-import fs from 'fs';
-import path from 'path';
+import { db } from './db/index';
+import { settings as settingsTable } from './db/schema';
+import { eq } from 'drizzle-orm';
 
-const settingsFile = path.resolve('data/settings.json');
-
-export function getSettings() {
+export async function getSettings(): Promise<Record<string, any>> {
     try {
-        if (fs.existsSync(settingsFile)) {
-            const data = fs.readFileSync(settingsFile, 'utf-8');
-            return JSON.parse(data);
+        const rows = await db.select().from(settingsTable);
+        const settingsObj: Record<string, any> = {};
+        for (const row of rows) {
+            try {
+                // If it looks like a boolean or number, parse it
+                if (row.value === 'true') settingsObj[row.key] = true;
+                else if (row.value === 'false') settingsObj[row.key] = false;
+                else if (!isNaN(Number(row.value)) && row.value.trim() !== '') settingsObj[row.key] = Number(row.value);
+                else settingsObj[row.key] = row.value;
+            } catch {
+                settingsObj[row.key] = row.value;
+            }
         }
+        return settingsObj;
     } catch (e) {
-        console.error('Failed to read settings', e);
+        console.error('Failed to read settings from DB', e);
+        return {};
     }
-    return {};
 }
 
-export function saveSettings(newSettings: Record<string, any>) {
+export async function saveSettings(newSettings: Record<string, any>) {
     try {
-        const dir = path.dirname(settingsFile);
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        
-        const current = getSettings();
+        const current = await getSettings();
         const merged = { ...current, ...newSettings };
-        fs.writeFileSync(settingsFile, JSON.stringify(merged, null, 2));
+        
+        for (const [key, val] of Object.entries(merged)) {
+            if (val === undefined || val === null) continue;
+            const strVal = typeof val === 'string' ? val : String(val);
+            await db.insert(settingsTable).values({ key, value: strVal }).onConflictDoUpdate({
+                target: settingsTable.key,
+                set: { value: strVal }
+            });
+        }
         return merged;
     } catch (e) {
-        console.error('Failed to save settings', e);
+        console.error('Failed to save settings to DB', e);
         return {};
     }
 }

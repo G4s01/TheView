@@ -7,7 +7,7 @@ export async function POST({ request, cookies }) {
   const { action, password } = body;
 
   if (action === "login") {
-    const settings = getSettings();
+    const settings = await getSettings();
     const correctPasswordHash = settings.adminPassword;
 
     // Se non c'è una password impostata, il default "admin" è hardcoded
@@ -21,7 +21,7 @@ export async function POST({ request, cookies }) {
         // Eseguiamo la migrazione silenziosa crittografandola ora.
         isValid = true;
         const { saveSettings } = await import("$lib/server/settings");
-        saveSettings({ adminPassword: hashPassword(password) });
+        await saveSettings({ adminPassword: hashPassword(password) });
       }
     } else {
       isValid = password === "admin";
@@ -46,7 +46,7 @@ export async function POST({ request, cookies }) {
     cookies.delete("admin_session", { path: "/", secure: false });
     return json({ success: true });
   } else if (action === "setup") {
-    const settings = getSettings();
+    const settings = await getSettings();
     const needsSetup = !settings.adminPassword;
     if (!needsSetup)
       return json({ error: "Setup already complete" }, { status: 403 });
@@ -55,7 +55,7 @@ export async function POST({ request, cookies }) {
       return json({ error: "Password too short" }, { status: 400 });
 
     const { saveSettings } = await import("$lib/server/settings");
-    saveSettings({ adminPassword: hashPassword(password) });
+    await saveSettings({ adminPassword: hashPassword(password) });
 
     cookies.set("admin_session", "active", {
       path: "/",

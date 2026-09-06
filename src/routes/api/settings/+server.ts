@@ -4,7 +4,7 @@ import type { RequestHandler } from "./$types";
 
 export const GET: RequestHandler = async ({ locals }) => {
   if (!locals.isAdmin) return json({ error: "Unauthorized" }, { status: 401 });
-  const settings = getSettings();
+  const settings = await getSettings();
 
   // Rimuovi o maschera i dati sensibili prima di inviarli al client
   const safeSettings = { ...settings };
@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       newSettings.qbit_password = encryptString(newSettings.qbit_password);
     }
 
-    const merged = saveSettings(newSettings);
+    const merged = await saveSettings(newSettings);
     return json({ success: true });
   } catch (e) {
     return json({ error: "Failed to save settings" }, { status: 500 });

@@ -18,7 +18,7 @@ export async function load({ locals }) {
   });
 
   const { getSettings } = await import("$lib/server/settings");
-  const settings = getSettings();
+  const settings = await getSettings();
   const needsSetup =
     !settings.adminPassword || settings.adminPassword === "admin";
 

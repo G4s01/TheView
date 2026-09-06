@@ -18,33 +18,33 @@
 		if (!target.files || target.files.length === 0) return;
 		
 		const file = target.files[0];
-		if (!confirm("ATTENZIONE: Stai per sovrascrivere l'intero database! Questa operazione è irreversibile e causerà il riavvio immediato della dashboard. Vuoi procedere?")) {
-			target.value = '';
-			return;
-		}
+		showConfirm("Ripristino Database", "ATTENZIONE: Stai per sovrascrivere l'intero database! Questa operazione è irreversibile e causerà il riavvio immediato della dashboard. Vuoi procedere?", async () => {
+			isUploadingBackup = true;
+			const formData = new FormData();
+			formData.append('file', file);
 
-		isUploadingBackup = true;
-		const formData = new FormData();
-		formData.append('file', file);
-
-		try {
-			const res = await fetch('/api/backup/upload', {
-				method: 'POST',
-				body: formData
-			});
-			if (res.ok) {
-				alert("Backup ripristinato con successo! La dashboard si sta riavviando. Ricarica la pagina tra qualche secondo.");
-				setTimeout(() => window.location.reload(), 2000);
-			} else {
-				const err = await res.json();
-				alert("Errore durante il ripristino: " + err.error);
+			try {
+				const res = await fetch('/api/backup/upload', {
+					method: 'POST',
+					body: formData
+				});
+				if (res.ok) {
+					showAlert("Ripristino Completato", "Backup ripristinato con successo! La dashboard si sta riavviando. Ricarica la pagina tra qualche secondo.");
+					setTimeout(() => window.location.reload(), 3000);
+				} else {
+					const err = await res.json();
+					showAlert("Errore", "Errore durante il ripristino: " + err.error);
+				}
+			} catch (e) {
+				showAlert("Errore", "Errore di rete durante il ripristino.");
+			} finally {
+				isUploadingBackup = false;
+				target.value = '';
 			}
-		} catch (e) {
-			alert("Errore di rete durante il ripristino.");
-		} finally {
-			isUploadingBackup = false;
-			target.value = '';
-		}
+		});
+		
+		// If they cancel, we just clear the input (handled in modal close but let's just clear it anyway or wait)
+		if (modalConfig.show === false) target.value = '';
 	}
 
 
@@ -65,6 +65,23 @@
 	let stickyNavbar = $state(true);
 	let showEditButton = $state(true);
 	let isSavingAppearance = $state(false);
+
+	let modalConfig = $state<{
+		show: boolean;
+		title: string;
+		message: string;
+		type: 'alert' | 'confirm';
+		onConfirm?: () => void;
+	}>({ show: false, title: '', message: '', type: 'alert' });
+
+	function showAlert(title: string, message: string) {
+		modalConfig = { show: true, title, message, type: 'alert' };
+	}
+
+	function showConfirm(title: string, message: string, onConfirm: () => void) {
+		modalConfig = { show: true, title, message, type: 'confirm', onConfirm };
+	}
+
 
 	let versionInfo = $state<any>({});
 	let isCheckingVersion = $state(false);
@@ -116,10 +133,10 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ qbit_url, qbit_username, qbit_password })
 			});
-			if (res.ok) alert('Impostazioni qBittorrent salvate con successo!');
-			else alert('Errore durante il salvataggio.');
+			if (res.ok) showAlert('Successo', 'Impostazioni qBittorrent salvate con successo!');
+			else showAlert('Errore', 'Errore durante il salvataggio.');
 		} catch (e) {
-			alert('Errore di rete.');
+			showAlert('Errore', 'Errore di rete.');
 		} finally {
 			isSavingQbit = false;
 		}
@@ -136,10 +153,10 @@
 			if (res.ok) {
 				await invalidateAll();
 			} else {
-				alert('Errore durante il salvataggio.');
+				showAlert('Errore', 'Errore durante il salvataggio.');
 			}
 		} catch (e) {
-			alert('Errore di rete.');
+			showAlert('Errore', 'Errore di rete.');
 		} finally {
 			isSavingAppearance = false;
 		}
@@ -446,15 +463,15 @@
 						</button>
 						<button
 							onclick={async () => {
-								if (!adminPassword) return alert("Inserisci una password!");
-								if (adminPassword !== adminPasswordConfirm) return alert("Le password non coincidono!");
+								if (!adminPassword) return showAlert("Attenzione", "Inserisci una password!");
+								if (adminPassword !== adminPasswordConfirm) return showAlert("Attenzione", "Le password non coincidono!");
 								try {
 									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminPassword }) });
 									adminPassword = '';
 									adminPasswordConfirm = '';
 									isChangingAdminPassword = false;
-									alert("Password modificata!");
-								} catch(e) { alert("Errore!"); }
+									showAlert("Successo", "Password modificata con successo!");
+								} catch(e) { showAlert("Errore", "Si è verificato un errore durante il cambio password."); }
 							}}
 							class="px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-bold uppercase tracking-wider rounded-lg shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
 						>
@@ -583,3 +600,50 @@
 	</div>
 
 </div>
+
+
+{#if modalConfig.show}
+	<div 
+		class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm"
+		role="presentation"
+	>
+		<div 
+			class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-gray-200 dark:border-gray-700 transform transition-all"
+			role="dialog"
+			aria-modal="true"
+		>
+			<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{modalConfig.title}</h2>
+			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{modalConfig.message}</p>
+			
+			<div class="flex justify-end space-x-3 mt-6">
+				{#if modalConfig.type === 'confirm'}
+					<button 
+						type="button" 
+						onclick={() => modalConfig.show = false}
+						class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+					>
+						Annulla
+					</button>
+					<button 
+						type="button" 
+						onclick={() => {
+							modalConfig.show = false;
+							if (modalConfig.onConfirm) modalConfig.onConfirm();
+						}}
+						class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors"
+					>
+						Procedi
+					</button>
+				{:else}
+					<button 
+						type="button" 
+						onclick={() => modalConfig.show = false}
+						class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
+					>
+						OK
+					</button>
+				{/if}
+			</div>
+		</div>
+	</div>
+{/if}

@@ -7,7 +7,7 @@ import { getSettings } from "$lib/server/settings";
 let cookieCache = "";
 
 export async function GET() {
-  const settings = getSettings();
+  const settings = await getSettings();
   const qbitUrl = settings.qbit_url || env.QBIT_URL || "http://172.17.0.1:8080";
   const qbitUser = settings.qbit_username || env.QBIT_USERNAME;
 
