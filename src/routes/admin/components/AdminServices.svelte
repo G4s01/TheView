@@ -10,7 +10,7 @@
 	import { flip } from 'svelte/animate';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { ArrowUpCircle } from 'lucide-svelte';
+	import { ArrowUpCircle } from '@lucide/svelte';
 
 	let { services, localCategories } = $props();
 

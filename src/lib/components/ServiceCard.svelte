@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { appState } from '$lib/client/state.svelte';
-	import { ArrowUpCircle } from 'lucide-svelte';
+	import { ArrowUpCircle } from '@lucide/svelte';
 	import QBittorrentWidget from './widgets/QBittorrentWidget.svelte';
 	import TextInput from './ui/TextInput.svelte';
 	import UrlInput from './ui/UrlInput.svelte';
