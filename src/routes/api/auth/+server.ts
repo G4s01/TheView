@@ -1,5 +1,6 @@
 import { json } from "@sveltejs/kit";
 import { getSettings } from "$lib/server/settings";
+import { hashPassword, verifyPassword } from "$lib/server/crypto";
 
 export async function POST({ request, cookies }) {
   const body = await request.json();
@@ -7,9 +8,26 @@ export async function POST({ request, cookies }) {
 
   if (action === "login") {
     const settings = getSettings();
-    const correctPassword = settings.adminPassword || "admin";
+    const correctPasswordHash = settings.adminPassword;
 
-    if (password === correctPassword) {
+    // Se non c'è una password impostata, il default "admin" è hardcoded
+    let isValid = false;
+
+    if (correctPasswordHash) {
+      if (verifyPassword(password, correctPasswordHash)) {
+        isValid = true;
+      } else if (password === correctPasswordHash) {
+        // FALLBACK: La password in settings è ancora in chiaro.
+        // Eseguiamo la migrazione silenziosa crittografandola ora.
+        isValid = true;
+        const { saveSettings } = await import("$lib/server/settings");
+        saveSettings({ adminPassword: hashPassword(password) });
+      }
+    } else {
+      isValid = password === "admin";
+    }
+
+    if (isValid) {
       cookies.set("admin_session", "active", {
         path: "/",
         httpOnly: true,
@@ -29,8 +47,7 @@ export async function POST({ request, cookies }) {
     return json({ success: true });
   } else if (action === "setup") {
     const settings = getSettings();
-    const needsSetup =
-      !settings.adminPassword || settings.adminPassword === "admin";
+    const needsSetup = !settings.adminPassword;
     if (!needsSetup)
       return json({ error: "Setup already complete" }, { status: 403 });
 
@@ -38,7 +55,7 @@ export async function POST({ request, cookies }) {
       return json({ error: "Password too short" }, { status: 400 });
 
     const { saveSettings } = await import("$lib/server/settings");
-    saveSettings({ adminPassword: password });
+    saveSettings({ adminPassword: hashPassword(password) });
 
     cookies.set("admin_session", "active", {
       path: "/",

@@ -24,22 +24,21 @@ export async function getNpmServices(
   npmUrl?: string,
   email?: string,
   password?: string,
-): Promise<DiscoveredService[]> {
+) {
   if (!npmUrl || !email || !password) {
-    console.log("NPM credentials not provided");
     return [];
   }
 
+  const { decryptString } = await import("./crypto");
+  const plainPassword = decryptString(password);
+
   try {
     // 1. Get Token
-    const tokenRes = await fetch(
-      rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/tokens`),
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identity: email, secret: password }),
-      },
-    );
+    const tokenRes = await fetch(new URL("/api/tokens", npmUrl).toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ identity: email, secret: plainPassword }),
+    });
 
     if (!tokenRes.ok) {
       console.error("Failed to authenticate with NPM API");
@@ -201,12 +200,14 @@ export async function discoverAllServices(
   })[] = [];
   if (npmUrl && npmEmail && npmPassword) {
     try {
+      const { decryptString } = await import("./crypto");
+      const plainPassword = decryptString(npmPassword);
       const tokenRes = await fetch(
         rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/tokens`),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ identity: npmEmail, secret: npmPassword }),
+          body: JSON.stringify({ identity: npmEmail, secret: plainPassword }),
         },
       );
 

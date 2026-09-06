@@ -10,6 +10,44 @@
 	import DOMPurify from "isomorphic-dompurify";
 	import { themeStore, themes } from '$lib/client/themeStore.svelte';
 
+	import { Download, Upload, DatabaseBackup } from '@lucide/svelte';
+	let isUploadingBackup = $state(false);
+
+	async function handleBackupUpload(e: Event) {
+		const target = e.target as HTMLInputElement;
+		if (!target.files || target.files.length === 0) return;
+		
+		const file = target.files[0];
+		if (!confirm("ATTENZIONE: Stai per sovrascrivere l'intero database! Questa operazione è irreversibile e causerà il riavvio immediato della dashboard. Vuoi procedere?")) {
+			target.value = '';
+			return;
+		}
+
+		isUploadingBackup = true;
+		const formData = new FormData();
+		formData.append('file', file);
+
+		try {
+			const res = await fetch('/api/backup/upload', {
+				method: 'POST',
+				body: formData
+			});
+			if (res.ok) {
+				alert("Backup ripristinato con successo! La dashboard si sta riavviando. Ricarica la pagina tra qualche secondo.");
+				setTimeout(() => window.location.reload(), 2000);
+			} else {
+				const err = await res.json();
+				alert("Errore durante il ripristino: " + err.error);
+			}
+		} catch (e) {
+			alert("Errore di rete durante il ripristino.");
+		} finally {
+			isUploadingBackup = false;
+			target.value = '';
+		}
+	}
+
+
 		import { onMount } from 'svelte';
 	let qbit_url = $state('');
 	let qbit_username = $state('');
@@ -425,6 +463,49 @@
 					</div>
 				</div>
 			{/if}
+		</div>
+	</div>
+
+	
+	<!-- Backup & Restore Section -->
+	<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
+		<div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
+			<div class="flex items-center space-x-3 mb-4">
+				<div class="p-2 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 rounded-lg">
+					<DatabaseBackup class="w-6 h-6" />
+				</div>
+				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Backup e Ripristino</h3>
+			</div>
+			
+			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Scarica una copia di sicurezza del tuo database SQLite o ripristina un backup precedente. Attenzione: il ripristino sovrascriverà i dati attuali.</p>
+			
+			<div class="flex flex-col sm:flex-row gap-4">
+				<a 
+					href="/api/backup/download" 
+					download
+					class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-sm font-bold uppercase tracking-wider rounded-xl transition-colors"
+				>
+					<Download class="w-4 h-4 mr-2" />
+					Scarica Backup
+				</a>
+				
+				<label class="relative inline-flex items-center justify-center px-4 py-2.5 bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-700 dark:text-red-400 text-sm font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer disabled:opacity-50 {isUploadingBackup ? 'opacity-50 pointer-events-none' : ''}">
+					{#if isUploadingBackup}
+						<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+						Ripristino in corso...
+					{:else}
+						<Upload class="w-4 h-4 mr-2" />
+						Ripristina Backup
+					{/if}
+					<input 
+						type="file" 
+						accept=".db,.sqlite,.sqlite3" 
+						class="hidden" 
+						onchange={handleBackupUpload}
+						disabled={isUploadingBackup}
+					/>
+				</label>
+			</div>
 		</div>
 	</div>
 

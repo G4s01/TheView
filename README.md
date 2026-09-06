@@ -27,6 +27,7 @@
 - 🔍 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click.
 - 🎨 **Smart Brand Icons & Glassmorphism**: Automatically fetches SVG icons from _Simple-Icons_ based on the service name. It extracts the brand's primary color and applies a beautiful tinted glassmorphism background to the card.
 - 📡 **Live Health Checks (Ping)**: Built-in pinging system. Shows live online/offline status and latency (ms) for all your tracked services with smooth pulsing indicators.
+- 🔄 **Docker Update Notifications**: Automatically checks if your Docker containers have new versions available on Docker Hub or GHCR by comparing image SHA256 digests. A notification badge will alert you directly on the dashboard!
 - ⚡ **In-Place Quick Edit**: Click the gear icon on any service card, and it seamlessly expands into a fully functional form directly on the grid, without annoying popups.
 - 🔌 **Interactive Widgets**: Rich integrations for your favorite services (e.g., live qBittorrent download/upload speeds) directly visible on the service cards.
 - 🌙 **Advanced Theming**: Pick your vibe. Full support for Dark/Light modes with premium community themes including **Dracula** (Classic, Alucard, Soft) and **Catppuccin** (Latte, Macchiato, Frappé).

@@ -10,7 +10,10 @@ export async function GET() {
   const settings = getSettings();
   const qbitUrl = settings.qbit_url || env.QBIT_URL || "http://172.17.0.1:8080";
   const qbitUser = settings.qbit_username || env.QBIT_USERNAME;
-  const qbitPass = settings.qbit_password || env.QBIT_PASSWORD;
+
+  const { decryptString } = await import("$lib/server/crypto");
+  const rawQbitPass = settings.qbit_password || env.QBIT_PASSWORD || "";
+  const qbitPass = decryptString(rawQbitPass);
 
   async function fetchTransferInfo(cookie: string) {
     return fetch(`${qbitUrl}/api/v2/transfer/info`, {
