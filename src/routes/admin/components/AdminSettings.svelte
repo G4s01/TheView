@@ -318,7 +318,7 @@
 				</div>
 				
 				<div class="flex flex-col space-y-3 pt-4">
-						<label class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Stile Icone Servizi</label>
+						<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Stile Icone Servizi</p>
 						<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 							<button type="button" onclick={() => iconStyle = 'rounded-xl'} class="flex flex-col items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border {iconStyle === 'rounded-xl' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-gray-200 dark:border-gray-700'} hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
 								<div class="w-12 h-12 bg-purple-500 rounded-xl shadow-sm flex items-center justify-center">

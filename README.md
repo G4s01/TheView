@@ -97,10 +97,13 @@ services:
 TheView stores all state (Categories, Services, uploaded Icons, and UI Settings) in a robust local SQLite database inside the `/app/data` volume. This means your dashboard is entirely portable just by backing up the `data/sqlite.db` file!
 
 ### 🔐 Security & Encryption
+
 All sensitive data (Admin Password, NPM credentials, qBittorrent passwords) are **strongly encrypted or hashed** (AES-256-GCM / SHA-256) inside the database. The system automatically generates a unique `APP_SECRET` on first boot. TheView does not store plaintext passwords anywhere.
 
 ### 💾 Backup & Restore
+
 You can easily backup or migrate your dashboard directly from the web interface:
+
 1. Go to **Settings** in the Admin panel.
 2. Scroll down to the **Backup e Ripristino** section.
 3. Click **Download Backup** to instantly download your entire SQLite database.

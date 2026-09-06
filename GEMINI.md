@@ -37,7 +37,7 @@ Quando scrivi codice per TheView, segui _strettamente_ queste linee guida:
    - Variabili reattive: `let count = $state(0);`
    - Props: `let { myProp } = $props();`
    - Eventi: `onclick={(e: Event) => handler()}` (Usa tipi stretti per gli eventi inline!)
-3. **Protezione CSRF in Homelab:** Manteniamo sempre `csrf: { checkOrigin: false }` nel file `svelte.config.js`.
+3. **Protezione CSRF:** Affidiamoci alla protezione CSRF nativa di SvelteKit. Non disabilitare `checkOrigin` in `svelte.config.js`.
 4. **UX Mobile e Interazione:**
    - Limita sempre il drag & drop esclusivamente a un apposito drag-handle (icona Lucide) per non bloccare lo scroll su smartphone.
    - Modifica "In-Place": Le card si convertono nel form di modifica espandendosi all'interno della griglia cliccando sull'icona delle impostazioni, senza lanciare popup modali o quickedit rapidi da chiuse.
