@@ -19,7 +19,7 @@ export async function GET({ cookies }) {
   return new Response(fileBuffer, {
     headers: {
       'Content-Type': 'application/vnd.sqlite3',
-      'Content-Disposition': `attachment; filename="theview_backup_${new Date().toISOString().split('T')[0]}.db"`,
+      'Content-Disposition': `attachment; filename="theview_backup_${new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19)}.db"`,
     },
   });
 }

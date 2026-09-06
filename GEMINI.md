@@ -25,7 +25,7 @@ Sta affrontando una transizione architetturale verso un layout a "Bento Box" per
 - `src/routes/+page.svelte`: La dashboard pubblica principale. Sfrutta CSS Grid per un layout "Bento Box" dove le tile possono assumere dimensioni dinamiche (1x1, 2x1, 2x2) in base al campo `size` del DB.
 - `src/routes/admin/...`: Pannello di amministrazione. Include la gestione dei backup SQLite in "Impostazioni".
 - `src/lib/server/discovery.ts`: Core logic per interrogare il demone Docker. Le verifiche degli update dei container avvengono ESCLUSIVAMENTE confrontando il digest SHA256 locale con quello remoto (su GHCR o DockerHub), interrogando i registry tramite il nome dell'immagine (es. `ghcr.io/user/repo:latest`). Non usare mai il `container_id`.
-- `data/`: Cartella persistita fuori dal container. Contiene il DB SQLite (`sqlite.db`), le icone caricate dagli utenti (`icons/`) e il file delle impostazioni (`settings.json`).
+- `data/`: Cartella persistita fuori dal container. Contiene ESCLUSIVAMENTE il DB SQLite (`sqlite.db`) che funge da Single Source of Truth per impostazioni, servizi e credenziali crittografate, e le icone caricate dagli utenti (`icons/`). Non introdurre file di configurazione JSON secondari.
 - `.gemini/`: Cartella **dedicata all'agente Antigravity**. Usala per generare script di prova, salvare backup temporanei di file da modificare, prendere note, o lasciare artefatti testuali (`scratch files`). **Non inquinare mai la root del progetto**.
 
 ## ⚙️ Metodologia di Lavoro e Workflow
