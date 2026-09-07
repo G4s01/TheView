@@ -8,9 +8,11 @@ export const GET: RequestHandler = async ({ locals }) => {
 
   // Rimuovi o maschera i dati sensibili prima di inviarli al client
   const safeSettings = { ...settings };
-  if (safeSettings.adminPassword) safeSettings.adminPassword = "********";
-  if (safeSettings.npmPassword) safeSettings.npmPassword = "********";
-  if (safeSettings.qbit_password) safeSettings.qbit_password = "********";
+  // Decrypt passwords for the admin client
+  const { decryptString } = await import("$lib/server/crypto");
+  if (safeSettings.adminPassword) delete safeSettings.adminPassword; // Never send admin hash
+  if (safeSettings.npmPassword) safeSettings.npmPassword = decryptString(safeSettings.npmPassword);
+  if (safeSettings.qbit_password) safeSettings.qbit_password = decryptString(safeSettings.qbit_password);
 
   return json(safeSettings);
 };

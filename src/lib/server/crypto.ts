@@ -73,6 +73,6 @@ export function decryptString(encryptedText: string): string {
         return decrypted;
     } catch (e) {
         console.error("Decryption failed", e);
-        return encryptedText; // Fallback al ritorno della stringa originale (potrebbe essere corrotta o la chiave è cambiata)
+        return ""; // Se fallisce, la chiave è sbagliata, azzeriamo per sicurezza (potrebbe essere corrotta o la chiave è cambiata)
     }
 }

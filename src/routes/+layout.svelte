@@ -3,7 +3,7 @@
 	import './layout.css';
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import { appState } from '$lib/client/state.svelte';
-	import { themeStore, themes } from '$lib/client/themeStore.svelte';
+	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -11,10 +11,26 @@
 	let { children, data } = $props();
 
 	let hasInitializedEditMode = false;
+	let hasInitializedAdminTab = false;
+	
 	$effect(() => {
 		if (data.isAdmin && !hasInitializedEditMode) {
 			appState.isEditMode = true;
 			hasInitializedEditMode = true;
+		}
+	});
+
+	$effect(() => {
+		if (browser && !hasInitializedAdminTab) {
+			const saved = localStorage.getItem('adminTab');
+			if (saved) appState.adminTab = saved;
+			hasInitializedAdminTab = true;
+		}
+	});
+
+	$effect(() => {
+		if (browser && hasInitializedAdminTab) {
+			localStorage.setItem('adminTab', appState.adminTab);
 		}
 	});
 
@@ -50,7 +66,6 @@
 	}
 
 	onMount(() => {
-		themeStore.init();
 		
 		if (data.isAdmin) {
 			appState.isEditMode = true;
@@ -163,11 +178,9 @@
 					{/if}
 				</div>
 				<div class="flex items-center space-x-1">
-					{#if themes.find(t => t.id === themeStore.theme)?.type === 'both'}
-					<button class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" onclick={() => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('theview-color-scheme', isDark ? 'dark' : 'light'); }} title="Tema Chiaro/Scuro">
+										<button class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" onclick={() => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('theview-color-scheme', isDark ? 'dark' : 'light'); }} title="Tema Chiaro/Scuro">
 						<Moon class="h-5 w-5" strokeWidth={1.5} />
 					</button>
-					{/if}
 				</div>
 			</div>
 		</div>

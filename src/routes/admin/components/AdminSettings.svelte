@@ -1,70 +1,13 @@
 <script lang="ts">
-	import TextInput from '$lib/components/ui/TextInput.svelte';
-	import UrlInput from '$lib/components/ui/UrlInput.svelte';
-	import ToggleInput from '$lib/components/ui/ToggleInput.svelte';
-	import SelectInput from '$lib/components/ui/SelectInput.svelte';
 	import { invalidateAll } from '$app/navigation';
-
-	import { slide } from "svelte/transition";
-	import { marked } from "marked";
-	import DOMPurify from "isomorphic-dompurify";
-	import { themeStore, themes } from '$lib/client/themeStore.svelte';
-
-	import { Download, Upload, DatabaseBackup, Loader2, RefreshCw, Plus, Eye, Check, EyeOff, ArrowUp, ExternalLink } from "@lucide/svelte";
-	let isUploadingBackup = $state(false);
-
-	async function handleBackupUpload(e: Event) {
-		const target = e.target as HTMLInputElement;
-		if (!target.files || target.files.length === 0) return;
-		
-		const file = target.files[0];
-		showConfirm("Ripristino Database", "ATTENZIONE: Stai per sovrascrivere l'intero database! Questa operazione è irreversibile e causerà il riavvio immediato della dashboard. Vuoi procedere?", async () => {
-			isUploadingBackup = true;
-			const formData = new FormData();
-			formData.append('file', file);
-
-			try {
-				const res = await fetch('/api/backup/upload', {
-					method: 'POST',
-					body: formData
-				});
-				if (res.ok) {
-					showAlert("Ripristino Completato", "Backup ripristinato con successo! La dashboard si sta riavviando. Ricarica la pagina tra qualche secondo.");
-					setTimeout(() => window.location.reload(), 3000);
-				} else {
-					const err = await res.json();
-					showAlert("Errore", "Errore durante il ripristino: " + err.error);
-				}
-			} catch (e) {
-				showAlert("Errore", "Errore di rete durante il ripristino.");
-			} finally {
-				isUploadingBackup = false;
-				target.value = '';
-			}
-		});
-		
-		// If they cancel, we just clear the input (handled in modal close but let's just clear it anyway or wait)
-		if (modalConfig.show === false) target.value = '';
-	}
-
-
-		import { onMount } from 'svelte';
-	let qbit_url = $state('');
-	let qbit_username = $state('');
-	let qbit_password = $state('');
-	let isSavingQbit = $state(false);
-	let showQbitPassword = $state(false);
+	import { onMount } from 'svelte';
 	
-	let showCategoriesDesktop = $state(true);
-	let showCategoriesMobile = $state(true);
-	let customNavbarTitleDesktop = $state('');
-	let customNavbarTitleMobile = $state('');
-	let showCategoryCounts = $state(true);
-	let showServiceDescriptions = $state(true);
-	let iconStyle = $state('rounded-xl');
-	let stickyNavbar = $state(true);
-	let showEditButton = $state(true);
-	let isSavingAppearance = $state(false);
+	import SettingsTheme from './SettingsTheme.svelte';
+	import SettingsAppearance from './SettingsAppearance.svelte';
+	import SettingsWidgets from './SettingsWidgets.svelte';
+	import SettingsSecurity from './SettingsSecurity.svelte';
+	import SettingsBackup from './SettingsBackup.svelte';
+	import SettingsSystem from './SettingsSystem.svelte';
 
 	let modalConfig = $state<{
 		show: boolean;
@@ -82,65 +25,17 @@
 		modalConfig = { show: true, title, message, type: 'confirm', onConfirm };
 	}
 
-
-	let versionInfo = $state<any>({});
-	let isCheckingVersion = $state(false);
-	let showChangelog = $state(false);
-
-	async function checkVersion(force = false) {
-		isCheckingVersion = true;
-		try {
-			const res = await fetch(`/api/version${force ? '?force=1' : ''}`);
-			if (res.ok) {
-				versionInfo = await res.json();
-			}
-		} catch (e) {}
-		isCheckingVersion = false;
-	}
-
-	onMount(async () => {
-		checkVersion();
-		try {
-			const res = await fetch('/api/settings');
-			if (res.ok) {
-				const data = await res.json(); console.log("FETCHED DATA:", data);
-				qbit_url = data.qbit_url || '';
-				qbit_username = data.qbit_username || '';
-				qbit_password = data.qbit_password || '';
-				showCategoriesDesktop = data.showCategoriesDesktop !== false;
-				showCategoriesMobile = data.showCategoriesMobile !== false;
-				
-				// Migration from old customNavbarTitle
-				customNavbarTitleDesktop = data.customNavbarTitleDesktop || data.customNavbarTitle || '';
-				customNavbarTitleMobile = data.customNavbarTitleMobile || data.customNavbarTitle || '';
-				
-				showCategoryCounts = data.showCategoryCounts !== false;
-				showServiceDescriptions = data.showServiceDescriptions !== false;
-				iconStyle = data.iconStyle || 'rounded-xl';
-				stickyNavbar = data.stickyNavbar !== false;
-				showEditButton = data.showEditButton !== false;
-			}
-		} catch (e) {
-			console.error(e);
-		}
-	});
-
-	async function saveQbitSettings() {
-		isSavingQbit = true;
-		try {
-			const res = await fetch('/api/settings', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ qbit_url, qbit_username, qbit_password })
-			});
-			if (res.ok) showAlert('Successo', 'Impostazioni qBittorrent salvate con successo!');
-			else showAlert('Errore', 'Errore durante il salvataggio.');
-		} catch (e) {
-			showAlert('Errore', 'Errore di rete.');
-		} finally {
-			isSavingQbit = false;
-		}
-	}
+	// State for Appearance
+	let showCategoriesDesktop = $state(true);
+	let showCategoriesMobile = $state(true);
+	let customNavbarTitleDesktop = $state('');
+	let customNavbarTitleMobile = $state('');
+	let showCategoryCounts = $state(true);
+	let showServiceDescriptions = $state(true);
+	let iconStyle = $state('rounded-xl');
+	let stickyNavbar = $state(true);
+	let showEditButton = $state(true);
+	let isSavingAppearance = $state(false);
 
 	async function saveAppearanceSettings() {
 		isSavingAppearance = true;
@@ -162,463 +57,127 @@
 		}
 	}
 
-	let isChangingAdminPassword = $state(false);
-	let adminPassword = $state('');
-	let adminPasswordConfirm = $state('');
-	let showAdminPassword = $state(false);
-	
-	const themeFamilies = [
-	    {
-	        name: "Sistema",
-	        options: [
-	            themes.find(t => t.id === 'default')
-	        ].filter(Boolean) as {id: string, name: string, type: string}[]
-	    },
-	    {
-	        name: "Dracula",
-	        options: [
-	            themes.find(t => t.id === 'dracula-pro'),
-	            themes.find(t => t.id === 'dracula-van-helsing'),
-	            themes.find(t => t.id === 'dracula'),
-	            themes.find(t => t.id === 'dracula-soft'),
-	            themes.find(t => t.id === 'dracula-alucard')
-	        ].filter(Boolean) as {id: string, name: string, type: string}[]
-	    },
-	    {
-	        name: "Catppuccin",
-	        options: [
-	            themes.find(t => t.id === 'catppuccin'),
-	            themes.find(t => t.id === 'catppuccin-macchiato'),
-	            themes.find(t => t.id === 'catppuccin-frappe'),
-	            themes.find(t => t.id === 'catppuccin-latte')
-	        ].filter(Boolean) as {id: string, name: string, type: string}[]
-	    }
-	];
+	// State for Widgets
+	let qbit_url = $state('');
+	let qbit_username = $state('');
+	let qbit_password = $state('');
+	let isSavingQbit = $state(false);
+
+	async function saveQbitSettings() {
+		isSavingQbit = true;
+		try {
+			const res = await fetch('/api/settings', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ qbit_url, qbit_username, qbit_password })
+			});
+			if (res.ok) showAlert('Successo', 'Impostazioni qBittorrent salvate con successo!');
+			else showAlert('Errore', 'Errore durante il salvataggio.');
+		} catch (e) {
+			showAlert('Errore', 'Errore di rete.');
+		} finally {
+			isSavingQbit = false;
+		}
+	}
+
+	// State for System
+	let versionInfo = $state<any>({});
+	let isCheckingVersion = $state(false);
+
+	async function checkVersion(force = false) {
+		isCheckingVersion = true;
+		try {
+			const res = await fetch(`/api/version${force ? '?force=1' : ''}`);
+			if (res.ok) {
+				versionInfo = await res.json();
+			}
+		} catch (e) {}
+		isCheckingVersion = false;
+	}
+
+	onMount(async () => {
+		checkVersion();
+		try {
+			const res = await fetch('/api/settings');
+			if (res.ok) {
+				const data = await res.json();
+				qbit_url = data.qbit_url || '';
+				qbit_username = data.qbit_username || '';
+				qbit_password = data.qbit_password || '';
+				showCategoriesDesktop = data.showCategoriesDesktop !== false;
+				showCategoriesMobile = data.showCategoriesMobile !== false;
+				
+				customNavbarTitleDesktop = data.customNavbarTitleDesktop || data.customNavbarTitle || '';
+				customNavbarTitleMobile = data.customNavbarTitleMobile || data.customNavbarTitle || '';
+				
+				showCategoryCounts = data.showCategoryCounts !== false;
+				showServiceDescriptions = data.showServiceDescriptions !== false;
+				iconStyle = data.iconStyle || 'rounded-xl';
+				stickyNavbar = data.stickyNavbar !== false;
+				showEditButton = data.showEditButton !== false;
+			}
+		} catch (e) {
+			console.error(e);
+		}
+	});
 </script>
 
 <div class="space-y-6">
-	<!-- Tema Section -->
-	<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
-		<div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
-			<div class="flex items-center space-x-3 mb-2">
-				<div class="p-2 bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 rounded-lg">
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
-				</div>
-				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">TEMA</h3>
-			</div>
-			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Personalizza l'aspetto di TheView. Scegli tra le varie famiglie di temi supportate.</p>
-			
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-				{#each themeFamilies as family}
-					{@const isSelected = family.options.some(t => t.id === themeStore.theme)}
-					<SelectInput 
-						label={family.name}
-						placeholder={family.name.toUpperCase()}
-						hideLabelWhenEmpty={true}
-						value={themeStore.theme}
-						class={isSelected ? 'ring-2 ring-blue-500 border-transparent bg-blue-50/50 dark:bg-blue-900/20' : ''}
-						options={family.options.map(t => ({
-							value: t.id, 
-							label: `${t.name} ${t.type === 'both' ? '☀️/🌙' : t.type === 'dark' ? '🌙' : '☀️'}`
-						}))}
-						onchange={(val) => themeStore.setTheme(val as string)}
-					/>
-				{/each}
-			</div>
-		</div>
+	<SettingsTheme />
+
+	<SettingsAppearance 
+		bind:showCategoriesDesktop
+		bind:showCategoriesMobile
+		bind:customNavbarTitleDesktop
+		bind:customNavbarTitleMobile
+		bind:showCategoryCounts
+		bind:showServiceDescriptions
+		bind:iconStyle
+		bind:stickyNavbar
+		bind:showEditButton
+		{saveAppearanceSettings}
+		{isSavingAppearance}
+	/>
+
+	<SettingsWidgets
+		bind:qbit_username
+		bind:qbit_password
+		bind:qbit_url
+		{saveQbitSettings}
+		{isSavingQbit}
+	/>
+
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+		<SettingsSecurity {showAlert} />
+		<SettingsBackup {showAlert} {showConfirm} />
 	</div>
 
-	<!-- Appearance Section -->
-	<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
-		<div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
-			<div class="flex items-center space-x-3 mb-4">
-				<div class="p-2 bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 rounded-lg">
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-				</div>
-				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Home</h3>
-			</div>
-			
-			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Personalizza l'aspetto della tua schermata principale.</p>
-			
-			<div class="space-y-6">
-				<h4 class="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2">Home Navbar</h4>
-				
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-						<div>
-							<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Categorie su Desktop</h4>
-							<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Mostra la topbar con le categorie sui display grandi</p>
-						</div>
-						<ToggleInput bind:checked={showCategoriesDesktop} />
-					</div>
-					
-					<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-						<div>
-							<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Categorie su Mobile</h4>
-							<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Mostra la bottom bar con le categorie su smartphone</p>
-						</div>
-						<ToggleInput bind:checked={showCategoriesMobile} />
-					</div>
-				</div>
-
-				{#if !showCategoriesDesktop || !showCategoriesMobile}
-					<div transition:slide class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-						<TextInput 
-							label="Titolo Sostitutivo Desktop" 
-							bind:value={customNavbarTitleDesktop} 
-							placeholder="Es. TheView Dashboard" 
-							disabled={showCategoriesDesktop}
-							class={showCategoriesDesktop ? 'opacity-50 cursor-not-allowed' : ''}
-						/>
-						<TextInput 
-							label="Titolo Sostitutivo Mobile" 
-							bind:value={customNavbarTitleMobile} 
-							placeholder="Es. TheView" 
-							disabled={showCategoriesMobile}
-							class={showCategoriesMobile ? 'opacity-50 cursor-not-allowed' : ''}
-						/>
-					</div>
-				{/if}
-
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-							<div>
-								<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Navbar Fissa</h4>
-								<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">La navbar rimarrà fissa in alto scorrendo la pagina</p>
-							</div>
-							<ToggleInput bind:checked={stickyNavbar} />
-						</div>
-						<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-							<div>
-								<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Tasto Modifica Rapida</h4>
-								<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Mostra la matita di modifica quando si è loggati</p>
-							</div>
-							<ToggleInput bind:checked={showEditButton} />
-						</div>
-					</div>
-
-				<h4 class="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2 pt-4">Home</h4>
-				
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-						<div>
-							<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Conteggio Servizi</h4>
-							<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Mostra il numero di servizi accanto a ogni categoria</p>
-						</div>
-						<ToggleInput bind:checked={showCategoryCounts} />
-					</div>
-					
-					<div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-						<div>
-							<h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Descrizioni</h4>
-							<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Mostra la descrizione sotto al nome di ogni servizio</p>
-						</div>
-						<ToggleInput bind:checked={showServiceDescriptions} />
-					</div>
-				</div>
-				
-				<div class="flex flex-col space-y-3 pt-4">
-						<p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Stile Icone Servizi</p>
-						<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-							<button type="button" onclick={() => iconStyle = 'rounded-xl'} class="flex flex-col items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border {iconStyle === 'rounded-xl' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-gray-200 dark:border-gray-700'} hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
-								<div class="w-12 h-12 bg-purple-500 rounded-xl shadow-sm flex items-center justify-center">
-									<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-								</div>
-								<span class="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Arrotondato</span>
-							</button>
-							<button type="button" onclick={() => iconStyle = 'rounded-full'} class="flex flex-col items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border {iconStyle === 'rounded-full' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-gray-200 dark:border-gray-700'} hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
-								<div class="w-12 h-12 bg-purple-500 rounded-full shadow-sm flex items-center justify-center">
-									<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-								</div>
-								<span class="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Circolare</span>
-							</button>
-							<button type="button" onclick={() => iconStyle = 'rounded-none'} class="flex flex-col items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border {iconStyle === 'rounded-none' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-gray-200 dark:border-gray-700'} hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
-								<div class="w-12 h-12 bg-purple-500 rounded-none shadow-sm flex items-center justify-center">
-									<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-								</div>
-								<span class="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Quadrato</span>
-							</button>
-						</div>
-					</div>
-				
-				<div class="flex justify-end pt-2">
-					<button 
-						onclick={saveAppearanceSettings}
-						disabled={isSavingAppearance}
-						class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 border border-transparent rounded-xl shadow-md shadow-purple-500/30 text-sm font-bold uppercase tracking-wider text-white bg-purple-600 hover:bg-purple-700 focus:outline-none transition-all disabled:opacity-50"
-					>
-						{#if isSavingAppearance}
-							<Loader2 class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" strokeWidth={2} />
-							Salvataggio...
-						{:else}
-							Salva Impostazioni Aspetto
-						{/if}
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Widget Config Section -->
-	<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
-		<div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
-			<div class="flex items-center space-x-3 mb-4">
-				<div class="p-2 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-lg">
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-					</svg>
-				</div>
-				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Integrazioni Widget</h3>
-			</div>
-			
-			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Configura le credenziali e gli indirizzi per far comunicare i widget con i tuoi servizi.</p>
-			
-			<div class="space-y-4">
-				<h4 class="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2">qBittorrent</h4>
-				<div class="space-y-4 pt-2 w-full">
-					<!-- Riga 1: Username e Password -->
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<TextInput label="Username (es. admin)" bind:value={qbit_username} />
-						<TextInput label="Password (es. adminadmin)" type={showQbitPassword ? "text" : "password"} bind:value={qbit_password} class="pr-10">
-							<button type="button" onclick={() => showQbitPassword = !showQbitPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-								{#if showQbitPassword}
-									<EyeOff class="h-5 w-5" strokeWidth={1.5} />
-								{:else}
-									<Eye class="h-5 w-5" strokeWidth={1.5} />
-								{/if}
-							</button>
-						</TextInput>
-					</div>
-					
-					<!-- Riga 2: URL e Bottone Salva -->
-					<div class="flex flex-col sm:flex-row gap-4">
-						<div class="flex-1 min-w-0">
-							<UrlInput label="Indirizzo Base (es. 172.17.0.1:8080)" bind:value={qbit_url} />
-						</div>
-						<div class="w-full sm:w-35 shrink-0">
-							<button 
-								onclick={saveQbitSettings}
-								disabled={isSavingQbit}
-								class="w-full h-10.5 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-md shadow-green-500/30 text-sm font-bold uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-all disabled:opacity-50"
-							>
-								{#if isSavingQbit}
-									...
-								{:else}
-									<Plus class="-ml-1 mr-1.5 h-4 w-4" strokeWidth={1.5} />
-									Salva
-								{/if}
-							</button>
-						</div>
-					</div>
-			</div>
-		</div>
-	</div>
-
-	</div>
-
-	<!-- Security Section -->
-	<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
-		<div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
-			<div class="flex items-center space-x-3 mb-4">
-				<div class="p-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg">
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-				</div>
-				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Sicurezza</h3>
-			</div>
-			
-			{#if !isChangingAdminPassword}
-				<div class="flex items-center justify-between">
-					<p class="text-sm text-gray-500 dark:text-gray-400">Proteggi l'accesso alla dashboard di amministrazione.</p>
-					<button 
-						onclick={() => isChangingAdminPassword = true}
-						class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-sm font-bold uppercase tracking-wider rounded-lg transition-colors"
-					>
-						Cambia Password
-					</button>
-				</div>
-			{:else}
-				<div transition:slide class="space-y-4 max-w-sm">
-					<TextInput label="Nuova Password Admin" type={showAdminPassword ? "text" : "password"} bind:value={adminPassword} class="pr-10">
-						<button type="button" onclick={() => showAdminPassword = !showAdminPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-							{#if showAdminPassword}
-								<EyeOff class="h-5 w-5" strokeWidth={1.5} />
-							{:else}
-								<Eye class="h-5 w-5" strokeWidth={1.5} />
-							{/if}
-						</button>
-					</TextInput>
-					<TextInput label="Conferma Password" type="password" bind:value={adminPasswordConfirm} />
-					<div class="flex space-x-3 pt-2">
-						<button 
-							onclick={() => {
-								isChangingAdminPassword = false;
-								adminPassword = '';
-								adminPasswordConfirm = '';
-							}}
-							class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-sm font-bold uppercase tracking-wider rounded-lg transition-colors"
-						>
-							Annulla
-						</button>
-						<button
-							onclick={async () => {
-								if (!adminPassword) return showAlert("Attenzione", "Inserisci una password!");
-								if (adminPassword !== adminPasswordConfirm) return showAlert("Attenzione", "Le password non coincidono!");
-								try {
-									await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminPassword }) });
-									adminPassword = '';
-									adminPasswordConfirm = '';
-									isChangingAdminPassword = false;
-									showAlert("Successo", "Password modificata con successo!");
-								} catch(e) { showAlert("Errore", "Si è verificato un errore durante il cambio password."); }
-							}}
-							class="px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-bold uppercase tracking-wider rounded-lg shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
-						>
-							Salva
-						</button>
-					</div>
-				</div>
-			{/if}
-		</div>
-	</div>
-
-	
-	<!-- Backup & Restore Section -->
-	<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
-		<div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
-			<div class="flex items-center space-x-3 mb-4">
-				<div class="p-2 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400 rounded-lg">
-					<DatabaseBackup class="w-6 h-6" />
-				</div>
-				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Backup e Ripristino</h3>
-			</div>
-			
-			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Scarica una copia di sicurezza del tuo database SQLite o ripristina un backup precedente. Attenzione: il ripristino sovrascriverà i dati attuali.</p>
-			
-			<div class="flex flex-col sm:flex-row gap-4">
-				<a 
-					href="/api/backup/download" 
-					download
-					class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-sm font-bold uppercase tracking-wider rounded-xl transition-colors"
-				>
-					<Download class="w-4 h-4 mr-2" />
-					Scarica Backup
-				</a>
-				
-				<label class="relative inline-flex items-center justify-center px-4 py-2.5 bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-700 dark:text-red-400 text-sm font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer disabled:opacity-50 {isUploadingBackup ? 'opacity-50 pointer-events-none' : ''}">
-					{#if isUploadingBackup}
-						<Loader2 class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" strokeWidth={2} />
-						Ripristino in corso...
-					{:else}
-						<Upload class="w-4 h-4 mr-2" />
-						Ripristina Backup
-					{/if}
-					<input 
-						type="file" 
-						accept=".db,.sqlite,.sqlite3" 
-						class="hidden" 
-						onchange={handleBackupUpload}
-						disabled={isUploadingBackup}
-					/>
-				</label>
-			</div>
-		</div>
-	</div>
-
-	<!-- System & Version Section -->
-	<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
-		<div class="p-6 bg-white dark:bg-gray-800 rounded-2xl">
-			<div class="flex items-center space-x-3 mb-6">
-				<div class="p-2 bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 rounded-lg">
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-				</div>
-				<h3 class="text-xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Sistema & Aggiornamenti</h3>
-			</div>
-
-			<div class="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-				<div class="space-y-1">
-					<div class="flex items-center space-x-2">
-						<span class="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Versione Attuale:</span>
-						<span class="text-base font-bold text-gray-900 dark:text-white">v{versionInfo.currentVersion || '...'}</span>
-					</div>
-					{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
-						<div class="flex items-center space-x-2 text-red-500 dark:text-red-400">
-							<ArrowUp class="w-4 h-4 animate-bounce" strokeWidth={1.5} />
-							<span class="text-sm font-bold uppercase tracking-wider">Nuova versione disponibile: v{versionInfo.latestVersion}</span>
-						</div>
-					{:else if versionInfo.latestVersion === versionInfo.currentVersion}
-						<div class="flex items-center space-x-2 text-green-600 dark:text-green-500">
-							<Check class="w-4 h-4" strokeWidth={2} />
-							<span class="text-xs font-bold uppercase tracking-wider">Il sistema è aggiornato</span>
-						</div>
-					{/if}
-				</div>
-
-				<div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-					{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion && versionInfo.url}
-						<button 
-							type="button"
-							onclick={() => showChangelog = !showChangelog}
-							class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors"
-						>
-							{showChangelog ? 'Nascondi Changelog' : 'Vedi Changelog'}
-						</button>
-					{/if}
-					<button 
-						type="button"
-						onclick={() => checkVersion(true)}
-						disabled={isCheckingVersion}
-						class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 text-sm font-bold uppercase tracking-wider rounded-lg transition-colors"
-					>
-						{#if isCheckingVersion}
-							<Loader2 class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" strokeWidth={2} />
-							Controllo...
-						{:else}
-							<RefreshCw class="w-4 h-4 mr-2" strokeWidth={1.5} />
-							Controlla
-						{/if}
-					</button>
-				</div>
-			</div>
-			
-			{#if showChangelog && versionInfo.releaseNotes && versionInfo.latestVersion !== versionInfo.currentVersion}
-			<div transition:slide class="mt-4 p-5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-inner">
-				<div class="flex items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
-					<h4 class="text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">Note di Rilascio v{versionInfo.latestVersion}</h4>
-					<a href={versionInfo.url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-3 py-1.5 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
-						<ExternalLink class="w-4 h-4 mr-1.5" strokeWidth={1.5} />
-						Apri su GitHub
-					</a>
-				</div>
-				<div class="prose prose-sm dark:prose-invert max-w-none max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-					{@html DOMPurify.sanitize(marked.parse(versionInfo.releaseNotes) as string)}
-				</div>
-			</div>
-			{/if}
-		</div>
-	</div>
-
+	<SettingsSystem 
+		{versionInfo}
+		{isCheckingVersion}
+		{checkVersion}
+	/>
 </div>
-
 
 {#if modalConfig.show}
 	<div 
-		class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm"
+		class="fixed inset-0 bg-black/50 z-100 flex items-center justify-center p-4 backdrop-blur-sm"
 		role="presentation"
 	>
 		<div 
-			class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-gray-200 dark:border-gray-700 transform transition-all"
+			class="bg-background text-foreground rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-border transform transition-all"
 			role="dialog"
 			aria-modal="true"
 		>
-			<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{modalConfig.title}</h2>
-			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{modalConfig.message}</p>
+			<h2 class="text-xl font-bold mb-2">{modalConfig.title}</h2>
+			<p class="text-sm text-muted-foreground mb-6">{modalConfig.message}</p>
 			
 			<div class="flex justify-end space-x-3 mt-6">
 				{#if modalConfig.type === 'confirm'}
 					<button 
 						type="button" 
 						onclick={() => modalConfig.show = false}
-						class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+						class="px-4 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors border border-border"
 					>
 						Annulla
 					</button>
@@ -628,7 +187,7 @@
 							modalConfig.show = false;
 							if (modalConfig.onConfirm) modalConfig.onConfirm();
 						}}
-						class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors"
+						class="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive hover:bg-destructive/90 rounded-lg shadow-sm transition-colors"
 					>
 						Procedi
 					</button>
@@ -636,7 +195,7 @@
 					<button 
 						type="button" 
 						onclick={() => modalConfig.show = false}
-						class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
+						class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg shadow-sm transition-colors"
 					>
 						OK
 					</button>

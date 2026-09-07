@@ -10,9 +10,11 @@
 	import { flip } from 'svelte/animate';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { ArrowUpCircle, Box, GripHorizontal, Plus, AlertTriangle, Upload, Check, Trash2 } from "@lucide/svelte";
+	import { ArrowUpCircle, Box, GripHorizontal, Plus, AlertTriangle, Upload, Check, Trash2, X } from "@lucide/svelte";
+	import ServiceForm from '$lib/components/ServiceForm.svelte';
+	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 
-	let { services, localCategories } = $props();
+	let { services, localCategories = $bindable() } = $props();
 
 	let updateStatuses = $state<Record<number, { updateAvailable: boolean, updateUrl?: string }>>({});
 
@@ -34,6 +36,17 @@
 	let editingServiceId = $state<number | null>(null);
 	let deletingServiceId = $state<number | null>(null);
 	
+	let newService = $state({
+		name: '',
+		url: '',
+		icon: '',
+		description: '',
+		categoryId: '',
+		pingEnabled: true,
+		widgetType: '',
+		dockerImage: ''
+	});
+	
 	let groupedServices = $state<Record<number, any[]>>({});
 	
 	// Create an untracked local copy to prevent infinite loops during drag
@@ -43,6 +56,7 @@
 	let isCreatingCategory = $state(false);
 	let newCategoryName = $state("");
 	let newServiceCategoryId = $state("");
+	let newPingEnabled = $state(true);
 
 	$effect(() => {
 		if (isDragging) return;
@@ -99,99 +113,28 @@
 
 <div class="space-y-8">
 	<!-- Add New Service Form -->
-	<div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl border border-gray-100 dark:border-gray-700">
+	<div class="bg-card text-card-foreground shadow-md rounded-2xl border border-border">
 		<button 
 			onclick={() => isAddServiceExpanded = !isAddServiceExpanded}
-			class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+			class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted transition-colors"
 		>
 			<div class="flex items-center space-x-3">
-				<div class="p-1.5 bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 rounded-lg">
+				<div class="p-1.5 bg-primary/20 text-primary rounded-lg">
 					<Plus class="h-5 w-5" strokeWidth={1.5} />
 				</div>
-				<h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Aggiungi Servizio</h3>
+				<h3 class="text-sm font-bold text-foreground uppercase tracking-wider">Aggiungi Servizio</h3>
 			</div>
 		</button>
 		
 		{#if isAddServiceExpanded}
-		<div transition:slide|local class="px-5 pb-6 border-t border-gray-100 dark:border-gray-700 pt-5">
-			<form novalidate method="POST" action="?/createService" use:enhance oninput={(e) => e.currentTarget.classList.remove('show-errors')} onchange={(e) => e.currentTarget.classList.remove('show-errors')} onsubmit={(e) => {
-				const form = e.currentTarget;
-				form.classList.remove('show-errors');
-				if (!form.checkValidity()) {
-					e.preventDefault();
-					void form.offsetWidth;
-					form.classList.add('show-errors');
-					return;
-				}
-			}} class="space-y-5">
-								<!-- Row 1: Nome, URL -->
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-					<TextInput label="Nome" name="name" id="name" required />
-					<UrlInput label="URL (Richiesto)" name="url" id="url" required />
-				</div>
-
-				<!-- Row 2: Icona, Descrizione -->
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start mt-4">
-					<div class="flex gap-2 items-center">
-						<TextInput label="Icona (ES. SIMPLE-ICONS o URL)" name="icon" id="icon" placeholder="Nome o carica ->" />
-						<label class="cursor-pointer border border-gray-200 dark:border-gray-700 rounded-xl w-10.5 h-10.5 flex items-center justify-center transition-colors bg-white dark:bg-gray-800 shadow-sm shrink-0 hover:bg-gray-50 dark:hover:bg-gray-700">
-							<Upload class="h-5 w-5 text-gray-500 dark:text-gray-400" strokeWidth={1.5} />
-							<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e: Event) => {
-								const target = e.target as HTMLInputElement; const file = target?.files?.[0]; if (!file) return;
-								const formData = new FormData(); formData.append('file', file);
-								const btn = target.parentElement as HTMLElement; btn.classList.add('opacity-50');
-								try {
-									const res = await fetch('/api/icons', { method: 'POST', body: formData });
-									const data = await res.json();
-									if (data.url) (document.getElementById("icon") as HTMLInputElement).value = data.url;
-								} catch (err) { console.error(err); } finally { btn.classList.remove('opacity-50'); }
-							}} />
-						</label>
-					</div>
-					<TextInput label="Descrizione" name="description" id="description" />
-				</div>
-
-				<!-- Row 3: Categoria, Ping, Widget, Button -->
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end mt-4">
-					<div class="flex flex-col gap-2">
-						{#if isCreatingCategory}
-							<div class="flex gap-2 h-10.5">
-								<TextInput label="Nome" bind:value={newCategoryName} />
-								<button type="button" onclick={async () => {
-									if (!newCategoryName) { isCreatingCategory = false; return; }
-									try {
-										const res = await fetch('/api/categories/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: newCategoryName }) });
-										if (res.ok) {
-											const data = await res.json();
-											localCategories = [...localCategories, data.category];
-											newServiceCategoryId = data.category.id;
-											isCreatingCategory = false;
-										} else {
-											const data = await res.json();
-											alert(data.error || 'Errore durante la creazione della categoria');
-										}
-									} catch(e) { console.error(e); }
-								}} class="px-3 bg-green-600 text-white rounded-xl hover:bg-green-700 text-sm font-medium whitespace-nowrap">Ok</button>
-								<button type="button" onclick={() => isCreatingCategory = false} class="px-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium">X</button>
-							</div>
-						{:else}
-							<SelectInput label="Categoria" name="categoryId" bind:value={newServiceCategoryId} required options={[{value: '', label: '-- Seleziona --'}, ...localCategories.map((c: any) => ({value: c.id, label: c.name})), {value: 'new_category_trigger', label: '+ Nuova...', class: 'font-bold text-blue-600'}]} onchange={(val) => { if (val === 'new_category_trigger') { isCreatingCategory = true; newServiceCategoryId = ''; } }} />
-						{/if}
-					</div>
-
-					<TextInput label="Immagine Docker (es. linuxserver/radarr:latest)" name="dockerImage" placeholder="es. ghcr.io/user/repo:latest" />
-					<ToggleInput label="Ping" name="pingEnabled" value="true" checked={true} />
-
-					<SelectInput label="Widget" name="widgetType" options={[{value: '', label: 'Nessuno'}, {value: 'qbittorrent', label: 'qBittorrent'}]} />
-
-					<div>
-						<button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-xl shadow-md shadow-green-500/30 text-sm font-bold uppercase tracking-wider text-white bg-green-600 hover:bg-green-700 hover:shadow-lg focus:outline-none transition-all h-10.5">
-							<Plus class="-ml-1 mr-1.5 h-4 w-4" strokeWidth={1.5} />
-							Salva
-						</button>
-					</div>
-				</div>
-			</form>
+		<div transition:slide|local class="px-5 pb-6 border-t border-border pt-5">
+			<ServiceForm 
+				mode="add" 
+				bind:service={newService} 
+				bind:categories={localCategories} 
+				action="?/createService" 
+				useEnhance={true} 
+			/>
 		</div>
 		{/if}
 	</div>
@@ -203,152 +146,98 @@
 			{@const categoryName = category.name}
 			{#if groupedServices[catId]}
 			
-			<div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl border border-gray-100 dark:border-gray-700">
-				<div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 flex justify-between items-center">
-					<h4 class="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{categoryName}</h4>
-					<span class="text-xs font-bold text-gray-400 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-lg">{groupedServices[catId].length}</span>
+			<div class="bg-card text-card-foreground shadow-md rounded-2xl border border-border">
+				<div class="px-5 py-3 border-b border-border bg-muted/50 flex justify-between items-center">
+					<h4 class="text-sm font-bold text-muted-foreground uppercase tracking-wider">{categoryName}</h4>
+					<span class="text-xs font-bold text-muted-foreground bg-muted px-2 py-1 rounded-lg">{groupedServices[catId].length}</span>
 				</div>
 				
 				<ul 
-					class="divide-y divide-gray-100 dark:divide-gray-700 min-h-15"
+					class="divide-y divide-border min-h-15"
 					use:dndzone={{items: groupedServices[catId], flipDurationMs, dropTargetStyle: { outline: '2px dashed #3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)' }}}
 					onconsider={(e) => handleDndConsider(e, catId)}
 					onfinalize={(e) => handleDndFinalize(e, catId)}
 				>
 					{#if groupedServices[catId].length === 0}
-						<li class="px-5 py-8 text-center text-sm font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider opacity-70">
+						<li class="px-5 py-8 text-center text-sm font-medium text-muted-foreground uppercase tracking-wider opacity-70">
 							Trascina qui un servizio
 						</li>
 					{/if}
 					
-					{#each groupedServices[catId] as service (service.id)}
-						<li animate:flip={{duration: flipDurationMs}} class="px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors bg-white dark:bg-gray-800 cursor-move">
-							{#if editingServiceId === service.id}
-								<form novalidate method="POST" action="?/updateService" oninput={(e) => e.currentTarget.classList.remove('show-errors')} onchange={(e) => e.currentTarget.classList.remove('show-errors')} onsubmit={(e) => {
-									const form = e.currentTarget;
-									form.classList.remove('show-errors');
-									if (!form.checkValidity()) {
-										e.preventDefault();
-										void form.offsetWidth;
-										form.classList.add('show-errors');
-										return;
-									}
-								}} use:enhance={() => {
-									return async ({ update }) => {
-										editingServiceId = null;
-										await update();
-									};
-								}} class="w-full">
-									<input type="hidden" name="id" value={service.id}>
-									<div transition:slide class="space-y-4 w-full bg-white dark:bg-gray-800 p-5 mt-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-md relative"><div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-blue-400 to-indigo-500 rounded-t-xl"></div>
-										<!-- Row 1: Nome, URL -->
-										<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-											<TextInput label="Nome" name="name" value={service.name} required />
-											<UrlInput label="URL (Richiesto)" name="url" value={service.url} required />
-										</div>
-										
-										<!-- Row 2: Icona, Descrizione -->
-										<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-											<div class="flex gap-2 items-center">
-												<TextInput label="Icona (ES. SIMPLE-ICONS o URL)" name="icon" id={"icon_edit_" + service.id} value={service.icon || ''} />
-												<label class="cursor-pointer border border-gray-200 dark:border-gray-700 rounded-xl w-10.5 h-10.5 flex items-center justify-center transition-colors bg-white dark:bg-gray-800 shadow-sm shrink-0 hover:bg-gray-50 dark:hover:bg-gray-700">
-													<Upload class="h-5 w-5 text-gray-500 dark:text-gray-400" strokeWidth={1.5} />
-													<input type="file" accept="image/png, image/svg+xml, image/jpeg" class="hidden" onchange={async (e: Event) => {
-														const target = e.target as HTMLInputElement; const file = target?.files?.[0];
-														if (!file) return;
-														const formData = new FormData(); formData.append('file', file);
-														const btn = target.parentElement as HTMLElement; btn.classList.add('opacity-50');
-														try {
-															const res = await fetch('/api/icons', { method: 'POST', body: formData });
-															const data = await res.json();
-															if (data.url) (document.getElementById("icon_edit_" + service.id) as HTMLInputElement).value = data.url;
-														} catch (err) { console.error(err); } finally { btn.classList.remove('opacity-50'); }
-													}} />
-												</label>
-											</div>
-											<TextInput label="Descrizione" name="description" value={service.description || ''} />
-										</div>
-										
-										<!-- Row 3: Categoria, Container ID, Widget, Ping, Buttons -->
-										<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-											<SelectInput label="Categoria" name="categoryId" value={service.categoryId} required options={localCategories.map((c: any) => ({value: c.id, label: c.name}))} />
-											<TextInput label="Immagine Docker (es. linuxserver/radarr:latest)" name="dockerImage" value={service.dockerImage || ''} placeholder="es. ghcr.io/user/repo:latest" />
-											<SelectInput label="Widget" name="widgetType" value={service.widgetType || ''} options={[{value: '', label: 'Nessuno'}, {value: 'qbittorrent', label: 'qBittorrent'}]} />
-											<div class="flex items-center h-10.5 pl-2">
-												<ToggleInput label="Ping" name="pingEnabled" value="true" checked={service.pingEnabled} />
-											</div>
-
-											<div class="flex gap-2 h-10.5">
-												<button type="button" onclick={() => editingServiceId = null} class="flex-1 inline-flex items-center justify-center border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
-													X
-												</button>
-												<button type="submit" class="flex-2 inline-flex items-center justify-center border border-transparent rounded-xl shadow-sm text-sm font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-colors">
-													<Check class="-ml-1 mr-1 h-4 w-4" strokeWidth={2} />
-													Salva
-												</button>
-											</div>
-										</div>
-									</div>
-								</form>
-							{:else if deletingServiceId === service.id}
-								<div transition:slide class="flex items-center justify-between w-full bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-200 dark:border-red-800">
-									<div class="flex items-center text-red-800 dark:text-red-400">
-										<AlertTriangle class="h-5 w-5 mr-2" strokeWidth={1.5} />
-										<span class="text-sm font-bold uppercase tracking-wider">Eliminare {service.name}?</span>
-									</div>
-									<div class="flex items-center space-x-2">
-										<button type="button" onclick={() => deletingServiceId = null} class="px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 uppercase tracking-wider transition-colors shadow-sm">
-											Annulla
-										</button>
-										<form method="POST" action="?/deleteService" use:enhance class="m-0">
-											<input type="hidden" name="id" value={service.id}>
-											<button type="submit" class="px-3 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg uppercase tracking-wider transition-colors shadow-sm shadow-red-500/30">
-												Conferma
-											</button>
-										</form>
-									</div>
-								</div>
-							{:else}
+					{#each groupedServices[catId] as service, i (service.id)}
+						<li animate:flip={{duration: flipDurationMs}} class="px-5 py-4 hover:bg-accent hover:text-accent-foreground transition-colors bg-card text-card-foreground cursor-move">
 								<div class="flex items-center justify-between w-full">
 									<div class="flex items-center">
-										<GripHorizontal class="h-5 w-5 text-gray-400 mr-3 hidden sm:block cursor-grab" strokeWidth={1.5} />
+										<GripHorizontal class="h-5 w-5 text-muted-foreground mr-3 hidden sm:block cursor-grab" strokeWidth={1.5} />
 										{#if service.iconDetails}
-											<div class="h-8 w-8 rounded-lg flex items-center justify-center mr-3 shadow-sm border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
+											<div class="h-8 w-8 rounded-lg flex items-center justify-center mr-3 shadow-sm border border-border bg-muted">
 												{#if service.iconDetails.type === 'custom' || service.iconDetails.type === 'brand'}
 													<img src={service.iconDetails.value} alt={service.name} class="h-5 w-5 object-contain" />
 												{:else}
-													<Box class="h-5 w-5 text-gray-400" strokeWidth={1.5} />
+													<Box class="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
 												{/if}
 											</div>
 										{:else if service.icon}
-											<div class="h-8 w-8 rounded-lg flex items-center justify-center mr-3 shadow-sm border border-gray-200 dark:border-gray-700 bg-gray-500">
+											<div class="h-8 w-8 rounded-lg flex items-center justify-center mr-3 shadow-sm border border-border bg-muted-foreground">
 												<span class="text-sm font-bold uppercase text-white">{service.icon.charAt(0)}</span>
 											</div>
 										{:else}
-											<div class="h-8 w-8 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center mr-3 text-gray-500 dark:text-gray-400">
+											<div class="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center mr-3 text-muted-foreground">
 												<Box class="w-5 h-5" strokeWidth={1.5} />
 											</div>
 										{/if}
 										<div>
-											<p class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">{service.name}</p>
-											<p class="text-xs text-gray-500 dark:text-gray-400 font-medium truncate w-48 sm:w-64 md:w-auto">{service.url}</p>
+											<p class="text-sm font-bold text-foreground uppercase tracking-wider">{service.name}</p>
+											<p class="text-xs text-muted-foreground font-medium truncate w-48 sm:w-64 md:w-auto">{service.url}</p>
 										</div>
 									</div>
 									<div class="flex items-center space-x-2">
 										{#if updateStatuses[service.id]?.updateAvailable}
-											<a href={updateStatuses[service.id].updateUrl} target="_blank" rel="noopener noreferrer" class="p-2 text-red-500 hover:text-red-600 transition-colors relative" title="Aggiornamento Disponibile!">
+											<a href={updateStatuses[service.id].updateUrl} target="_blank" rel="noopener noreferrer" class="p-2 text-destructive hover:text-destructive/80 transition-colors relative" title="Aggiornamento Disponibile!">
 												<span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-40 animate-ping"></span>
 												<ArrowUpCircle class="w-5 h-5 animate-pulse relative" />
 											</a>
 										{/if}
-										<button type="button" onclick={() => editingServiceId = service.id} class="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-lg shadow-sm" title="Modifica Servizio">
-											<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-										</button>
-										<button type="button" onclick={() => deletingServiceId = service.id} class="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg shadow-sm" title="Elimina Servizio">
-											<Trash2 class="w-5 h-5" strokeWidth={1.5} />
+										<ConfirmDeleteButton 
+											class="w-9 h-9"
+											onConfirm={async () => {
+												const formData = new FormData();
+												formData.append('id', service.id.toString());
+												await fetch('?/deleteService', { method: 'POST', body: formData });
+												window.location.reload();
+											}} 
+										/>
+										<button type="button" onclick={() => editingServiceId = editingServiceId === service.id ? null : service.id} class="p-2 text-primary hover:text-primary/80 transition-colors bg-primary/10 hover:bg-primary/20 rounded-lg shadow-sm" title={editingServiceId === service.id ? "Chiudi Modifica" : "Modifica Servizio"}>
+											{#if editingServiceId === service.id}
+												<X class="w-5 h-5" strokeWidth={2} />
+											{:else}
+												<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+											{/if}
 										</button>
 									</div>
 								</div>
+								
+								{#if editingServiceId === service.id}
+									<div transition:slide class="w-full mt-4 relative cursor-default" onclick={(e) => e.stopPropagation()} role="presentation">
+										<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-blue-400 to-indigo-500 rounded-t-xl z-10"></div>
+										<div class="p-5 bg-card text-card-foreground border border-border rounded-xl shadow-md">
+											<ServiceForm 
+												mode="edit" 
+												bind:service={groupedServices[catId][i]} 
+												bind:categories={localCategories} 
+												action="?/updateService" 
+												useEnhance={true} 
+												hideDelete={true}
+												hideCancel={true}
+												enhanceFn={() => {
+													return async ({ update }: any) => {
+														editingServiceId = null;
+														await update();
+													};
+												}}
+											/>
+										</div>
+									</div>
 							{/if}
 						</li>
 					{/each}

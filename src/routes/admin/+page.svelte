@@ -33,7 +33,7 @@
 
 	{#if appState.adminTab === 'services'}
 		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
-			<AdminServices {services} {localCategories} />
+			<AdminServices {services} bind:localCategories />
 		</div>
 	{:else if appState.adminTab === 'categories'}
 		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">

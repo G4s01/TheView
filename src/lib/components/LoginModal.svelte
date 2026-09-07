@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Eye, EyeOff } from "@lucide/svelte";
 	import { fade, scale } from 'svelte/transition';
 
 	let { show, onClose, onSuccess } = $props<{
@@ -10,6 +11,7 @@
 	let password = $state('');
 	let error = $state('');
 	let loading = $state(false);
+	let showPassword = $state(false);
 
 	function autofocus(node: HTMLElement) {
 		setTimeout(() => node.focus(), 10);
@@ -66,14 +68,23 @@
 			
 			<form onsubmit={handleLogin} class="space-y-4">
 				<div>
-					<input 
-						type="password" 
-						bind:value={password} 
-						placeholder="Password" 
-						class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-						required
-						use:autofocus
-					/>
+					<div class="relative w-full">
+						<input 
+							type={showPassword ? "text" : "password"} 
+							bind:value={password} 
+							placeholder="Password" 
+							class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+							required
+							use:autofocus
+						/>
+						<button type="button" onclick={() => showPassword = !showPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+							{#if showPassword}
+								<EyeOff class="h-5 w-5" strokeWidth={1.5} />
+							{:else}
+								<Eye class="h-5 w-5" strokeWidth={1.5} />
+							{/if}
+						</button>
+					</div>
 				</div>
 				
 				{#if error}

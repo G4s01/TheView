@@ -14,10 +14,10 @@
 				error = null;
 			} else {
 				const errBody = await res.json().catch(() => ({}));
-				error = errBody.error || 'Errore di connessione API';
+				error = errBody.error || 'ERRORE API';
 			}
 		} catch (e: any) {
-			error = 'Server irraggiungibile';
+			error = 'IRRAGGIUNGIBILE';
 		}
 	}
 

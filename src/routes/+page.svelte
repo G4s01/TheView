@@ -111,7 +111,7 @@
 				onfinalize={(e) => handleDndFinalize(e, categoryName)}
 			>
 				{#each services as service (service.id)}
-					<div animate:flip={{duration: flipDurationMs}} class="transition-all duration-300 {editingServiceId === service.id ? 'col-span-full sm:col-span-2 lg:col-span-2 xl:col-span-2 2xl:col-span-2' : ''}">
+					<div animate:flip={{duration: flipDurationMs}} class="transition-all duration-300 {editingServiceId === service.id ? 'col-span-full md:col-span-full lg:col-span-3 xl:col-span-3 2xl:col-span-3' : ''}">
 						<ServiceCard {service} liveStatus={statuses[service.id]} categories={data.categories || []} isExpanded={editingServiceId === service.id} onExpandToggle={(val) => editingServiceId = val ? service.id : null} showDescription={data.showServiceDescriptions} iconStyle={data.iconStyle} />
 					</div>
 				{/each}

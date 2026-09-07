@@ -1,30 +1,63 @@
 <script lang="ts">
-	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { Label } from "$lib/components/ui/label";
+	import type { Snippet } from "svelte";
 
-	interface Props extends HTMLInputAttributes {
-		label: string;
+	let {
+		value = $bindable(),
+		name = '',
+		label = '',
+		type = 'text',
+		placeholder = ' ',
+		required = false,
+		pattern = undefined,
+		disabled = false,
+		id = Math.random().toString(36).substring(7),
+		class: className = '',
+		children
+	} = $props<{
+		value?: string;
+		name?: string;
+		label?: string;
+		type?: 'text' | 'password' | 'email' | 'url' | 'number';
+		placeholder?: string;
+		required?: boolean;
+		pattern?: string;
+		disabled?: boolean;
 		id?: string;
-		value?: string | null;
-        bgClass?: string;
-        children?: import('svelte').Snippet;
-	}
-
-	let { label, id = 'input-' + Math.random().toString(36).substring(2, 9), value = $bindable(), bgClass = 'bg-white dark:bg-gray-800', children, ...rest }: Props = $props();
+		class?: string;
+		children?: Snippet;
+	}>();
 </script>
 
-<div class="relative w-full h-[42px]">
-	<input 
-		{id} 
-		bind:value 
-		{...rest} 
+<div class="relative w-full h-10 {className}">
+	<input
+		{type}
+		{id}
+		{name}
+		bind:value
 		placeholder=" " 
-		class="block px-4 pb-2 pt-2.5 w-full h-full text-sm text-gray-900 bg-transparent rounded-xl border border-gray-200 appearance-none dark:text-white dark:border-gray-700 dark:focus:border-blue-500 focus:outline-none focus:ring-1 focus:border-blue-600 peer transition-colors {rest.class || ''}" 
+		{required}
+		{pattern}
+		{disabled}
+		class="peer h-10 w-full placeholder-transparent bg-transparent border-0 focus:ring-0 focus:outline-none px-3 z-10 relative shadow-none text-sm text-foreground"
 	/>
-	<label 
-		for={id} 
-		class="absolute text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-[21px] top-2.5 z-10 origin-[0] {bgClass} px-1.5 peer-focus:px-1.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2.5 peer-focus:-translate-y-[21px] start-3 pointer-events-none"
-	>
-		{label}
-	</label>
-	{@render children?.()}
+	
+	<fieldset aria-hidden="true" class="absolute inset-0 m-0 p-0 px-2 border border-input rounded-md peer-focus:border-primary peer-focus:border-2 peer-focus:[&>legend]:max-w-full peer-[&:not(:placeholder-shown)]:[&>legend]:max-w-full transition-colors pointer-events-none z-0">
+		<legend class="invisible px-1.5 text-[10px] font-bold uppercase tracking-wider h-0 overflow-hidden whitespace-nowrap max-w-0 transition-all duration-200">
+			{#if label}{label} {#if required}*{/if}{/if}
+		</legend>
+	</fieldset>
+
+	{#if label}
+		<Label 
+			for={id} 
+			class="absolute left-2 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-placeholder-shown:normal-case peer-focus:-top-2.5 peer-focus:text-[10px] peer-focus:font-bold peer-focus:uppercase peer-focus:text-primary pointer-events-none peer-[&:not(:placeholder-shown)]:-top-2.5 z-20 bg-transparent"
+		>
+			{label} {#if required}<span class="text-destructive">*</span>{/if}
+		</Label>
+	{/if}
+	
+	{#if children}
+		{@render children()}
+	{/if}
 </div>
