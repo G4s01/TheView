@@ -23,14 +23,15 @@
 
 **TheView** is conceived as a lightweight, highly customizable, and aesthetically pleasing alternative to dashboard projects like Homer, Heimdall, or Dashy. It is built natively for users who want a rich UI without the burden of manual configuration files.
 
-- 🖥️ **100% Web UI Driven**: Forget editing YAML files. Add, edit, remove, and reorder services using an intuitive drag-and-drop web interface.
+- 🖥️ **100% Web UI Driven**: Forget editing YAML files. Add, edit, remove, and reorder categories and services using an intuitive drag-and-drop web interface.
+- 🍱 **Bento Grid Design**: A beautiful, modern Bento Box layout powered by CSS Grid and `shadcn-svelte` primitives that perfectly adapts to your screen size.
 - 🔍 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click.
-- 🎨 **Smart Brand Icons & Glassmorphism**: Automatically fetches SVG icons from _Simple-Icons_ based on the service name. It extracts the brand's primary color and applies a beautiful tinted glassmorphism background to the card.
+- 🎨 **Smart Brand Icons & Glassmorphism**: Automatically fetches SVG icons from _Dashboard-Icons_ or custom URLs based on the service name.
 - 📡 **Live Health Checks (Ping)**: Built-in pinging system. Shows live online/offline status and latency (ms) for all your tracked services with smooth pulsing indicators.
 - 🔄 **Docker Update Notifications**: Automatically checks if your Docker containers have new versions available on Docker Hub or GHCR by comparing image SHA256 digests. A notification badge will alert you directly on the dashboard!
-- ⚡ **In-Place Quick Edit**: Click the gear icon on any service card, and it seamlessly expands into a fully functional form directly on the grid, without annoying popups.
+- ⚡ **Seamless In-Place Edit**: Click the edit icon on any service card, and it elegantly scales into a fully functional form directly on the grid, gracefully expanding its layout without annoying popups.
 - 🔌 **Interactive Widgets**: Rich integrations for your favorite services (e.g., live qBittorrent download/upload speeds) directly visible on the service cards.
-- 🌙 **Advanced Theming**: Pick your vibe. Full support for Dark/Light modes with premium community themes including **Dracula** (Classic, Alucard, Soft) and **Catppuccin** (Latte, Macchiato, Frappé).
+- 🌙 **Advanced Theming**: Pick your vibe. Full support for Dark/Light modes with premium community themes. All built with strict Shadcn variables for pixel-perfect contrast.
 - 📱 **Fully Responsive**: Carefully designed to look stunning and function perfectly on desktops, tablets, and smartphones.
 
 ---
