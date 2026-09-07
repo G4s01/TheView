@@ -5,7 +5,7 @@
 	import ToggleInput from '$lib/components/ui/ToggleInput.svelte';
 	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 	import BackButton from '$lib/components/ui/BackButton.svelte';
-	import { Upload, Check, Save } from '@lucide/svelte';
+	import { Upload, Check, Save, Plus } from '@lucide/svelte';
 	import { enhance } from '$app/forms';
 	import type { Action } from 'svelte/action';
 	import { Button } from '$lib/components/ui/button';
@@ -21,7 +21,8 @@
 			description: '',
 			categoryId: '',
 			pingEnabled: true,
-			widgetType: ''
+			widgetType: 'none',
+			size: '1x1'
 		}),
 		categories = $bindable([]),
 		isSaving = false,
@@ -102,10 +103,17 @@
 			});
 		}
 	};
+
+	$effect(() => {
+		if (service) {
+			if (!service.widgetType) service.widgetType = 'none';
+			if (!service.size) service.size = '1x1';
+			if (service.pingEnabled === undefined) service.pingEnabled = true;
+		}
+	});
 </script>
 
 <form
-	novalidate
 	method={action ? 'POST' : undefined}
 	action={action}
 	use:optionalEnhance={enhanceFn}
@@ -240,12 +248,25 @@
 				name="widgetType"
 				bind:value={service.widgetType}
 				options={[
+					{ value: 'none', label: 'NESSUNO' },
 					{ value: 'qbittorrent', label: 'qBittorrent' }
 				]}
 			/>
 		</div>
 
-		<!-- ROW 3 -->
+		<div class="md:col-span-12 h-10 w-full">
+			<SelectInput
+				label="DIMENSIONE"
+				name="size"
+				bind:value={service.size}
+				options={[
+					{ value: '1x1', label: '1x1 (Singola)' },
+					{ value: '2x1', label: '2x1 (Larga)' },
+					{ value: '1x2', label: '1x2 (Verticale)' },
+					{ value: '2x2', label: '2x2 (Grande)' }
+				]}
+			/>
+		</div>
 		<div class="md:col-span-12 flex flex-col md:flex-row gap-4 h-auto md:h-10 w-full items-start md:items-center">
 			<div class="flex-1 w-full min-w-0 h-10">
 				<TextInput label="DESCRIZIONE" name="description" bind:value={service.description} />
@@ -275,7 +296,7 @@
 					{:else if mode === 'discovery'}
 						<BackButton onclick={handleCancel} text="" class="w-10 h-10 p-0 shadow-sm shrink-0" title="ANNULLA" />
 						<Button type="submit" disabled={isSaving} class="w-10 h-10 p-0 bg-green-500 hover:bg-green-600 text-white shadow-sm shrink-0" title="AGGIUNGI">
-							<Check class="w-5 h-5" strokeWidth={2.5} />
+							<Plus class="w-5 h-5" strokeWidth={2.5} />
 						</Button>
 					{:else if mode === 'add'}
 						<Button type="submit" disabled={isSaving} class="w-10 h-10 p-0 bg-green-500 hover:bg-green-600 text-white shadow-sm shrink-0" title="SALVA">

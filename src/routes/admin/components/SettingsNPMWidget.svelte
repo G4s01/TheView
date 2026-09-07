@@ -3,8 +3,10 @@
 	import UrlInput from '$lib/components/ui/UrlInput.svelte';
 	import SaveButton from '$lib/components/ui/SaveButton.svelte';
 	import BackButton from '$lib/components/ui/BackButton.svelte';
+	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
+	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 	import { slide } from 'svelte/transition';
-	import { Eye, EyeOff, Trash } from "@lucide/svelte";
+	import { Eye, EyeOff } from "@lucide/svelte";
 
 	let {
 		npmUrlCombined = $bindable(),
@@ -12,14 +14,14 @@
 		npmPassword = $bindable(),
 		isNpmEditing = $bindable(),
 		showNpmPassword = $bindable(),
-		showNpmDisconnectModal = $bindable()
+		onDisconnect
 	} = $props<{
 		npmUrlCombined: string;
 		npmEmail: string;
 		npmPassword: string;
 		isNpmEditing: boolean;
 		showNpmPassword: boolean;
-		showNpmDisconnectModal: boolean;
+		onDisconnect: () => void;
 	}>();
 
 	let originalUrl = $state(npmUrlCombined);
@@ -46,15 +48,15 @@
 <div class="bg-card text-card-foreground rounded-2xl shadow-lg border border-border">
 	<div class="p-6">
 		<div class="flex items-center space-x-3 mb-6">
-			<img src="https://cdn.simpleicons.org/nginxproxymanager/4B5563" alt="NPM" class="w-8 h-8" />
+			<ServiceIcon icon="nginx-proxy-manager" name="NPM" size="lg" iconStyle="rounded-xl" />
 			<div>
 				<h3 class="text-xl font-bold uppercase tracking-wider text-foreground">NGINX PROXY MANAGER</h3>
 				<p class="text-sm text-muted-foreground">COLLEGA E SCOVA I SERVIZI ESPOSTI</p>
 			</div>
 			<div class="flex-1"></div>
 			{#if npmUrlCombined && npmEmail && npmPassword && !isNpmEditing}
-				<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
-					<span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
+				<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent text-accent-foreground">
+					<span class="w-2 h-2 rounded-full bg-accent-foreground mr-2"></span>
 					CONFIGURATO
 				</span>
 			{:else}
@@ -113,7 +115,7 @@
 		{:else}
 			<div class="bg-muted text-muted-foreground rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-border" transition:slide>
 				<div class="flex items-center gap-3 mb-4 sm:mb-0">
-					<div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg">
+					<div class="p-2 bg-accent/20 text-accent rounded-lg">
 						<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
 					</div>
 					<div>
@@ -122,15 +124,10 @@
 					</div>
 				</div>
 				<div class="flex items-center space-x-3 w-full sm:w-auto justify-end">
-					<button 
-						type="button"
-						aria-label="Disconnetti NPM"
-						title="Disconnetti NPM"
-						onclick={() => showNpmDisconnectModal = true} 
-						class="text-red-500 hover:text-red-600 dark:text-red-400 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-					>
-						<Trash class="w-5 h-5" strokeWidth={1.5} />
-					</button>
+					<ConfirmDeleteButton 
+						class="w-9 h-9"
+						onConfirm={onDisconnect}
+					/>
 					<button onclick={() => { isNpmEditing = true; showNpmPassword = false; }} class="px-4 py-2 bg-card border border-border text-foreground text-sm font-bold uppercase tracking-wider rounded-xl shadow-sm hover:bg-muted transition-colors">
 						MODIFICA
 					</button>

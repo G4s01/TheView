@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Settings, Moon, Link, LogOut, ArrowUp, LogIn } from "@lucide/svelte";
+	import { Settings, Moon, Pencil, PencilOff, LogOut, ArrowUp, LogIn } from "@lucide/svelte";
 	import './layout.css';
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import { appState } from '$lib/client/state.svelte';
@@ -77,7 +77,7 @@
 
 <svelte:window onscroll={handleScroll} />
 
-<div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
+<div class="flex flex-col min-h-screen bg-background text-foreground">
 	{#if $page.url.pathname !== '/setup'}
 	<!-- Topbar Header -->
 	{#if isNavbarHidden}
@@ -91,7 +91,7 @@
 	
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<header 
-		class="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-transform duration-300 {isNavbarHidden ? '-translate-y-full' : 'translate-y-0'}"
+		class="sticky top-0 z-40 bg-card border-b border-border transition-transform duration-300 {isNavbarHidden ? '-translate-y-full' : 'translate-y-0'}"
 		onmouseleave={() => { if (!data.stickyNavbar && !$page.url.pathname.startsWith('/admin')) isNavbarHidden = true; }}
 	>
 		<div class="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16 max-w-[1920px] mx-auto">
@@ -100,13 +100,13 @@
 			<div class="flex-1 flex items-center justify-start min-w-50">
 				<div class="flex items-center space-x-3">
 					{#if $page.url.pathname.startsWith('/admin')}
-						<a href="/" class="flex items-center justify-center p-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors shadow-sm" title="Torna alla Dashboard">
+						<a href="/" class="flex items-center justify-center p-2 bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-xl transition-colors shadow-sm" title="Torna alla Dashboard">
 							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
 						</a>
 					{/if}
 					<a href="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
 						<img src="/favicon.svg" alt="TheView Logo" class="w-8 h-8" />
-						<span class="hidden sm:inline text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-500 to-purple-500">TheView</span>
+						<span class="hidden sm:inline text-xl font-bold text-foreground tracking-tight">TheView</span>
 					</a>
 				</div>
 			</div>
@@ -115,16 +115,16 @@
 			<div class="hidden md:flex w-full max-w-7xl shrink px-4">
 				{#if $page.url.pathname.startsWith('/admin')}
 					<nav class="flex items-center w-full space-x-3">
-						<button onclick={() => appState.adminTab = 'services'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'services' ? 'border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}">
+						<button onclick={() => appState.adminTab = 'services'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'services' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 							Servizi
 						</button>
-						<button onclick={() => appState.adminTab = 'categories'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'categories' ? 'border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}">
+						<button onclick={() => appState.adminTab = 'categories'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'categories' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 							Categorie
 						</button>
-						<button onclick={() => appState.adminTab = 'discovery'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'discovery' ? 'border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}">
+						<button onclick={() => appState.adminTab = 'discovery'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'discovery' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 							Discovery
 						</button>
-						<button onclick={() => appState.adminTab = 'settings'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'settings' ? 'border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}">
+						<button onclick={() => appState.adminTab = 'settings'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'settings' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 							Impostazioni
 						</button>
 					</nav>
@@ -134,13 +134,13 @@
 						{#if data.showCategoriesDesktop}
 							{#each categories as category}
 								{#if category.count > 0 || appState.isEditMode}
-									<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 hover:border-gray-300 dark:hover:bg-gray-800/50 dark:hover:border-gray-600">
+									<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-border text-muted-foreground hover:bg-muted hover:text-foreground">
 										{category.name}
 									</a>
 								{/if}
 							{/each}
 						{:else if data.customNavbarTitleDesktop}
-							<span class="px-4 py-2 text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 whitespace-nowrap">
+							<span class="px-4 py-2 text-sm font-bold uppercase tracking-wider text-foreground whitespace-nowrap">
 								{data.customNavbarTitleDesktop}
 							</span>
 						{/if}
@@ -151,34 +151,38 @@
 
 			<!-- Right Column (Actions) -->
 			<div class="flex-1 flex items-center justify-end min-w-37.5 space-x-2 sm:space-x-4">
-				<div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700 transition-colors {data.isAdmin && appState.isEditMode ? 'ring-2 ring-blue-500 border-blue-500' : ''}">
+				<div class="flex items-center bg-muted rounded-lg p-1 border border-border transition-colors {data.isAdmin && appState.isEditMode ? 'ring-2 ring-primary border-primary' : ''}">
 					{#if data.isAdmin}
-						<a href="/admin" class="relative p-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors" title="Pannello Amministrazione">
+						<a href="/admin" class="relative p-1.5 text-muted-foreground hover:text-foreground transition-colors" title="Pannello Amministrazione">
 							<Settings class="h-5 w-5" strokeWidth={1.5} />
 							{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
-								<div class="absolute -top-1 -right-1 bg-red-500 rounded-full text-white p-0.5 animate-bounce shadow-sm ring-1 ring-white dark:ring-gray-800" title="Nuova versione disponibile!">
+								<div class="absolute -top-1 -right-1 bg-destructive rounded-full text-destructive-foreground p-0.5 animate-bounce shadow-sm ring-1 ring-background" title="Nuova versione disponibile!">
 									<ArrowUp class="w-2.5 h-2.5" strokeWidth={1.5} />
 								</div>
 							{/if}
 						</a>
 						{#if data.showEditButton && $page.url.pathname === '/'}
-						<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-						<button class="p-1.5 transition-colors {appState.isEditMode ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'}" onclick={() => appState.isEditMode = !appState.isEditMode} title={appState.isEditMode ? "Chiudi Modalità Modifica" : "Modalità Modifica"}>
-							<Link class="h-5 w-5" strokeWidth={1.5} />
+						<div class="w-px h-4 bg-border mx-1"></div>
+						<button class="p-1.5 transition-colors {appState.isEditMode ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" onclick={() => appState.isEditMode = !appState.isEditMode} title={appState.isEditMode ? "DISATTIVA" : "MODIFICA"}>
+							{#if appState.isEditMode}
+								<Pencil class="h-5 w-5" strokeWidth={1.5} />
+							{:else}
+								<PencilOff class="h-5 w-5" strokeWidth={1.5} />
+							{/if}
 						</button>
 						{/if}
-						<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-						<button class="p-1.5 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors" onclick={async () => { await fetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); window.location.reload(); }} title="Esci dalla sessione">
+						<div class="w-px h-4 bg-border mx-1"></div>
+						<button class="p-1.5 text-destructive hover:opacity-80 transition-colors" onclick={async () => { await fetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); window.location.reload(); }} title="Esci dalla sessione">
 							<LogOut class="h-5 w-5" strokeWidth={1.5} />
 						</button>
 					{:else}
-						<button class="p-1.5 text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400 transition-colors" onclick={() => data.needsSetup ? goto('/setup') : showLogin = true} title="Accedi">
+						<button class="p-1.5 text-primary hover:text-primary/80 transition-colors" onclick={() => data.needsSetup ? goto('/setup') : showLogin = true} title="Accedi">
 							<LogIn class="h-5 w-5" strokeWidth={1.5} />
 						</button>
 					{/if}
 				</div>
 				<div class="flex items-center space-x-1">
-										<button class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" onclick={() => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('theview-color-scheme', isDark ? 'dark' : 'light'); }} title="Tema Chiaro/Scuro">
+										<button class="p-2 text-muted-foreground hover:text-foreground transition-colors" onclick={() => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('theview-color-scheme', isDark ? 'dark' : 'light'); }} title="Tema Chiaro/Scuro">
 						<Moon class="h-5 w-5" strokeWidth={1.5} />
 					</button>
 				</div>
@@ -187,18 +191,18 @@
 
 		<!-- Mobile Header Tabs (if admin) -->
 		{#if $page.url.pathname.startsWith('/admin')}
-		<div class="md:hidden relative border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/90 w-full" style="-webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent);">
+		<div class="md:hidden relative border-t border-border bg-card/90 w-full" style="-webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent);">
 			<nav class="flex items-center space-x-2 px-4 py-3 overflow-x-auto no-scrollbar relative z-0">
-			<button onclick={() => appState.adminTab = 'services'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'services' ? 'border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}">
+			<button onclick={() => appState.adminTab = 'services'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'services' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 				Servizi
 			</button>
-			<button onclick={() => appState.adminTab = 'categories'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'categories' ? 'border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}">
+			<button onclick={() => appState.adminTab = 'categories'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'categories' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 				Categorie
 			</button>
-			<button onclick={() => appState.adminTab = 'discovery'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'discovery' ? 'border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}">
+			<button onclick={() => appState.adminTab = 'discovery'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'discovery' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 				Discovery
 			</button>
-			<button onclick={() => appState.adminTab = 'settings'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'settings' ? 'border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'}">
+			<button onclick={() => appState.adminTab = 'settings'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'settings' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 				Impostazioni
 			</button>
 			<!-- spacer for right padding scroll -->
@@ -206,18 +210,18 @@
 			</nav>
 		</div>
 		{:else}
-		<div class="md:hidden relative border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/90 w-full" style="-webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent);">
+		<div class="md:hidden relative border-t border-border bg-card/90 w-full" style="-webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent);">
 			<nav class="flex items-center space-x-2 px-4 py-3 overflow-x-auto no-scrollbar relative z-0">
 			{#if data.showCategoriesMobile}
 				{#each categories as category}
 					{#if category.count > 0 || appState.isEditMode}
-					<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 hover:border-gray-300 dark:hover:bg-gray-800/50 dark:hover:border-gray-600">
+					<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-border text-muted-foreground hover:bg-muted hover:text-foreground">
 						{category.name}
 					</a>
 					{/if}
 				{/each}
 			{:else if data.customNavbarTitleMobile}
-				<div class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 whitespace-nowrap">
+				<div class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider text-foreground whitespace-nowrap">
 					{data.customNavbarTitleMobile}
 				</div>
 			{/if}
@@ -236,10 +240,10 @@
 		</div>
 		<footer class="w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-end items-center mt-auto">
 			{#if versionInfo.currentVersion}
-			<div class="flex items-center space-x-1 text-xs font-medium text-gray-400 dark:text-gray-500">
+			<div class="flex items-center space-x-1 text-xs font-medium text-muted-foreground">
 				<span>v{versionInfo.currentVersion}</span>
 				{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
-				<a href={versionInfo.url || 'https://github.com/g4s01/TheView/releases'} target="_blank" rel="noopener noreferrer" class="text-red-500 hover:text-red-600 transition-colors animate-pulse flex items-center" title="Nuova versione {versionInfo.latestVersion} disponibile su GitHub!">
+				<a href={versionInfo.url || 'https://github.com/g4s01/TheView/releases'} target="_blank" rel="noopener noreferrer" class="text-destructive hover:text-destructive/80 transition-colors animate-pulse flex items-center" title="Nuova versione {versionInfo.latestVersion} disponibile su GitHub!">
 					<ArrowUp class="w-4 h-4" strokeWidth={1.5} />
 				</a>
 				{/if}

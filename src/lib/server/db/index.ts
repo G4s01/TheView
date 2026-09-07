@@ -31,7 +31,10 @@ sqlite.exec(`
     docker_image TEXT,
     widget_type TEXT,
     ping_enabled INTEGER DEFAULT 1 NOT NULL,
-    position INTEGER DEFAULT 0
+    position INTEGER DEFAULT 0,
+    size TEXT DEFAULT '1x1' NOT NULL,
+    is_widget INTEGER DEFAULT 0 NOT NULL,
+    require_auth INTEGER DEFAULT 0 NOT NULL
   );
 
   CREATE TABLE IF NOT EXISTS settings (
@@ -83,6 +86,39 @@ try {
     );
   } else if (!hasContainerId && !hasDockerImage) {
     sqlite.exec(`ALTER TABLE services ADD COLUMN docker_image TEXT;`);
+  }
+
+  const hasSize = columns.some((c) => c.name === "size");
+  if (!hasSize) {
+    sqlite.exec(
+      `ALTER TABLE services ADD COLUMN size TEXT DEFAULT '1x1' NOT NULL;`,
+    );
+  }
+  const hasIsWidget = columns.some((c) => c.name === "is_widget");
+  if (!hasIsWidget) {
+    sqlite.exec(
+      `ALTER TABLE services ADD COLUMN is_widget INTEGER DEFAULT 0 NOT NULL;`,
+    );
+  }
+  const hasRequireAuth = columns.some((c) => c.name === "require_auth");
+  if (!hasRequireAuth) {
+    sqlite.exec(
+      `ALTER TABLE services ADD COLUMN require_auth INTEGER DEFAULT 0 NOT NULL;`,
+    );
+  }
+
+  // Safely drop old columns if they exist (SQLite 3.35.0+)
+  const hasRowSpan = columns.some((c) => c.name === "row_span");
+  if (hasRowSpan) {
+    try {
+      sqlite.exec(`ALTER TABLE services DROP COLUMN row_span;`);
+    } catch (e) {}
+  }
+  const hasColSpan = columns.some((c) => c.name === "col_span");
+  if (hasColSpan) {
+    try {
+      sqlite.exec(`ALTER TABLE services DROP COLUMN col_span;`);
+    } catch (e) {}
   }
 } catch (e: any) {
   console.error("Migration error:", e.message);

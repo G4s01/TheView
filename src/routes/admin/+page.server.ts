@@ -43,9 +43,15 @@ export const actions: Actions = {
       iconToSave = iconToSave.substring(1);
     }
     const description = data.get("description")?.toString() || null;
-    const widgetType = data.get("widgetType")?.toString() || null;
+    let widgetType = data.get("widgetType")?.toString() || null;
+    if (widgetType === "none") widgetType = null;
     const pingEnabled = data.get("pingEnabled") === "on";
     const dockerImage = data.get("dockerImage")?.toString() || null;
+    const size = (data.get("size")?.toString() || "1x1") as
+      | "1x1"
+      | "2x1"
+      | "2x2"
+      | "1x2";
 
     try {
       await db.insert(services).values({
@@ -57,6 +63,7 @@ export const actions: Actions = {
         widgetType,
         pingEnabled,
         dockerImage,
+        size,
       });
       return { success: true };
     } catch (error) {
@@ -82,9 +89,15 @@ export const actions: Actions = {
       iconToSave = iconToSave.substring(1);
     }
     const description = data.get("description")?.toString() || null;
-    const widgetType = data.get("widgetType")?.toString() || null;
+    let widgetType = data.get("widgetType")?.toString() || null;
+    if (widgetType === "none") widgetType = null;
     const pingEnabled = data.get("pingEnabled") === "on";
     const dockerImage = data.get("dockerImage")?.toString() || null;
+    const size = (data.get("size")?.toString() || "1x1") as
+      | "1x1"
+      | "2x1"
+      | "2x2"
+      | "1x2";
 
     try {
       await db
@@ -98,6 +111,7 @@ export const actions: Actions = {
           widgetType,
           pingEnabled,
           dockerImage,
+          size,
         })
         .where(eq(services.id, parseInt(id)));
       return { success: true };

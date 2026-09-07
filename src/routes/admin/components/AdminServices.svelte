@@ -13,6 +13,7 @@
 	import { ArrowUpCircle, Box, GripHorizontal, Plus, AlertTriangle, Upload, Check, Trash2, X } from "@lucide/svelte";
 	import ServiceForm from '$lib/components/ServiceForm.svelte';
 	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
+	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
 
 	let { services, localCategories = $bindable() } = $props();
 
@@ -154,7 +155,7 @@
 				
 				<ul 
 					class="divide-y divide-border min-h-15"
-					use:dndzone={{items: groupedServices[catId], flipDurationMs, dropTargetStyle: { outline: '2px dashed #3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)' }}}
+					use:dndzone={{items: groupedServices[catId], flipDurationMs, dropTargetStyle: { outline: '2px dashed hsl(var(--primary))', backgroundColor: 'hsl(var(--primary) / 0.05)' }}}
 					onconsider={(e) => handleDndConsider(e, catId)}
 					onfinalize={(e) => handleDndFinalize(e, catId)}
 				>
@@ -169,23 +170,7 @@
 								<div class="flex items-center justify-between w-full">
 									<div class="flex items-center">
 										<GripHorizontal class="h-5 w-5 text-muted-foreground mr-3 hidden sm:block cursor-grab" strokeWidth={1.5} />
-										{#if service.iconDetails}
-											<div class="h-8 w-8 rounded-lg flex items-center justify-center mr-3 shadow-sm border border-border bg-muted">
-												{#if service.iconDetails.type === 'custom' || service.iconDetails.type === 'brand'}
-													<img src={service.iconDetails.value} alt={service.name} class="h-5 w-5 object-contain" />
-												{:else}
-													<Box class="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-												{/if}
-											</div>
-										{:else if service.icon}
-											<div class="h-8 w-8 rounded-lg flex items-center justify-center mr-3 shadow-sm border border-border bg-muted-foreground">
-												<span class="text-sm font-bold uppercase text-white">{service.icon.charAt(0)}</span>
-											</div>
-										{:else}
-											<div class="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center mr-3 text-muted-foreground">
-												<Box class="w-5 h-5" strokeWidth={1.5} />
-											</div>
-										{/if}
+										<ServiceIcon icon={service.iconDetails?.value || service.icon} name={service.name} size="lg" iconStyle="rounded-xl" class="mr-3 shadow-sm border border-border" />
 										<div>
 											<p class="text-sm font-bold text-foreground uppercase tracking-wider">{service.name}</p>
 											<p class="text-xs text-muted-foreground font-medium truncate w-48 sm:w-64 md:w-auto">{service.url}</p>
@@ -194,7 +179,7 @@
 									<div class="flex items-center space-x-2">
 										{#if updateStatuses[service.id]?.updateAvailable}
 											<a href={updateStatuses[service.id].updateUrl} target="_blank" rel="noopener noreferrer" class="p-2 text-destructive hover:text-destructive/80 transition-colors relative" title="Aggiornamento Disponibile!">
-												<span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-40 animate-ping"></span>
+												<span class="absolute inline-flex h-full w-full rounded-full bg-destructive opacity-40 animate-ping"></span>
 												<ArrowUpCircle class="w-5 h-5 animate-pulse relative" />
 											</a>
 										{/if}
@@ -219,7 +204,7 @@
 								
 								{#if editingServiceId === service.id}
 									<div transition:slide class="w-full mt-4 relative cursor-default" onclick={(e) => e.stopPropagation()} role="presentation">
-										<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-blue-400 to-indigo-500 rounded-t-xl z-10"></div>
+										<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-accent rounded-t-xl z-10"></div>
 										<div class="p-5 bg-card text-card-foreground border border-border rounded-xl shadow-md">
 											<ServiceForm 
 												mode="edit" 

@@ -6,6 +6,7 @@
 	import { marked } from "marked";
 	import DOMPurify from "isomorphic-dompurify";
 	import { Button } from "$lib/components/ui/button";
+	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
 
 	let {
 		versionInfo,
@@ -45,12 +46,12 @@
 					<span class="text-base font-bold text-foreground">v{versionInfo.currentVersion || '...'}</span>
 				</div>
 				{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
-					<div class="flex items-center space-x-2 text-red-500 dark:text-red-400">
+					<div class="flex items-center space-x-2 text-destructive">
 						<ArrowUp class="w-4 h-4 animate-bounce" strokeWidth={1.5} />
 						<span class="text-sm font-bold uppercase tracking-wider">Nuova versione disponibile: v{versionInfo.latestVersion}</span>
 					</div>
 				{:else if versionInfo.latestVersion === versionInfo.currentVersion}
-					<div class="flex items-center space-x-2 text-emerald-600 dark:text-emerald-500">
+					<div class="flex items-center space-x-2 text-primary">
 						<Check class="w-4 h-4" strokeWidth={2} />
 						<span class="text-xs font-bold uppercase tracking-wider">Il sistema è aggiornato</span>
 					</div>
@@ -94,13 +95,13 @@
 				<div class="flex items-center gap-2">
 					<Button variant="outline" size="icon" onclick={() => copyChangelog()} title="Copia Changelog">
 						{#if copiedChangelog}
-							<Check class="w-4 h-4 text-emerald-500" strokeWidth={2} />
+							<Check class="w-4 h-4 text-primary" strokeWidth={2} />
 						{:else}
 							<Copy class="w-4 h-4" strokeWidth={1.5} />
 						{/if}
 					</Button>
 					<Button variant="outline" size="icon" href={versionInfo.url} target="_blank" rel="noopener noreferrer" title="Apri su GitHub">
-						<img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/github.svg" class="w-5 h-5 dark:invert opacity-80 hover:opacity-100 transition-opacity" alt="GitHub" />
+						<ServiceIcon icon="github" name="GitHub" size="sm" class="dark:invert opacity-80 hover:opacity-100 transition-opacity" />
 					</Button>
 				</div>
 			</div>

@@ -20,6 +20,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       pingEnabled,
       widgetType,
       dockerImage,
+      size,
     } = await request.json();
 
     if (!id || !name || !url || !categoryId) {
@@ -38,12 +39,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         url,
         icon: iconToSave,
         description: description || null,
-        categoryId,
+        categoryId: parseInt(categoryId.toString()),
         pingEnabled: pingEnabled ?? true,
-        widgetType: widgetType || null,
-        dockerImage: dockerImage !== undefined ? dockerImage : undefined,
+        widgetType: widgetType === "none" ? null : widgetType || null,
+        dockerImage: dockerImage || null,
+        size: size || "1x1",
       })
-      .where(eq(services.id, id));
+      .where(eq(services.id, parseInt(id.toString())));
 
     return json({ success: true });
   } catch (error) {

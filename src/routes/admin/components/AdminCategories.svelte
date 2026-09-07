@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { Loader2, GripHorizontal, Plus, AlertTriangle, Check, Trash2, Box } from "@lucide/svelte";
+	import { Loader2, GripHorizontal, Plus, Check, Box } from "@lucide/svelte";
 	import TextInput from '$lib/components/ui/TextInput.svelte';
 	import SaveButton from '$lib/components/ui/SaveButton.svelte';
+	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
+	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 	import { Button } from "$lib/components/ui/button";
 	import { dndzone } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
@@ -26,21 +28,12 @@
 		];
 	}
 
-	let categoryToDelete = $state<string | number | null>(null);
-
-	function deleteCategory(catId: string | number) {
+	async function deleteCategory(catId: string | number) {
 		if (typeof catId === 'string' && catId.startsWith('new_')) {
 			// Just remove from local array
 			localCategories = localCategories.filter((c: any) => c.id !== catId);
 			return;
 		}
-		categoryToDelete = catId;
-	}
-
-	async function confirmDeleteCategory() {
-		if (categoryToDelete === null) return;
-		const catId = categoryToDelete;
-		categoryToDelete = null;
 
 		// Instant delete for existing ones
 		const formData = new FormData();
@@ -119,18 +112,8 @@
 
 						<div class="hidden sm:flex flex-wrap gap-2 items-center flex-1 min-w-0">
 							{#each catServices as s}
-								<div class="flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-muted relative group cursor-pointer" title={s.name}>
-									{#if s.iconDetails}
-										{#if s.iconDetails.type === 'custom' || s.iconDetails.type === 'brand'}
-											<img src={s.iconDetails.value} alt={s.name} class="h-5 w-5 object-contain" />
-										{:else}
-											<Box class="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-										{/if}
-									{:else if s.icon}
-										<span class="text-sm font-bold uppercase text-muted-foreground">{s.icon.charAt(0)}</span>
-									{:else}
-										<Box class="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
-									{/if}
+								<div title={s.name}>
+									<ServiceIcon icon={s.iconDetails?.value || s.icon} name={s.name} size="lg" iconStyle="rounded-lg" class="border border-border cursor-pointer" />
 								</div>
 							{/each}
 						</div>
@@ -139,25 +122,16 @@
 					<div class="flex flex-row w-full sm:w-auto items-center justify-between sm:justify-end shrink-0 gap-4 mt-2 sm:mt-0">
 						<div class="flex sm:hidden flex-wrap gap-2 items-center">
 							{#each catServices as s}
-								<div class="flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-muted relative group cursor-pointer" title={s.name}>
-									{#if s.iconDetails}
-										{#if s.iconDetails.type === 'custom' || s.iconDetails.type === 'brand'}
-											<img src={s.iconDetails.value} alt={s.name} class="h-5 w-5 object-contain" />
-										{:else}
-											<Box class="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-										{/if}
-									{:else if s.icon}
-										<span class="text-sm font-bold uppercase text-muted-foreground">{s.icon.charAt(0)}</span>
-									{:else}
-										<Box class="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
-									{/if}
+								<div title={s.name}>
+									<ServiceIcon icon={s.iconDetails?.value || s.icon} name={s.name} size="lg" iconStyle="rounded-lg" class="border border-border cursor-pointer" />
 								</div>
 							{/each}
 						</div>
 
-						<Button variant="ghost" size="icon" onclick={() => deleteCategory(category.id)} class="text-destructive hover:text-destructive hover:bg-destructive/10 h-10 w-10" title="Elimina Categoria">
-							<Trash2 class="w-5 h-5" strokeWidth={1.5} />
-						</Button>
+						<ConfirmDeleteButton 
+							onConfirm={() => deleteCategory(category.id)}
+							class="h-10 w-10 shrink-0"
+						/>
 					</div>
 				</li>
 			{/each}
@@ -173,37 +147,3 @@
 
 	</div>
 </div>
-
-{#if categoryToDelete !== null}
-	<div class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
-		<div class="bg-card text-card-foreground rounded-2xl shadow-xl max-w-sm w-full overflow-hidden transform transition-all border border-border p-6" role="dialog" aria-modal="true">
-			<div class="flex items-center justify-center w-12 h-12 mx-auto bg-destructive/10 rounded-full mb-4">
-				<AlertTriangle class="w-6 h-6 text-destructive" strokeWidth={1.5} />
-			</div>
-			
-			<h3 class="text-lg font-bold text-center text-foreground mb-2">
-				ELIMINA
-			</h3>
-			<p class="text-sm text-center text-muted-foreground mb-6">
-				FACENDOLO <strong>ELIMINI I SUOI SERVIZI</strong>. SEI SICURO?
-			</p>
-			
-			<div class="flex gap-3 justify-center w-full">
-				<Button 
-					variant="outline"
-					class="flex-1"
-					onclick={() => categoryToDelete = null}
-				>
-					ANNULLA
-				</Button>
-				<Button 
-					variant="destructive"
-					class="flex-1"
-					onclick={confirmDeleteCategory}
-				>
-					ELIMINA
-				</Button>
-			</div>
-		</div>
-	</div>
-{/if}

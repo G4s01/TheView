@@ -8,6 +8,7 @@
 	import SettingsSecurity from './SettingsSecurity.svelte';
 	import SettingsBackup from './SettingsBackup.svelte';
 	import SettingsSystem from './SettingsSystem.svelte';
+	import BaseModal from '$lib/components/ui/BaseModal.svelte';
 
 	let modalConfig = $state<{
 		show: boolean;
@@ -159,48 +160,43 @@
 	/>
 </div>
 
-{#if modalConfig.show}
-	<div 
-		class="fixed inset-0 bg-black/50 z-100 flex items-center justify-center p-4 backdrop-blur-sm"
-		role="presentation"
-	>
-		<div 
-			class="bg-background text-foreground rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-border transform transition-all"
-			role="dialog"
-			aria-modal="true"
-		>
-			<h2 class="text-xl font-bold mb-2">{modalConfig.title}</h2>
-			<p class="text-sm text-muted-foreground mb-6">{modalConfig.message}</p>
-			
-			<div class="flex justify-end space-x-3 mt-6">
-				{#if modalConfig.type === 'confirm'}
-					<button 
-						type="button" 
-						onclick={() => modalConfig.show = false}
-						class="px-4 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors border border-border"
-					>
-						Annulla
-					</button>
-					<button 
-						type="button" 
-						onclick={() => {
-							modalConfig.show = false;
-							if (modalConfig.onConfirm) modalConfig.onConfirm();
-						}}
-						class="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive hover:bg-destructive/90 rounded-lg shadow-sm transition-colors"
-					>
-						Procedi
-					</button>
-				{:else}
-					<button 
-						type="button" 
-						onclick={() => modalConfig.show = false}
-						class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg shadow-sm transition-colors"
-					>
-						OK
-					</button>
-				{/if}
-			</div>
+<BaseModal 
+	bind:open={modalConfig.show} 
+	title={modalConfig.title} 
+	description={modalConfig.message}
+>
+	{#snippet children()}
+		<div></div>
+	{/snippet}
+	{#snippet footer()}
+		<div class="flex justify-end space-x-3 w-full">
+			{#if modalConfig.type === 'confirm'}
+				<button 
+					type="button" 
+					onclick={() => modalConfig.show = false}
+					class="px-4 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors border border-border"
+				>
+					Annulla
+				</button>
+				<button 
+					type="button" 
+					onclick={() => {
+						modalConfig.show = false;
+						if (modalConfig.onConfirm) modalConfig.onConfirm();
+					}}
+					class="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive hover:bg-destructive/90 rounded-lg shadow-sm transition-colors"
+				>
+					Procedi
+				</button>
+			{:else}
+				<button 
+					type="button" 
+					onclick={() => modalConfig.show = false}
+					class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg shadow-sm transition-colors"
+				>
+					OK
+				</button>
+			{/if}
 		</div>
-	</div>
-{/if}
+	{/snippet}
+</BaseModal>

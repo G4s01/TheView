@@ -6,6 +6,7 @@
 	import UrlInput from './ui/UrlInput.svelte';
 	import SelectInput from './ui/SelectInput.svelte';
 	import ToggleInput from './ui/ToggleInput.svelte';
+	import ServiceIcon from './ui/ServiceIcon.svelte';
 	import { slide, fade } from 'svelte/transition';
 	import ServiceForm from './ServiceForm.svelte';
 		let { service, liveStatus = null, categories = [], isExpanded = false, showDescription = true, iconStyle = 'rounded-xl', onExpandToggle } = $props<{
@@ -20,6 +21,7 @@
 			categoryId?: number;
 			dockerImage?: string | null;
 			iconDetails?: { type: 'custom' | 'brand' | 'lucide', value: string } | null;
+			size?: string;
 		};
 		liveStatus?: { isOnline: boolean; latencyMs?: number } | null;
 		categories?: { id: number; name: string }[];
@@ -37,7 +39,8 @@
 		categoryId: null as number | null,
 		pingEnabled: false,
 		widgetType: '',
-		dockerImage: ''
+		dockerImage: '',
+		size: '1x1'
 	});
 	
 	let showDeleteConfirm = $state(false);
@@ -68,8 +71,9 @@
 			description: service.description || '',
 			categoryId: service.categoryId || null,
 			pingEnabled: service.pingEnabled ?? true,
-			widgetType: service.widgetType || '',
-			dockerImage: service.dockerImage || ''
+			widgetType: service.widgetType || 'none',
+			dockerImage: service.dockerImage || '',
+			size: service.size || '1x1'
 		};
 		if (onExpandToggle) onExpandToggle(true);
 	}
@@ -104,7 +108,10 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(editService)
 			});
-			window.location.reload();
+			if (res.ok) {
+				Object.assign(service, editService);
+				if (onExpandToggle) onExpandToggle(false);
+			}
 		} catch (err) {
 			console.error(err);
 		} finally {
@@ -129,9 +136,10 @@
 	let bgColor = $derived('');
 	let borderColor = $derived('');
 	let iconBgColor = $derived('');
+	let currentSize = $derived(service.size || '1x1');
 </script>
 
-<div class="relative h-full group">
+<div class="relative h-full w-full group">
 	{#if appState.isEditMode && !isExpanded}
 		<div class="absolute top-2 right-2 flex space-x-1.5 z-20">
 			<button onclick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(); }} class="p-1.5 bg-card/90 rounded-xl border border-border hover:bg-muted shadow-sm transition-colors text-muted-foreground" title="Impostazioni Servizio">
@@ -149,80 +157,76 @@
 	href={appState.isEditMode ? undefined : service.url} 
 	target={appState.isEditMode ? undefined : '_blank'} 
 	rel={appState.isEditMode ? undefined : "noopener noreferrer"}
-	class="flex flex-col relative bg-card text-card-foreground rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-colors duration-200 h-full"
+	class="relative bg-card text-card-foreground rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-colors duration-200 w-full h-full {!isExpanded ? 'overflow-hidden' : 'overflow-visible'} {
+		!isExpanded 
+		? (currentSize === '2x1' ? 'flex flex-row items-center gap-4' 
+			: (currentSize === '2x2' || currentSize === '1x2' ? 'flex flex-col items-center justify-center text-center' 
+			: 'flex flex-col justify-between')) 
+		: 'flex flex-col'
+	}"
 	style="background-color: {bgColor}; border-color: {borderColor};"
 	onclick={(e: Event) => { if (appState.isEditMode) e.preventDefault(); }}
 >
 	{#if !isExpanded}
-		<div class="flex items-start justify-between">
-			<!-- Icon -->
-			<div class="relative">
-				<div 
-					class="h-10 w-10 {iconStyle} flex items-center justify-center shadow-sm"
-					style="background-color: {iconBgColor || '#4B5563'}"
-				>
-					{#if service.iconDetails}
-						{#if service.iconDetails.type === 'custom' || service.iconDetails.type === 'brand'}
-							<img src={service.iconDetails.value} alt={service.name} class="h-6 w-6 object-contain {iconStyle === 'rounded-full' ? 'rounded-full' : (iconStyle === 'rounded-xl' ? 'rounded' : 'rounded-none')}" />
-						{:else}
-							<Box class="h-6 w-6 text-white" strokeWidth={1.5} />
-						{/if}
+		<!-- Status Indicator (top right) now absolute to free up flow layout -->
+		{#if service.pingEnabled && !appState.isEditMode}
+			<div class="absolute top-4 right-4 flex items-center space-x-1.5 z-10" title={tooltipText}>
+				<span class="relative flex h-2.5 w-2.5">
+					{#if status === 'checking'}
+						<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
+					{:else if status === 'online'}
+						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
 					{:else}
-						<Box class="h-6 w-6 text-white" strokeWidth={1.5} />
+						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
 					{/if}
-				</div>
+				</span>
+			</div>
+		{/if}
 
-				{#if dockerVersionInfo && dockerVersionInfo.updateAvailable && !appState.isEditMode}
-					<!-- svelte-ignore a11y_click_events_have_key_events -->
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<div 
-						class="absolute -top-1.5 -right-1.5 flex items-center justify-center z-20 cursor-pointer text-red-500 hover:text-red-600 transition-colors bg-card rounded-full shadow-sm" 
-						title="Aggiornamento disponibile online! Clicca per vedere la release."
-						onclick={(e) => {
-							e.preventDefault();
-							e.stopPropagation();
-							if (dockerVersionInfo?.updateUrl) {
-								window.open(dockerVersionInfo.updateUrl, '_blank');
-							}
-						}}
-					>
-						<span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-40 animate-ping"></span>
-						<ArrowUpCircle class="w-4 h-4 animate-pulse relative" />
-					</div>
-				{/if}
+		<!-- Icon -->
+		<div class="relative flex-shrink-0 {currentSize === '1x1' ? 'w-full flex items-start' : ''}">
+			<div 
+				class="{(currentSize !== '1x1') ? 'h-14 w-14' : 'h-10 w-10'} {iconStyle} flex items-center justify-center shadow-sm"
+				style="background-color: {iconBgColor || '#4B5563'}"
+			>
+				<ServiceIcon {iconStyle} name={service.name} icon={service.icon} size={(currentSize !== '1x1') ? 'lg' : 'md'} />
 			</div>
 
-			<!-- Status Indicator (top right) -->
-			{#if service.pingEnabled && !appState.isEditMode}
-				<div class="flex items-center space-x-1.5" title={tooltipText}>
-					<span class="relative flex h-2.5 w-2.5">
-						{#if status === 'checking'}
-							<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-							<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
-						{:else if status === 'online'}
-							<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-						{:else}
-							<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-						{/if}
-					</span>
+			{#if dockerVersionInfo && dockerVersionInfo.updateAvailable && !appState.isEditMode}
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div 
+					class="absolute -top-1.5 -right-1.5 flex items-center justify-center z-20 cursor-pointer text-red-500 hover:text-red-600 transition-colors bg-card rounded-full shadow-sm" 
+					title="Aggiornamento disponibile online! Clicca per vedere la release."
+					onclick={(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						if (dockerVersionInfo?.updateUrl) {
+							window.open(dockerVersionInfo.updateUrl, '_blank');
+						}
+					}}
+				>
+					<span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-40 animate-ping"></span>
+					<ArrowUpCircle class="w-4 h-4 animate-pulse relative" />
 				</div>
 			{/if}
 		</div>
 
-		<div class="mt-4 flex-1 pb-4">
-			<h3 class="text-base font-semibold text-foreground truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+		<div class="min-w-0 flex flex-col {currentSize === '1x1' ? 'text-left' : (currentSize === '2x1' ? 'flex-1 text-left' : 'mt-4 items-center text-center')}">
+			<h3 class="{(currentSize !== '1x1') ? 'text-xl font-bold' : 'text-base font-semibold'} text-foreground truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors w-full">
 				{service.name}
 			</h3>
 			
-			<div transition:slide|local={{ duration: 250 }}>
+			<div transition:slide|local={{ duration: 250 }} class="w-full">
 				{#if showDescription}
-				<p class="mt-1 text-sm text-muted-foreground line-clamp-2 min-h-10">
+				<p class="mt-1 {(currentSize !== '1x1') ? 'text-base' : 'text-sm'} text-muted-foreground line-clamp-2">
 					{service.description || service.url}
 				</p>
 				{/if}
 				
 				{#if service.widgetType === 'qbittorrent'}
-					<div class="mt-2" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
+					<div class="mt-2 w-full text-left" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
 						<QBittorrentWidget />
 					</div>
 				{/if}
@@ -234,15 +238,7 @@
 				class="h-10 w-10 {iconStyle} flex items-center justify-center shadow-sm"
 				style="background-color: {iconBgColor || '#4B5563'}"
 			>
-				{#if service.iconDetails}
-					{#if service.iconDetails.type === 'custom' || service.iconDetails.type === 'brand'}
-						<img src={service.iconDetails.value} alt={service.name} class="h-6 w-6 object-contain {iconStyle === 'rounded-full' ? 'rounded-full' : (iconStyle === 'rounded-xl' ? 'rounded' : 'rounded-none')}" />
-					{:else}
-						<Box class="h-6 w-6 text-white" strokeWidth={1.5} />
-					{/if}
-				{:else}
-					<Box class="h-6 w-6 text-white" strokeWidth={1.5} />
-				{/if}
+				<ServiceIcon {iconStyle} name={service.name} icon={service.icon} />
 			</div>
 		{/snippet}
 

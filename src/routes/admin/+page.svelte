@@ -26,7 +26,7 @@
 
 
 	{#if form?.error}
-		<div class="p-4 rounded-md bg-red-50 text-red-700 dark:bg-red-900/50 dark:text-red-200">
+		<div class="p-4 rounded-md bg-destructive/10 text-destructive border border-destructive/20">
 			{form.error}
 		</div>
 	{/if}

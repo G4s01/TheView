@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { Eye, EyeOff } from "@lucide/svelte";
-	import { fade, scale } from 'svelte/transition';
+	import BaseModal from '$lib/components/ui/BaseModal.svelte';
+	import TextInput from '$lib/components/ui/TextInput.svelte';
 
-	let { show, onClose, onSuccess } = $props<{
+	let { show = $bindable(), onClose, onSuccess } = $props<{
 		show: boolean;
 		onClose: () => void;
 		onSuccess: () => void;
@@ -43,72 +44,54 @@
 	}
 </script>
 
-{#if show}
-	<!-- Backdrop -->
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<div 
-		class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-		transition:fade={{ duration: 150 }}
-		onclick={onClose}
-		role="presentation"
-	>
-		<!-- Modal -->
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-		<div 
-			class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-sm w-full p-6 border border-gray-200 dark:border-gray-700"
-			transition:scale={{ duration: 150, start: 0.95 }}
-			onclick={(e: Event) => e.stopPropagation()}
-			role="dialog"
-			aria-modal="true"
-			tabindex="-1"
-		>
-			<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Modalità Modifica</h2>
-			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Inserisci la password di amministrazione per abilitare le modifiche.</p>
+<BaseModal 
+	bind:open={show} 
+	title="Modalità Modifica" 
+	description="Inserisci la password di amministrazione per abilitare le modifiche."
+>
+	{#snippet children()}
+		<form id="login-form" onsubmit={handleLogin} class="space-y-4">
+			<div class="relative w-full">
+				<input 
+					type={showPassword ? "text" : "password"} 
+					bind:value={password} 
+					placeholder="Password" 
+					class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10"
+					required
+					use:autofocus
+				/>
+				<button type="button" onclick={() => showPassword = !showPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground">
+					{#if showPassword}
+						<EyeOff class="h-5 w-5" strokeWidth={1.5} />
+					{:else}
+						<Eye class="h-5 w-5" strokeWidth={1.5} />
+					{/if}
+				</button>
+			</div>
 			
-			<form onsubmit={handleLogin} class="space-y-4">
-				<div>
-					<div class="relative w-full">
-						<input 
-							type={showPassword ? "text" : "password"} 
-							bind:value={password} 
-							placeholder="Password" 
-							class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-							required
-							use:autofocus
-						/>
-						<button type="button" onclick={() => showPassword = !showPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-							{#if showPassword}
-								<EyeOff class="h-5 w-5" strokeWidth={1.5} />
-							{:else}
-								<Eye class="h-5 w-5" strokeWidth={1.5} />
-							{/if}
-						</button>
-					</div>
-				</div>
-				
-				{#if error}
-					<p class="text-sm text-red-500">{error}</p>
-				{/if}
-
-				<div class="flex justify-end space-x-3 mt-6">
-					<button 
-						type="button" 
-						onclick={onClose}
-						class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-					>
-						Annulla
-					</button>
-					<button 
-						type="submit" 
-						disabled={loading}
-						class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors disabled:opacity-50"
-					>
-						{loading ? 'Sblocco...' : 'Sblocca'}
-					</button>
-				</div>
-			</form>
+			{#if error}
+				<p class="text-sm text-destructive">{error}</p>
+			{/if}
+		</form>
+	{/snippet}
+	{#snippet footer()}
+		<div class="flex justify-end space-x-3 w-full mt-4">
+			<button 
+				type="button" 
+				onclick={onClose}
+				class="px-4 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors border border-border"
+			>
+				Annulla
+			</button>
+			<button 
+				type="submit" 
+				form="login-form"
+				disabled={loading}
+				class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg shadow-sm transition-colors disabled:opacity-50"
+			>
+				{loading ? 'Sblocco...' : 'Sblocca'}
+			</button>
 		</div>
-	</div>
-{/if}
+	{/snippet}
+</BaseModal>
 

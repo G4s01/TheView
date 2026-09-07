@@ -18,6 +18,7 @@ export async function load() {
       categoryId: services.categoryId,
       position: services.position,
       dockerImage: services.dockerImage,
+      size: services.size,
     })
     .from(services)
     .orderBy(services.position);

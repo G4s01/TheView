@@ -75,9 +75,9 @@
 	{#each Object.entries(localGroups) as [categoryName, services]}
 		{#if services.length > 0 || appState.isEditMode}
 		<section id="{categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="scroll-mt-24">
-			<h2 class="text-lg font-bold uppercase tracking-wider text-gray-900 dark:text-white mb-3 flex items-center">
+			<h2 class="text-lg font-bold uppercase tracking-wider text-foreground mb-3 flex items-center">
 				{#if data.showCategoryCounts}
-				<span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
+				<span class="bg-primary/20 text-primary text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
 					{services.length}
 				</span>
 				{/if}
@@ -85,7 +85,7 @@
 					<input 
 						type="text" 
 						value={categoryName} 
-						class="bg-transparent border-b border-dashed border-gray-400 focus:border-blue-500 focus:outline-none w-auto" 
+						class="bg-transparent border-b border-dashed border-muted-foreground focus:border-primary focus:outline-none w-auto" 
 						title="Modifica Nome Categoria"
 						onchange={async (e) => {
 							const target = e.target as HTMLInputElement;
@@ -105,13 +105,13 @@
 			</h2>
 			
 			<div 
-				class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 min-h-[100px]"
+				class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 min-h-[100px] grid-flow-dense auto-rows-[136px]"
 				use:dndzone={{items: services, flipDurationMs, dragDisabled: !appState.isEditMode || editingServiceId !== null}}
 				onconsider={(e) => handleDndConsider(e, categoryName)}
 				onfinalize={(e) => handleDndFinalize(e, categoryName)}
 			>
 				{#each services as service (service.id)}
-					<div animate:flip={{duration: flipDurationMs}} class="transition-all duration-300 {editingServiceId === service.id ? 'col-span-full md:col-span-full lg:col-span-3 xl:col-span-3 2xl:col-span-3' : ''}">
+					<div animate:flip={{duration: flipDurationMs}} class="transition-all duration-300 h-full w-full {editingServiceId === service.id ? 'overflow-visible' : 'overflow-hidden'} {editingServiceId === service.id ? 'col-span-full md:col-span-full lg:col-span-3 xl:col-span-3 2xl:col-span-3 row-span-3' : (service.size === '2x2' ? 'col-span-2 row-span-2' : service.size === '2x1' ? 'col-span-2 row-span-1' : service.size === '1x2' ? 'col-span-1 row-span-2' : 'col-span-1 row-span-1')}">
 						<ServiceCard {service} liveStatus={statuses[service.id]} categories={data.categories || []} isExpanded={editingServiceId === service.id} onExpandToggle={(val) => editingServiceId = val ? service.id : null} showDescription={data.showServiceDescriptions} iconStyle={data.iconStyle} />
 					</div>
 				{/each}
@@ -121,9 +121,9 @@
 	{/each}
 	
 	{#if Object.keys(localGroups).length === 0}
-		<div class="text-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-			<h3 class="mt-2 text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white">Nessun servizio trovato</h3>
-			<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Inizia aggiungendo un nuovo servizio dal pannello di amministrazione.</p>
+		<div class="text-center py-20 bg-card rounded-xl border border-dashed border-border">
+			<h3 class="mt-2 text-sm font-bold uppercase tracking-wider text-foreground">Nessun servizio trovato</h3>
+			<p class="mt-1 text-sm text-muted-foreground">Inizia aggiungendo un nuovo servizio dal pannello di amministrazione.</p>
 		</div>
 	{/if}
 </div>

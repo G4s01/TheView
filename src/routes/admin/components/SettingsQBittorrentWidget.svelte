@@ -3,6 +3,7 @@
 	import UrlInput from '$lib/components/ui/UrlInput.svelte';
 	import { Eye, EyeOff, Pencil, Plus, X } from "@lucide/svelte";
 	import SaveButton from "$lib/components/ui/SaveButton.svelte";
+	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
 
 	let {
 		qbit_username = $bindable(),
@@ -28,9 +29,7 @@
 	<div class="flex items-center justify-between w-full">
 		<div class="flex items-center space-x-4 flex-1 min-w-0 mr-4">
 			<div class="shrink-0">
-				<div class="h-10 w-10 rounded-xl flex items-center justify-center shadow-sm border border-border bg-muted">
-					<img src="https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/qbittorrent.png" alt="qBittorrent" class="h-6 w-6 object-contain" />
-				</div>
+				<ServiceIcon icon="qbittorrent" name="qBittorrent" size="lg" iconStyle="rounded-xl" class="shadow-sm border border-border bg-card" />
 			</div>
 			<div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 flex-1 min-w-0">
 				<p class="text-sm font-semibold text-foreground uppercase tracking-wider truncate">qBittorrent</p>
@@ -38,13 +37,13 @@
 		</div>
 		
 		<div>
-			<button type="button" onclick={(e: Event) => { e.stopPropagation(); isExpanded = !isExpanded; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm text-white transition-all duration-300 {isExpanded ? 'bg-gray-500 hover:bg-muted-foreground' : 'bg-blue-600 hover:bg-blue-700'} focus:outline-none hover:scale-110">
+			<button type="button" onclick={(e: Event) => { e.stopPropagation(); isExpanded = !isExpanded; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm transition-all duration-300 {isExpanded ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground hover:opacity-90'} focus:outline-none hover:scale-110">
 				<div class="relative w-5 h-5">
 					<Pencil class="absolute top-0 left-0 w-4 h-4 transition-all duration-300 {isExpanded ? 'opacity-60' : ''}" strokeWidth={2.5} />
 					{#if isExpanded}
-						<X class="absolute -bottom-1 -right-1 w-3.5 h-3.5 text-white shadow-sm" strokeWidth={3} />
+						<X class="absolute -bottom-1 -right-1 w-3.5 h-3.5 shadow-sm" strokeWidth={3} />
 					{:else}
-						<Plus class="absolute -bottom-1 -right-1 w-3.5 h-3.5 text-white shadow-sm" strokeWidth={3} />
+						<Plus class="absolute -bottom-1 -right-1 w-3.5 h-3.5 shadow-sm" strokeWidth={3} />
 					{/if}
 				</div>
 			</button>
@@ -54,7 +53,7 @@
 	{#if isExpanded}
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div class="w-full mt-2 relative">
-			<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-blue-500 to-indigo-600 rounded-t-xl z-10"></div>
+			<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-accent rounded-t-xl z-10"></div>
 			<div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border relative space-y-4" onclick={(e) => e.stopPropagation()} role="presentation">
 				<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
 					<div class="md:col-span-6 h-10">
