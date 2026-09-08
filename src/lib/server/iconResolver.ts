@@ -6,7 +6,6 @@ const aliasMap: Record<string, string> = {
   dockhand: "docker",
   "portainer-ce": "portainer",
   pihole: "pi-hole",
-  theview: "svelte",
   homeassistant: "home-assistant",
   jellyfin: "jellyfin",
   plex: "plex",
@@ -63,6 +62,13 @@ const aliasMap: Record<string, string> = {
   adguard: "adguard-home",
 };
 
+const exactMatchOverrides: Record<
+  string,
+  { type: "custom" | "brand" | "lucide"; value: string }
+> = {
+  theview: { type: "custom", value: "/favicon.svg" },
+};
+
 export function normalizeName(name: string): string {
   if (!name) return "";
   let clean = name.toLowerCase().replace(/[^a-z0-9-]/g, "");
@@ -110,13 +116,15 @@ export function resolveIcon(
   containerName?: string | null,
   url?: string | null,
 ): { type: "custom" | "brand" | "lucide"; value: string } {
-  // 1. Prioritize user custom icon (upload or direct URL)
+  // 1. Priorità all'icona custom definita dall'utente
   if (customIcon) {
     if (customIcon.startsWith("http") || customIcon.startsWith("/")) {
       return { type: "custom", value: customIcon };
     }
-    // If it's a typed brand name (e.g. "radarr")
     const cleanCustom = normalizeName(customIcon);
+    if (exactMatchOverrides[cleanCustom]) {
+      return exactMatchOverrides[cleanCustom];
+    }
     if (dashboardIcons.includes(cleanCustom)) {
       return {
         type: "brand",
@@ -131,29 +139,54 @@ export function resolveIcon(
     }
   }
 
-  // 2. Cascade logic
-  const candidates = [
-    extractFromImage(dockerImage),
-    normalizeName(containerName || ""),
-    extractFromDomain(url),
-  ].filter(Boolean);
+  // 2. OVERRIDE STATICO PER "THEVIEW" (Auto-riconoscimento)
+  if (
+    (dockerImage && dockerImage.includes("ghcr.io/g4s01/theview")) ||
+    (containerName && containerName.toLowerCase() === "theview")
+  ) {
+    return { type: "custom", value: "/favicon.svg" };
+  }
 
-  for (const candidate of candidates) {
+  // Helper per la verifica all'interno di dashboardIcons
+  const findBrandIcon = (candidate: string) => {
+    if (!candidate) return null;
+    if (exactMatchOverrides[candidate]) {
+      return exactMatchOverrides[candidate];
+    }
     if (dashboardIcons.includes(candidate)) {
       return {
-        type: "brand",
+        type: "brand" as const,
         value: `https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/${candidate}.svg`,
       };
     }
     if (dashboardIcons.includes(`${candidate}-dark`)) {
       return {
-        type: "brand",
+        type: "brand" as const,
         value: `https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/${candidate}-dark.svg`,
       };
     }
-  }
+    return null;
+  };
 
-  // 3. Fallback (DuckDNS Paperella invece del box grigio!)
+  // 3. Discovery a cascata: IMMAGINE > CONTAINER > DOMINIO
+  // Valutiamo rigorosamente in questo ordine per evitare match errati
+
+  // A) Valuta l'estrazione dall'immagine Docker
+  const imageCandidate = extractFromImage(dockerImage);
+  const imageMatch = findBrandIcon(imageCandidate);
+  if (imageMatch) return imageMatch;
+
+  // B) Valuta il nome del container
+  const containerCandidate = normalizeName(containerName || "");
+  const containerMatch = findBrandIcon(containerCandidate);
+  if (containerMatch) return containerMatch;
+
+  // C) Valuta il dominio (valutato per ultimo per evitare falsi positivi)
+  const domainCandidate = extractFromDomain(url);
+  const domainMatch = findBrandIcon(domainCandidate);
+  if (domainMatch) return domainMatch;
+
+  // 4. Fallback (DuckDNS Paperella)
   return {
     type: "brand",
     value:
