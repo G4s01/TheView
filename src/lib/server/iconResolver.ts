@@ -1,66 +1,45 @@
+import { DEFAULT_ALIASES } from "./defaultAliases";
 import { dashboardIcons } from "./dashboardIcons";
+import fs from "node:fs";
+import path from "node:path";
 
-const aliasMap: Record<string, string> = {
-  "wg-easy": "wireguard",
-  npm: "nginx-proxy-manager",
-  dockhand: "docker",
-  "portainer-ce": "portainer",
-  pihole: "pi-hole",
-  homeassistant: "home-assistant",
-  jellyfin: "jellyfin",
-  plex: "plex",
-  radarr: "radarr",
-  sonarr: "sonarr",
-  lidarr: "lidarr",
-  readarr: "readarr",
-  prowlarr: "prowlarr",
-  bazarr: "bazarr",
-  overseerr: "overseerr",
-  tautulli: "tautulli",
-  qbittorrent: "qbittorrent",
-  transmission: "transmission",
-  deluge: "deluge",
-  rtorrent: "rtorrent",
-  nzbget: "nzbget",
-  sabnzbd: "sabnzbd",
-  nextcloud: "nextcloud",
-  owncloud: "owncloud",
-  syncthing: "syncthing",
-  filebrowser: "filebrowser",
-  vaultwarden: "vaultwarden",
-  bitwarden: "bitwarden",
-  "uptime-kuma": "uptime-kuma",
-  grafana: "grafana",
-  prometheus: "prometheus",
-  influxdb: "influxdb",
-  telegraf: "telegraf",
-  mariadb: "mariadb",
-  postgres: "postgresql",
-  postgresql: "postgresql",
-  mysql: "mysql",
-  redis: "redis",
-  mongodb: "mongodb",
-  nginx: "nginx",
-  apache: "apache",
-  traefik: "traefik",
-  caddy: "caddy",
-  authelia: "authelia",
-  authentik: "authentik",
-  keycloak: "keycloak",
-  guacamole: "apacheguacamole",
-  gitea: "gitea",
-  forgejo: "forgejo",
-  gitlab: "gitlab",
-  github: "github",
-  portainer: "portainer",
-  unraid: "unraid",
-  truenas: "truenas",
-  proxmox: "proxmox",
-  opnsense: "opnsense",
-  pfsense: "pfsense",
-  adguardhome: "adguard-home",
-  adguard: "adguard-home",
-};
+
+const ALIASES_FILE_PATH = path.join(process.cwd(), "data", "aliases.json");
+const CACHE_TTL = 5000; // 5 secondi
+let cachedAliases: Record<string, string> | null = null;
+let lastCacheTime = 0;
+
+function getAliases(): Record<string, string> {
+  const now = Date.now();
+  if (cachedAliases && now - lastCacheTime < CACHE_TTL) {
+    return cachedAliases;
+  }
+
+  try {
+    if (!fs.existsSync(ALIASES_FILE_PATH)) {
+      fs.mkdirSync(path.dirname(ALIASES_FILE_PATH), { recursive: true });
+      fs.writeFileSync(
+        ALIASES_FILE_PATH,
+        JSON.stringify(DEFAULT_ALIASES, null, 2),
+        "utf-8"
+      );
+      cachedAliases = DEFAULT_ALIASES;
+    } else {
+      const content = fs.readFileSync(ALIASES_FILE_PATH, "utf-8");
+      const parsed = JSON.parse(content);
+      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+        throw new Error("Il file JSON non contiene un oggetto valido");
+      }
+      cachedAliases = parsed as Record<string, string>;
+    }
+  } catch (error) {
+    console.warn("[iconResolver] Errore durante la lettura di aliases.json:", error);
+    cachedAliases = DEFAULT_ALIASES;
+  }
+
+  lastCacheTime = now;
+  return cachedAliases;
+}
 
 const exactMatchOverrides: Record<
   string,
@@ -72,15 +51,25 @@ const exactMatchOverrides: Record<
 export function normalizeName(name: string): string {
   if (!name) return "";
   let clean = name.toLowerCase().replace(/[^a-z0-9-]/g, "");
-  return aliasMap[clean] || clean;
+  const aliases = getAliases();
+  return aliases[clean] || clean;
 }
 
 export function extractFromImage(image?: string | null): string {
   if (!image) return "";
+
+  // Rimuove registry/namespace (tutto ciò che c'è prima dell'ultimo /)
   const parts = image.split("/");
   const lastPart = parts[parts.length - 1];
-  const name = lastPart.split(":")[0];
-  return normalizeName(name);
+
+  // Rimuove digest se presente (es. @sha256:12345)
+  const withoutDigest = lastPart.split("@")[0];
+
+  // Rimuove il tag (tutto ciò che c'è dopo i :)
+  const name = withoutDigest.split(":")[0];
+
+  // Ritorna esattamente e solo il nome estratto (es. dockhand)
+  return name;
 }
 
 export function extractFromDomain(url?: string | null): string {
@@ -96,15 +85,15 @@ export function extractFromDomain(url?: string | null): string {
     const parts = hostname.split(".");
 
     // Se c'è un solo elemento (es. "localhost"), restituiscilo
-    if (parts.length === 1) return normalizeName(parts[0]);
+    if (parts.length === 1) return parts[0];
 
     // Prendi la prima parte (es. "radarr" in "radarr.duckdns.org")
     // Se la prima parte è "www", prendi la seconda
     if (parts[0] === "www" && parts.length > 1) {
-      return normalizeName(parts[1]);
+      return parts[1];
     }
 
-    return normalizeName(parts[0]);
+    return parts[0];
   } catch (e) {
     return "";
   }
@@ -169,22 +158,33 @@ export function resolveIcon(
   };
 
   // 3. Discovery a cascata: IMMAGINE > CONTAINER > DOMINIO
-  // Valutiamo rigorosamente in questo ordine per evitare match errati
+  // Valutiamo rigorosamente in questo ordine per evitare match errati tramite blocchi if/else
 
   // A) Valuta l'estrazione dall'immagine Docker
-  const imageCandidate = extractFromImage(dockerImage);
+  const rawImageName = extractFromImage(dockerImage);
+  const imageCandidate = rawImageName ? normalizeName(rawImageName) : "";
   const imageMatch = findBrandIcon(imageCandidate);
-  if (imageMatch) return imageMatch;
 
-  // B) Valuta il nome del container
-  const containerCandidate = normalizeName(containerName || "");
-  const containerMatch = findBrandIcon(containerCandidate);
-  if (containerMatch) return containerMatch;
+  if (imageMatch) {
+    return imageMatch; // Cortocircuito immediato
+  } else {
+    // B) Valuta il nome del container (se l'immagine non ha prodotto risultati)
+    const containerCandidate = normalizeName(containerName || "");
+    const containerMatch = findBrandIcon(containerCandidate);
 
-  // C) Valuta il dominio (valutato per ultimo per evitare falsi positivi)
-  const domainCandidate = extractFromDomain(url);
-  const domainMatch = findBrandIcon(domainCandidate);
-  if (domainMatch) return domainMatch;
+    if (containerMatch) {
+      return containerMatch;
+    } else {
+      // C) ULTIMA SPIAGGIA assoluta: Valuta il dominio se immagine e container falliscono
+      const rawDomain = extractFromDomain(url);
+      const domainCandidate = rawDomain ? normalizeName(rawDomain) : "";
+      const domainMatch = findBrandIcon(domainCandidate);
+
+      if (domainMatch) {
+        return domainMatch;
+      }
+    }
+  }
 
   // 4. Fallback (DuckDNS Paperella)
   return {
