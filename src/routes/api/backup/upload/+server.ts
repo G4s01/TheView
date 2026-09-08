@@ -2,9 +2,6 @@ import { json } from "@sveltejs/kit";
 import { env } from "$env/dynamic/private";
 import fs from "fs";
 import path from "path";
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 
 export async function POST({ request, cookies }) {
   if (cookies.get("admin_session") !== "active") {
@@ -36,14 +33,6 @@ export async function POST({ request, cookies }) {
     // Sovrascrive il database fisico atomicamente
     fs.writeFileSync(resolvedPath + ".new", buffer);
     fs.renameSync(resolvedPath + ".new", resolvedPath);
-
-    // Eseguiamo la migrazione ufficiale Drizzle sul nuovo file
-    const sqlite = new Database(resolvedPath);
-    const dbInstance = drizzle(sqlite);
-    migrate(dbInstance, {
-      migrationsFolder: path.resolve("src/lib/server/db/migrations"),
-    });
-    sqlite.close();
 
     // Riavvia il container dopo 1 secondo per ricaricare le istanze globali di DB/Drizzle
     setTimeout(() => {

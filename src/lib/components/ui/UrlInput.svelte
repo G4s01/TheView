@@ -4,6 +4,7 @@
     import { clickOutside } from '$lib/actions/clickOutside';
     import { scale } from 'svelte/transition';
 	import { Label } from "$lib/components/ui/label";
+	import * as Popover from "$lib/components/ui/popover";
 
     interface Props extends HTMLInputAttributes {
         label: string;
@@ -64,21 +65,15 @@
 </script>
 
 <div class="relative w-full h-10 flex flex-row items-center group/url {rest.class || ''}">
-    <div class="relative h-10 w-21.25 shrink-0" use:clickOutside={() => isProtocolOpen = false}>
-        <button 
-            type="button"
-            class="flex items-center justify-between h-10 w-full bg-transparent border border-input border-r-0 rounded-l-md pl-3 pr-2 text-sm font-medium text-muted-foreground focus:outline-none transition-colors group-focus-within/url:border-primary group-focus-within/url:border-y-2 group-focus-within/url:border-l-2 group-focus-within/url:text-foreground uppercase tracking-wider"
-            onclick={(e) => { e.preventDefault(); isProtocolOpen = !isProtocolOpen; }}
-        >
-            <span>{protocol}</span>
-            <ChevronDown class="h-4 w-4 text-muted-foreground transition-transform duration-200 {isProtocolOpen ? 'rotate-180' : ''}" strokeWidth={1.5} />
-        </button>
-        
-        {#if isProtocolOpen}
-            <div 
-                class="absolute z-50 w-25 mt-1 bg-popover border border-border rounded-md shadow-lg overflow-hidden origin-top-left"
-                transition:scale={{ duration: 150, start: 0.95 }}
+    <div class="relative h-10 w-21.25 shrink-0">
+        <Popover.Root bind:open={isProtocolOpen}>
+            <Popover.Trigger
+                class="flex items-center justify-between h-10 w-full bg-transparent border border-input border-r-0 rounded-l-md pl-3 pr-2 text-sm font-medium text-muted-foreground focus:outline-none transition-colors group-focus-within/url:border-primary group-focus-within/url:border-y-2 group-focus-within/url:border-l-2 group-focus-within/url:text-foreground uppercase tracking-wider"
             >
+                <span>{protocol}</span>
+                <ChevronDown class="h-4 w-4 text-muted-foreground transition-transform duration-200 {isProtocolOpen ? 'rotate-180' : ''}" strokeWidth={1.5} />
+            </Popover.Trigger>
+            <Popover.Content class="w-25 p-0" sideOffset={4}>
                 <ul class="py-1">
                     <li>
                         <button type="button" class="w-full text-left px-4 py-2 text-sm uppercase tracking-wider hover:bg-muted transition-colors {protocol === 'http://' ? 'bg-muted font-bold text-primary' : 'text-foreground font-medium'}" onclick={() => changeProtocol('http://')}>http://</button>
@@ -87,8 +82,8 @@
                         <button type="button" class="w-full text-left px-4 py-2 text-sm uppercase tracking-wider hover:bg-muted transition-colors {protocol === 'https://' ? 'bg-muted font-bold text-primary' : 'text-foreground font-medium'}" onclick={() => changeProtocol('https://')}>https://</button>
                     </li>
                 </ul>
-            </div>
-        {/if}
+            </Popover.Content>
+        </Popover.Root>
     </div>
     
     <div class="relative flex-1 h-10 min-w-0">

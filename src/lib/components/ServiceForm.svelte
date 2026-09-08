@@ -124,6 +124,18 @@
 	onsubmit={(e) => {
 		const form = e.currentTarget;
 		form.classList.remove('show-errors');
+		
+		if (isCreatingCategory && newCategoryName) {
+			e.preventDefault();
+			createCategory().then(async () => {
+				if (!isCreatingCategory) {
+					await import('svelte').then(m => m.tick());
+					form.requestSubmit();
+				}
+			});
+			return;
+		}
+
 		if (!form.checkValidity()) {
 			e.preventDefault();
 			void form.offsetWidth;
