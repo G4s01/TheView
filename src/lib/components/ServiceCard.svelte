@@ -64,7 +64,7 @@
 			if (animationTimeout) clearTimeout(animationTimeout);
 			animationTimeout = setTimeout(() => {
 				isAnimating = false;
-			}, 300);
+			}, 500);
 		});
 
 		return () => {
@@ -181,7 +181,7 @@
 	href={appState.isEditMode ? undefined : service.url} 
 	target={appState.isEditMode ? undefined : '_blank'} 
 	rel={appState.isEditMode ? undefined : "noopener noreferrer"}
-	class="relative bg-card text-card-foreground rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out w-full h-full {isExpanded && !isAnimating ? 'overflow-visible' : 'overflow-hidden'} {
+	class="relative bg-card text-card-foreground rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-all duration-500 ease-in-out w-full h-full {isExpanded && !isAnimating ? 'overflow-visible' : 'overflow-hidden'} {
 		!isExpanded 
 		? (currentSize === '2x1' ? 'flex flex-row items-center gap-4' 
 			: (currentSize === '2x2' || currentSize === '1x2' ? 'flex flex-col items-center justify-center text-center' 
