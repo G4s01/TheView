@@ -7,7 +7,6 @@
 	import SelectInput from './ui/SelectInput.svelte';
 	import ToggleInput from './ui/ToggleInput.svelte';
 	import ServiceIcon from './ui/ServiceIcon.svelte';
-	import { slide, fade } from 'svelte/transition';
 	import ServiceForm from './ServiceForm.svelte';
 	import { clickOutside } from '$lib/actions/clickOutside';
 	import { Button } from "$lib/components/ui/button";
@@ -243,7 +242,7 @@
 				{service.name}
 			</h3>
 			
-			<div transition:fade|local={{ duration: 200 }} class="w-full">
+			<div class="w-full">
 				{#if showDescription && service.description}
 				<p class="mt-1 {(currentSize !== '1x1') ? 'text-base' : 'text-sm'} text-muted-foreground line-clamp-2">
 					{service.description}
