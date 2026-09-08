@@ -1,3 +1,0 @@
-# Crawling disabled by default
-User-agent: *
-Disallow: /
