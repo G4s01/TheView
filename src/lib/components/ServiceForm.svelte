@@ -3,8 +3,10 @@
 	import UrlInput from '$lib/components/ui/UrlInput.svelte';
 	import SelectInput from '$lib/components/ui/SelectInput.svelte';
 	import ToggleInput from '$lib/components/ui/ToggleInput.svelte';
+	import IconCombobox from '$lib/components/IconCombobox.svelte';
 	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 	import BackButton from '$lib/components/ui/BackButton.svelte';
+	import SaveButton from '$lib/components/ui/SaveButton.svelte';
 	import { Upload, Check, Save, Plus } from '@lucide/svelte';
 	import { enhance } from '$app/forms';
 	import type { Action } from 'svelte/action';
@@ -170,10 +172,8 @@
 					<div class="flex-1 min-w-0 h-10">
 						<TextInput label="NUOVA CATEGORIA" bind:value={newCategoryName} />
 					</div>
-					<Button type="button" onclick={createCategory} class="w-10 h-10 p-0 shadow-sm shrink-0" title="SALVA">
-						<Save class="w-5 h-5" strokeWidth={2} />
-					</Button>
-					<BackButton onclick={() => { isCreatingCategory = false; newCategoryName = ''; }} text="" class="w-10 h-10 p-0 shadow-sm shrink-0" title="ANNULLA" />
+					<SaveButton type="button" onclick={createCategory} class="shadow-sm shrink-0" text="" title="SALVA" />
+					<BackButton onclick={() => { isCreatingCategory = false; newCategoryName = ''; }} text="" class="shadow-sm shrink-0" title="ANNULLA" />
 				</div>
 			{:else}
 				<SelectInput
@@ -201,7 +201,7 @@
 		</div>
 		<div class="md:col-span-6 flex gap-4 items-center h-10">
 			<div class="flex-1 min-w-0 h-10">
-				<TextInput label="ICONA (NOME O LINK)" name="icon" bind:value={service.icon} />
+				<IconCombobox name="icon" bind:value={service.icon} />
 			</div>
 			<label
 				class="cursor-pointer bg-transparent text-foreground border border-input rounded-md w-10 h-10 flex items-center justify-center transition-colors shadow-none shrink-0 hover:bg-accent hover:text-accent-foreground"
@@ -235,14 +235,14 @@
 		</div>
 
 		<!-- ROW 3 -->
-		<div class="md:col-span-6 h-10">
+		<div class="md:col-span-5 h-10">
 			<TextInput
 				label="IMMAGINE DOCKER"
 				name="dockerImage"
 				bind:value={service.dockerImage}
 			/>
 		</div>
-		<div class="md:col-span-6 h-10 w-full">
+		<div class="md:col-span-3 h-10 w-full">
 			<SelectInput
 				label="WIDGET"
 				name="widgetType"
@@ -253,8 +253,7 @@
 				]}
 			/>
 		</div>
-
-		<div class="md:col-span-12 h-10 w-full">
+		<div class="md:col-span-4 h-10 w-full">
 			<SelectInput
 				label="DIMENSIONE"
 				name="size"
@@ -284,24 +283,16 @@
 							<ConfirmDeleteButton onConfirm={() => { if (onDelete) onDelete(); }} />
 						{/if}
 						{#if !hideCancel}
-							<BackButton onclick={handleCancel} text="" class="w-10 h-10 p-0 shadow-sm shrink-0" title="ANNULLA" />
+							<BackButton onclick={handleCancel} text="" class="shadow-sm shrink-0" title="ANNULLA" />
 						{/if}
-						<Button type="submit" disabled={isSaving} class="w-10 h-10 p-0 shadow-sm shrink-0" title="SALVA">
-							{#if isSaving}
-								...
-							{:else}
-								<Save class="w-5 h-5" strokeWidth={2} />
-							{/if}
-						</Button>
+						<SaveButton type="submit" isLoading={isSaving} class="shadow-sm shrink-0" text="" title="SALVA" />
 					{:else if mode === 'discovery'}
-						<BackButton onclick={handleCancel} text="" class="w-10 h-10 p-0 shadow-sm shrink-0" title="ANNULLA" />
-						<Button type="submit" disabled={isSaving} class="w-10 h-10 p-0 bg-green-500 hover:bg-green-600 text-white shadow-sm shrink-0" title="AGGIUNGI">
-							<Plus class="w-5 h-5" strokeWidth={2.5} />
+						<BackButton onclick={handleCancel} text="" class="shadow-sm shrink-0" title="ANNULLA" />
+						<Button type="submit" disabled={isSaving} size="icon" class="bg-green-500 hover:bg-green-600 text-white shadow-sm shrink-0" title="AGGIUNGI">
+							<Plus class="w-4 h-4" strokeWidth={2.5} />
 						</Button>
 					{:else if mode === 'add'}
-						<Button type="submit" disabled={isSaving} class="w-10 h-10 p-0 bg-green-500 hover:bg-green-600 text-white shadow-sm shrink-0" title="SALVA">
-							<Save class="w-5 h-5" strokeWidth={2.5} />
-						</Button>
+						<SaveButton type="submit" isLoading={isSaving} text="" class="bg-green-500 hover:bg-green-600 text-white shadow-sm shrink-0" title="SALVA" />
 					{/if}
 				</div>
 			</div>

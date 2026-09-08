@@ -42,7 +42,7 @@
 		class="peer h-10 w-full placeholder-transparent bg-transparent border-0 focus:ring-0 focus:outline-none px-3 z-10 relative shadow-none text-sm text-foreground"
 	/>
 	
-	<fieldset aria-hidden="true" class="absolute inset-0 m-0 p-0 px-2 border border-input rounded-md peer-focus:border-primary peer-focus:border-2 peer-focus:[&>legend]:max-w-full peer-[&:not(:placeholder-shown)]:[&>legend]:max-w-full transition-colors pointer-events-none z-0">
+	<fieldset aria-hidden="true" class="absolute inset-0 m-0 p-0 px-2 border border-input rounded-md peer-focus:border-primary peer-focus:border-2 peer-focus:[&>legend]:max-w-full peer-not-placeholder-shown:[&>legend]:max-w-full transition-colors pointer-events-none z-0">
 		<legend class="invisible px-1.5 text-[10px] font-bold uppercase tracking-wider h-0 overflow-hidden whitespace-nowrap max-w-0 transition-all duration-200">
 			{#if label}{label} {#if required}*{/if}{/if}
 		</legend>
@@ -51,7 +51,7 @@
 	{#if label}
 		<Label 
 			for={id} 
-			class="absolute left-2 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-placeholder-shown:normal-case peer-focus:-top-2.5 peer-focus:text-[10px] peer-focus:font-bold peer-focus:uppercase peer-focus:text-primary pointer-events-none peer-[&:not(:placeholder-shown)]:-top-2.5 z-20 bg-transparent"
+			class="absolute left-2 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-placeholder-shown:normal-case peer-focus:-top-2.5 peer-focus:text-[10px] peer-focus:font-bold peer-focus:uppercase peer-focus:text-primary pointer-events-none peer-not-placeholder-shown:-top-2.5 z-20 bg-transparent"
 		>
 			{label} {#if required}<span class="text-destructive">*</span>{/if}
 		</Label>

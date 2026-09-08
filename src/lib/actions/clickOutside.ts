@@ -1,15 +1,48 @@
-export function clickOutside(node: HTMLElement, handler: () => void) {
+export function clickOutside(node: HTMLElement, options: (() => void) | { enabled: boolean; handler: () => void; ignore?: string }) {
+	let handler: () => void;
+	let enabled = false;
+	let attached = false;
+	let ignoreSelector: string | undefined;
+
 	const onClick = (event: MouseEvent) => {
-		if (node && !node.contains(event.target as Node) && !event.defaultPrevented) {
+		if (enabled && node && !node.contains(event.target as Node) && !event.defaultPrevented) {
+			if (ignoreSelector && (event.target as Element).closest?.(ignoreSelector)) {
+				return;
+			}
 			handler();
 		}
 	};
 
-	document.addEventListener('click', onClick, true);
+	function processOptions(opt: any) {
+		if (typeof opt === 'function') {
+			handler = opt;
+			enabled = true;
+			ignoreSelector = undefined;
+		} else {
+			handler = opt.handler;
+			enabled = opt.enabled !== false;
+			ignoreSelector = opt.ignore;
+		}
+		
+		if (enabled && !attached) {
+			document.addEventListener('click', onClick, true);
+			attached = true;
+		} else if (!enabled && attached) {
+			document.removeEventListener('click', onClick, true);
+			attached = false;
+		}
+	}
+	
+	processOptions(options);
 
 	return {
+		update(newOptions: any) {
+			processOptions(newOptions);
+		},
 		destroy() {
-			document.removeEventListener('click', onClick, true);
+			if (attached) {
+				document.removeEventListener('click', onClick, true);
+			}
 		}
 	};
 }

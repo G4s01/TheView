@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Trash, Check } from "@lucide/svelte";
+    import { Trash, Check, Undo2 } from "@lucide/svelte";
     import { Button } from "$lib/components/ui/button";
     import { cn } from "$lib/utils";
     
@@ -27,10 +27,12 @@
         </Button>
         <Button 
             variant="outline" 
+            size="icon"
             class={cn("shrink-0", className)}
             onclick={() => (showConfirm = false)} 
+            title="ANNULLA"
         >
-            ANNULLA
+            <Undo2 />
         </Button>
     </div>
 {:else}
@@ -39,7 +41,7 @@
         size="icon" 
         onclick={() => (showConfirm = true)} 
         class={cn("shrink-0", className)} 
-        title="Elimina"
+        title="ELIMINA"
     >
         <Trash />
     </Button>

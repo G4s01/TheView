@@ -1,34 +1,57 @@
+---
+trigger: always_on
+description: Contesto architetturale, vincoli e linee guida di TheView, con istruzioni esplicite sull'utilizzo delle skill e dell'MCP.
+---
+
 # 🪐 TheView - Antigravity Vibecoding Context
 
-Benvenuto! Questo file contiene il contesto architetturale e il metodo di lavoro per **TheView**, in modo da poterti allineare immediatamente allo stack e alle preferenze dello sviluppatore.
+Benvenuto! Questo file contiene il contesto architetturale, i vincoli di sicurezza e il metodo di lavoro per **TheView**, progettato per massimizzare la tua autonomia e accuratezza tramite le **Skill locali** e il **Server MCP** integrati nel workspace.
 
 ## 📌 Cos'è TheView?
-**TheView** è una dashboard web moderna per homelab e self-hosting, concepita come alternativa leggera, esteticamente appagante e dinamica. Il suo scopo è raccogliere i link ai vari servizi in un'unica pagina organizzata per categorie. 
 
-## 🛠️ Tech Stack & Standard
-- **Framework:** SvelteKit (Node Adapter) + Svelte 5 (uso estensivo di Runes: `$state`, `$derived`, `$props`).
-- **Motore UI:** `shadcn-svelte` + Tailwind CSS v4.
-- **Skill Attiva:** Hai a disposizione il comando `/shadcn-svelte`. Usalo SEMPRE come fonte di verità per generare, modificare o impaginare i primitivi UI, lasciandoti guidare dalle sue best practice per proporzioni e layout.
-- **Iconografia:**
-  - Servizi/Brand: ESCLUSIVAMENTE `dashboard-icons` (walkxcode).
-  - UI Strutturale: ESCLUSIVAMENTE `lucide-svelte`.
-- **Database:** SQLite tramite `better-sqlite3` e `drizzle-orm`. (Mai alterare lo schema a mano, usa sempre `drizzle-kit generate`).
+**TheView** è una dashboard web moderna per homelab e self-hosting. Utilizza un layout "Bento Grid" (Tetris-style) per organizzare link e widget interattivi in formati dinamici (1x1, 1x2, 2x1, 2x2).
 
-## 📂 Struttura del Progetto
-- `src/routes/+page.svelte`: Dashboard principale (layout "Bento Box" con CSS Grid).
-- `src/routes/admin/...`: Pannello di amministrazione e impostazioni.
-- `src/lib/server/discovery.ts`: Core logic per interrogare il demone Docker (update basati su digest SHA256).
-- `data/`: Cartella persistita fuori dal container. Contiene `sqlite.db` (Single Source of Truth).
-- `.gemini/`: Cartella per l'agente Antigravity. Non inquinare la root del progetto.
+## 🧠 INTEGRAZIONE SKILL E MCP (OBBLIGATORIA)
 
-## 🧹 STRATEGIA ARCHITETTURALE E STILE (FASI 2, 3 & 4)
-Stiamo ultimando la bonifica UI e preparando l'infrastruttura per la Bento Grid, il Theming dinamico e i futuri Widget. Segui queste direttive:
-1. **Theming Assoluto (Zero Classi Legacy):** L'app deve supportare l'iniezione di palette custom a runtime. Distruggi attivamente classi come `bg-white`, `bg-gray-800`, `dark:bg-slate-900`. Usa SOLO variabili semantiche shadcn (`bg-card`, `bg-background`, `text-foreground`, `border-border`).
-2. **Standardizzazione Dinamica (Skill-Led):** Abbandona i vecchi flex disallineati per i form. Usa CSS Grid per impaginare i campi, ma affidati alla tua skill `/shadcn-svelte` per stabilire le altezze ideali e i gap ottimali.
-3. **Bento Grid Readiness:** Progetta i componenti, le card e i widget in modo che siano fluidi e pronti a inserirsi in un layout con span di righe/colonne dinamici (es. 1x1, 2x1, 2x2).
-4. **Unificazione Componenti (DRY):** Usa un singolo componente riutilizzabile (es. `ServiceForm.svelte`) per aggiunta, modifica e Discovery. Gestisci le differenze tramite props (es. `mode="discovery"` pre-compila e nasconde il tasto elimina; `mode="edit"` mostra il tasto elimina). I tasti per annullare devono essere bottoni testuali (`variant="outline"`), non icone "X".
-5. **Floating Labels:** Se usi etichette galleggianti, la `<Label>` in `absolute` DEVE avere `bg-card px-1` (o background equivalente del parent) per mascherare elegantemente il bordo dell'input.
+Per garantirti sempre il contesto più aggiornato e idiomatico, devi **SEMPRE** consultare e attivare le seguenti Skill a seconda del task in corso:
 
-## ⚙️ REGOLE DI VIBECODING TASSATIVE
-1. **ZERO REGEX:** È severamente vietato usare `sed`, `awk` o script Python per "iniettare" codice. Analizza il file e sovrascrivilo per intero.
-2. **Esecuzione Isolata:** Quando ricevi un task di UI, lavora su un componente alla volta per evitare di rompere il layout.
+- 🟠 **Svelte 5 & SvelteKit**:
+  - **Tooling (MCP):** Usa sempre il tool MCP `@sveltejs/mcp` (in `.agents/plugins/svelte-ai/`) per interrogare la documentazione ufficiale se hai dubbi sulle API.
+  - **Skill:** Attiva `svelte-core-bestpractices` e `svelte-code-writer` per garantire un uso corretto e idiomatico di Runes (`$state`, `$derived`, `$props`, `$effect`).
+- 🎨 **UI, Styling & Componenti**:
+  - **Skill:** Attiva `shadcn-svelte` e `tailwind-v4-shadcn`. Usa la CLI di shadcn-svelte per aggiungere primitivi. Usa esplicitamente le utility v4 di Tailwind (es. `size-*`, gap flessibili) senza incappare in pattern legacy di v3.
+- 🗄️ **Database (SQLite)**:
+  - **Skill:** Attiva `drizzle` quando lavori sullo schema o sulle query.
+- 🔄 **Data Fetching (in transizione)**:
+  - **Skill:** Attiva `tanstack-query-best-practices` per gestire il caching, i polling e le mutazioni lato client.
+
+## 📂 Struttura e Volumi (Docker)
+
+- `src/routes/+page.svelte`: Dashboard pubblica (CSS Grid `grid-flow-dense` con `auto-rows-[136px]`).
+- `src/routes/admin/...`: Pannello di amministrazione globale.
+- `data/`: Volume persistente unico. Contiene:
+  - `sqlite.db`: Database SQLite.
+  - `icons/`: Cartella per upload fisici (garbage collector al logout). **Divieto:** Mai scrivere file persistenti in `static/uploads`.
+
+## 🛡️ REGOLE BACKEND E SICUREZZA (TASSATIVE)
+
+1. **Nessun Bypass TLS Globale:** Vietato usare `process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"`. Per interrogare servizi self-signed, inietta un `Agent` custom di `undici` (`rejectUnauthorized: false`) solo nella specifica chiamata `fetch`.
+2. **Integrità Database (Drizzle-Only):** Non eseguire MAI query SQL grezze (`CREATE TABLE`, `ALTER TABLE`) per manipolare lo schema. Usa sempre e solo `migrate()` di `drizzle-orm/better-sqlite3/migrator`. Modifiche allo schema richiedono `drizzle-kit generate` come descritto nella skill.
+3. **API Documentation:** Qualsiasi endpoint in `src/routes/api/` deve essere documentato nel file `ARCHITECTURE_AUDIT.md`.
+
+## 🎨 STRATEGIA UI E THEMING
+
+1. **Theming Assoluto (Zero Legacy):** L'app usa variabili HSL root. È SEVERAMENTE VIETATO usare classi cromatiche hardcodate (es. `bg-white`, `text-green-500`). Usa ESCLUSIVAMENTE variabili semantiche shadcn: `bg-background`, `bg-card`, `text-foreground`, `text-muted-foreground`, `border-border`, `text-destructive`.
+2. **Layout e Spaziature:**
+   - Evita classi come `space-y-*` o `space-x-*`. Usa `flex` combinato con `gap-*` per prevedibilità.
+   - Usa `size-*` (es. `size-6`) al posto di `w-6 h-6`.
+3. **Bento Grid Fluidity:** I contenuti delle Card devono essere fluidi (`w-full h-full`) e usare Flexbox per adattarsi dinamicamente ai formati espansi/verticali, preservando i padding.
+4. **Modali e Dialoghi:** Mai modali custom sovrapposti. Usa i primitivi `<Dialog>` per UI o `<AlertDialog>` per conferme distruttive.
+5. **Componenti DRY:** L'icona va delegata a `<ServiceIcon>`. I form di inserimento/modifica devono condividere `<ServiceForm>`, differenziando per `mode`.
+6. **Iconografia:** Usa esclusivamente `lucide-svelte` per la UI strutturale.
+
+## ⚙️ REGOLE DI VIBECODING
+
+1. **Zero Regex:** Vietato usare `sed`, `awk` o script Python per iniettare codice. Analizza, comprendi il contesto e sovrascrivi l'intero componente in modo pulito.
+2. **Lavoro Modulare & Verifica:** Lavora su un file alla volta. Prima di alterare lo stato reattivo (`$state`), valuta sempre l'impatto sulle librerie terze (come `svelte-dnd-action` o TanStack Query).
+3. **Inizializza con la Ricerca:** Prima di ipotizzare come implementare una feature in Svelte 5 o Tailwind v4, usa i tool a tua disposizione (Skill + MCP) per verificare la sintassi corretta ed evitare allucinazioni su versioni vecchie dei framework.

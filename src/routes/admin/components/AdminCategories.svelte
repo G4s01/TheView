@@ -84,15 +84,15 @@
 			</div>
 			<div class="flex items-center gap-2">
 				<Button variant="outline" size="icon" onclick={addCategory} title="Aggiungi">
-					<Plus class="w-5 h-5" strokeWidth={1.5} />
+					<Plus class="w-4 h-4" strokeWidth={1.5} />
 				</Button>
-				<SaveButton onclick={saveAll} isLoading={isSaving} class="h-10 w-10 p-0" title="Salva" />
+				<SaveButton onclick={saveAll} isLoading={isSaving} title="Salva" />
 			</div>
 		</div>
 
 		<!-- List -->
 		<ul 
-			class="divide-y divide-border min-h-[50px] w-full"
+			class="divide-y divide-border min-h-12.5 w-full"
 			use:dndzone={{items: localCategories, flipDurationMs}}
 			onconsider={handleDndConsider}
 			onfinalize={handleDndFinalize}
@@ -130,7 +130,7 @@
 
 						<ConfirmDeleteButton 
 							onConfirm={() => deleteCategory(category.id)}
-							class="h-10 w-10 shrink-0"
+							class="shrink-0"
 						/>
 					</div>
 				</li>

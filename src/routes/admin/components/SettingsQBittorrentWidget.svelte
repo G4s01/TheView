@@ -4,6 +4,7 @@
 	import { Eye, EyeOff, Pencil, Plus, X } from "@lucide/svelte";
 	import SaveButton from "$lib/components/ui/SaveButton.svelte";
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
+	import { clickOutside } from '$lib/actions/clickOutside';
 
 	let {
 		qbit_username = $bindable(),
@@ -25,9 +26,9 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-<li class="px-6 py-5 hover:bg-muted/50 transition-colors flex flex-col gap-4 cursor-pointer" onclick={() => isExpanded = !isExpanded}>
+<li id="qbit-row" class="px-6 py-5 hover:bg-muted/50 transition-colors flex flex-col gap-4 cursor-pointer qbit-row" onclick={() => isExpanded = !isExpanded}>
 	<div class="flex items-center justify-between w-full">
-		<div class="flex items-center space-x-4 flex-1 min-w-0 mr-4">
+		<div class="flex items-center gap-4 flex-1 min-w-0 mr-4">
 			<div class="shrink-0">
 				<ServiceIcon icon="qbittorrent" name="qBittorrent" size="lg" iconStyle="rounded-xl" class="shadow-sm border border-border bg-card" />
 			</div>
@@ -37,7 +38,7 @@
 		</div>
 		
 		<div>
-			<button type="button" onclick={(e: Event) => { e.stopPropagation(); isExpanded = !isExpanded; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm transition-all duration-300 {isExpanded ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground hover:opacity-90'} focus:outline-none hover:scale-110">
+			<button id="edit-qbit-btn" type="button" onclick={(e: Event) => { e.stopPropagation(); isExpanded = !isExpanded; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm transition-all duration-300 {isExpanded ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground hover:opacity-90'} focus:outline-none hover:scale-110 edit-qbit-btn">
 				<div class="relative w-5 h-5">
 					<Pencil class="absolute top-0 left-0 w-4 h-4 transition-all duration-300 {isExpanded ? 'opacity-60' : ''}" strokeWidth={2.5} />
 					{#if isExpanded}
@@ -52,9 +53,9 @@
 	
 	{#if isExpanded}
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<div class="w-full mt-2 relative">
+		<div class="w-full mt-2 relative" use:clickOutside={{ enabled: isExpanded, handler: () => isExpanded = false, ignore: '#edit-qbit-btn, #qbit-row' }}>
 			<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-accent rounded-t-xl z-10"></div>
-			<div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border relative space-y-4" onclick={(e) => e.stopPropagation()} role="presentation">
+			<div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border relative flex flex-col gap-4" onclick={(e) => e.stopPropagation()} role="presentation">
 				<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
 					<div class="md:col-span-6 h-10">
 						<TextInput label="Username (es. admin)" bind:value={qbit_username} />

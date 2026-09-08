@@ -9,6 +9,7 @@
 		class: className = "", 
 		title = "INDIETRO",
 		text = "ANNULLA",
+		size = text ? "sm" : "icon",
 		children
 	}: {
 		onclick?: any;
@@ -16,6 +17,7 @@
 		class?: string;
 		title?: string;
 		text?: string;
+		size?: "default" | "sm" | "lg" | "icon";
 		children?: Snippet;
 	} = $props();
 </script>
@@ -25,6 +27,7 @@
 	type="button"
 	{onclick}
 	{disabled}
+	{size}
 	class="font-bold tracking-wider uppercase {className}"
 	{title}
 >

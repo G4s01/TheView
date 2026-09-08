@@ -7,6 +7,7 @@
 	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 	import { slide } from 'svelte/transition';
 	import { Eye, EyeOff } from "@lucide/svelte";
+	import { clickOutside } from '$lib/actions/clickOutside';
 
 	let {
 		npmUrlCombined = $bindable(),
@@ -47,7 +48,7 @@
 
 <div class="bg-card text-card-foreground rounded-2xl shadow-lg border border-border">
 	<div class="p-6">
-		<div class="flex items-center space-x-3 mb-6">
+		<div class="flex items-center gap-3 mb-6">
 			<ServiceIcon icon="nginx-proxy-manager" name="NPM" size="lg" iconStyle="rounded-xl" />
 			<div>
 				<h3 class="text-xl font-bold uppercase tracking-wider text-foreground">NGINX PROXY MANAGER</h3>
@@ -67,7 +68,7 @@
 		</div>
 
 		{#if isNpmEditing}
-			<div class="space-y-4 pt-2 w-full" transition:slide>
+			<div class="flex flex-col gap-4 pt-2 w-full" transition:slide use:clickOutside={{ enabled: isNpmEditing, handler: handleCancel, ignore: '#edit-npm-btn' }}>
 				<!-- Riga 1: Email e Password -->
 				<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
 					<div class="md:col-span-6 h-10">
@@ -95,13 +96,13 @@
 						{#if originalUrl && originalEmail}
 							<BackButton 
 								onclick={handleCancel}
-								class="w-10 h-10 p-0 shrink-0"
+								class="shrink-0"
 								text=""
 								title="ANNULLA"
 							/>
 						{/if}
 						<SaveButton 
-							class="w-10 h-10 p-0 shrink-0"
+							class="shrink-0"
 							onclick={async () => {
 								await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: npmUrlCombined, npmEmail, npmPassword }) });
 								isNpmEditing = false;
@@ -123,12 +124,12 @@
 						<p class="text-xs text-muted-foreground">ACCOUNT: {npmEmail}</p>
 					</div>
 				</div>
-				<div class="flex items-center space-x-3 w-full sm:w-auto justify-end">
+				<div class="flex items-center gap-3 w-full sm:w-auto justify-end">
 					<ConfirmDeleteButton 
-						class="w-9 h-9"
+						class="shrink-0"
 						onConfirm={onDisconnect}
 					/>
-					<button onclick={() => { isNpmEditing = true; showNpmPassword = false; }} class="px-4 py-2 bg-card border border-border text-foreground text-sm font-bold uppercase tracking-wider rounded-xl shadow-sm hover:bg-muted transition-colors">
+					<button id="edit-npm-btn" onclick={() => { isNpmEditing = true; showNpmPassword = false; }} class="px-4 py-2 bg-card border border-border text-foreground text-sm font-bold uppercase tracking-wider rounded-xl shadow-sm hover:bg-muted transition-colors edit-npm-btn">
 						MODIFICA
 					</button>
 				</div>

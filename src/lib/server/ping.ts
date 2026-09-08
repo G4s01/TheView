@@ -1,4 +1,5 @@
 import { rewriteUrlForDocker } from "$lib/server/dockerHost";
+import { Agent } from "undici";
 export async function pingService(
   url: string,
   timeoutMs: number = 3000,
@@ -8,14 +9,14 @@ export async function pingService(
 
   const start = Date.now();
   try {
+    const agent = new Agent({ connect: { rejectUnauthorized: false } });
+
     // Preferire richieste HEAD per risparmiare banda e risorse
     const response = await fetch(rewriteUrlForDocker(url), {
       method: "HEAD",
       signal: controller.signal,
-      // Su reti locali o homelab a volte ci sono problemi di certificati auto-firmati,
-      // ma fetch() nativo in Node non permette facilmente di ignorarli come axios (rejectUnauthorized).
-      // Per ora usiamo fetch standard.
-    });
+      dispatcher: agent,
+    } as any);
 
     clearTimeout(id);
 

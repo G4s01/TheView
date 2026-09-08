@@ -44,6 +44,14 @@ export async function POST({ request, cookies }) {
     }
   } else if (action === "logout") {
     cookies.delete("admin_session", { path: "/", secure: false });
+
+    // Eseguiamo la pulizia delle icone orfane in background (non bloccante)
+    import("$lib/server/icons")
+      .then(({ cleanOrphanIcons }) => {
+        cleanOrphanIcons().catch(console.error);
+      })
+      .catch(console.error);
+
     return json({ success: true });
   } else if (action === "setup") {
     const settings = await getSettings();

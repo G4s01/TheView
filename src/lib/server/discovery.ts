@@ -2,6 +2,7 @@ import { resolveIcon } from "$lib/server/iconResolver";
 import { rewriteUrlForDocker } from "$lib/server/dockerHost";
 import { env } from "$env/dynamic/private";
 import http from "http";
+import { Agent } from "undici";
 
 export interface DiscoveredService {
   id: string;
@@ -17,6 +18,9 @@ export interface DiscoveredService {
   _npmMatch?: string;
   _iconOverride?: string;
   _dockerImage?: string;
+  icon?: string;
+  dockerImage?: string;
+  _rawDescription?: string;
 }
 
 // Interroga l'API di NPM per trovare i proxy hosts
@@ -33,12 +37,15 @@ export async function getNpmServices(
   const plainPassword = decryptString(password);
 
   try {
+    const agent = new Agent({ connect: { rejectUnauthorized: false } });
+
     // 1. Get Token
     const tokenRes = await fetch(new URL("/api/tokens", npmUrl).toString(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ identity: email, secret: plainPassword }),
-    });
+      dispatcher: agent,
+    } as any);
 
     if (!tokenRes.ok) {
       console.error("Failed to authenticate with NPM API");
@@ -55,7 +62,8 @@ export async function getNpmServices(
       ),
       {
         headers: { Authorization: `Bearer ${token}` },
-      },
+        dispatcher: agent,
+      } as any,
     );
 
     if (!hostsRes.ok) {
@@ -202,13 +210,15 @@ export async function discoverAllServices(
     try {
       const { decryptString } = await import("./crypto");
       const plainPassword = decryptString(npmPassword);
+      const agent = new Agent({ connect: { rejectUnauthorized: false } });
       const tokenRes = await fetch(
         rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/tokens`),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ identity: npmEmail, secret: plainPassword }),
-        },
+          dispatcher: agent,
+        } as any,
       );
 
       if (!tokenRes.ok) {
@@ -219,7 +229,10 @@ export async function discoverAllServices(
           rewriteUrlForDocker(
             `${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`,
           ),
-          { headers: { Authorization: `Bearer ${tokenData.token}` } },
+          {
+            headers: { Authorization: `Bearer ${tokenData.token}` },
+            dispatcher: agent,
+          } as any,
         );
 
         if (!hostsRes.ok) {
@@ -362,7 +375,6 @@ export async function discoverAllServices(
     }
   });
 
-  // Popola l'icona usando guess per ogni servizio
   const enriched = filtered.map((s) => {
     let iconDetails = resolveIcon(
       s._iconOverride,
@@ -371,12 +383,16 @@ export async function discoverAllServices(
       s.url,
     );
 
-    // Se l'icona trovata è tramite override, teniamo quello come valore salvabile,
-    // altrimenti vuoto per farlo dedurre a runtime, o possiamo salvare il nome
     return {
       ...s,
       iconDetails,
-      icon: s._iconOverride || null,
+      icon:
+        s._iconOverride ||
+        (iconDetails?.type !== "lucide" ? iconDetails?.value : "") ||
+        "",
+      dockerImage: s._dockerImage || "",
+      _rawDescription: s.description,
+      description: "",
     };
   });
 

@@ -17,6 +17,12 @@
 
     let imageError = $state(false);
 
+    $effect(() => {
+        if (icon) {
+            imageError = false;
+        }
+    });
+
     let sizeClass = $derived(
         size === 'sm' ? 'size-4' : 
         size === 'lg' ? 'size-8' : 
@@ -31,10 +37,10 @@
 
     let iconUrl = $derived.by(() => {
         if (!icon) return null;
-        if (icon.startsWith('http://') || icon.startsWith('https://')) {
+        if (icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('/')) {
             return icon;
         }
-        return `https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/${icon}.png`;
+        return `https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/${icon}.png`;
     });
 
     let showImage = $derived(!!iconUrl && !imageError);

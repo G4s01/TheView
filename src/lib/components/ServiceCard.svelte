@@ -9,6 +9,8 @@
 	import ServiceIcon from './ui/ServiceIcon.svelte';
 	import { slide, fade } from 'svelte/transition';
 	import ServiceForm from './ServiceForm.svelte';
+	import { clickOutside } from '$lib/actions/clickOutside';
+	import { Button } from "$lib/components/ui/button";
 		let { service, liveStatus = null, categories = [], isExpanded = false, showDescription = true, iconStyle = 'rounded-xl', onExpandToggle } = $props<{
 		service: {
 			id: number;
@@ -48,7 +50,29 @@
 
 	let dockerVersionInfo = $state<{ version: string; updateAvailable: boolean; updateUrl?: string } | null>(null);
 
-	import { onMount } from 'svelte';
+	let isAnimating = $state(false);
+	let animationTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
+
+	import { onMount, untrack } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
+
+	$effect(() => {
+		// Track isExpanded properly
+		const currentExpanded = isExpanded;
+		
+		untrack(() => {
+			isAnimating = true;
+			if (animationTimeout) clearTimeout(animationTimeout);
+			animationTimeout = setTimeout(() => {
+				isAnimating = false;
+			}, 300);
+		});
+
+		return () => {
+			if (animationTimeout) clearTimeout(animationTimeout);
+		};
+	});
+	
 	onMount(() => {
 		if (service.dockerImage) {
 			fetch(`/api/docker/version?image=${encodeURIComponent(service.dockerImage)}`)
@@ -111,6 +135,7 @@
 			if (res.ok) {
 				Object.assign(service, editService);
 				if (onExpandToggle) onExpandToggle(false);
+				await invalidateAll();
 			}
 		} catch (err) {
 			console.error(err);
@@ -139,14 +164,14 @@
 	let currentSize = $derived(service.size || '1x1');
 </script>
 
-<div class="relative h-full w-full group">
+<div class="relative h-full w-full group" use:clickOutside={{ enabled: isExpanded, handler: () => { if (isExpanded && onExpandToggle) onExpandToggle(false); } }}>
 	{#if appState.isEditMode && !isExpanded}
 		<div class="absolute top-2 right-2 flex space-x-1.5 z-20">
-			<button onclick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(); }} class="p-1.5 bg-card/90 rounded-xl border border-border hover:bg-muted shadow-sm transition-colors text-muted-foreground" title="Impostazioni Servizio">
-				<Pencil class="w-4 h-4" strokeWidth={1.5} />
-			</button>
-			<div class="p-1.5 bg-card/90 rounded-xl border border-border hover:bg-muted shadow-sm transition-colors text-muted-foreground cursor-move" title="Trascina per spostare">
-				<GripHorizontal class="w-4 h-4 pointer-events-none" strokeWidth={1.5} />
+			<Button variant="outline" size="icon" onclick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(); }} class="bg-card/90 text-muted-foreground" title="Impostazioni Servizio">
+				<Pencil strokeWidth={1.5} />
+			</Button>
+			<div class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-card/90 hover:bg-muted shadow-sm h-8 w-8 cursor-move text-muted-foreground" title="Trascina per spostare">
+				<GripHorizontal class="pointer-events-none" strokeWidth={1.5} />
 			</div>
 		</div>
 	{/if}
@@ -157,7 +182,7 @@
 	href={appState.isEditMode ? undefined : service.url} 
 	target={appState.isEditMode ? undefined : '_blank'} 
 	rel={appState.isEditMode ? undefined : "noopener noreferrer"}
-	class="relative bg-card text-card-foreground rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-colors duration-200 w-full h-full {!isExpanded ? 'overflow-hidden' : 'overflow-visible'} {
+	class="relative bg-card text-card-foreground rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out w-full h-full {isExpanded && !isAnimating ? 'overflow-visible' : 'overflow-hidden'} {
 		!isExpanded 
 		? (currentSize === '2x1' ? 'flex flex-row items-center gap-4' 
 			: (currentSize === '2x2' || currentSize === '1x2' ? 'flex flex-col items-center justify-center text-center' 
@@ -185,7 +210,7 @@
 		{/if}
 
 		<!-- Icon -->
-		<div class="relative flex-shrink-0 {currentSize === '1x1' ? 'w-full flex items-start' : ''}">
+		<div class="relative shrink-0 {currentSize === '1x1' ? 'w-full flex items-start' : ''}">
 			<div 
 				class="{(currentSize !== '1x1') ? 'h-14 w-14' : 'h-10 w-10'} {iconStyle} flex items-center justify-center shadow-sm"
 				style="background-color: {iconBgColor || '#4B5563'}"
@@ -218,10 +243,10 @@
 				{service.name}
 			</h3>
 			
-			<div transition:slide|local={{ duration: 250 }} class="w-full">
-				{#if showDescription}
+			<div transition:fade|local={{ duration: 200 }} class="w-full">
+				{#if showDescription && service.description}
 				<p class="mt-1 {(currentSize !== '1x1') ? 'text-base' : 'text-sm'} text-muted-foreground line-clamp-2">
-					{service.description || service.url}
+					{service.description}
 				</p>
 				{/if}
 				
@@ -242,7 +267,7 @@
 			</div>
 		{/snippet}
 
-		<div class="w-full h-full" transition:fade|local={{ duration: 200 }} role="presentation" onclick={(e) => e.stopPropagation()}>
+		<div class="w-full h-full flex flex-col" role="presentation" onclick={(e) => e.stopPropagation()}>
 			<ServiceForm 
 				mode="edit" 
 				bind:service={editService} 

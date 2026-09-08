@@ -11,6 +11,7 @@
 	import ServiceForm from '$lib/components/ServiceForm.svelte';
 	import SettingsNPMWidget from './SettingsNPMWidget.svelte';
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
+	import { clickOutside } from '$lib/actions/clickOutside';
 	
 	let { localCategories = $bindable() } = $props();
 
@@ -152,7 +153,7 @@
 										{/if}
 									</div>
 								</div>
-								<p class="text-sm text-muted-foreground truncate flex-1">{ds.url || ds.description}</p>
+								<p class="text-sm text-muted-foreground truncate flex-1">{ds.url || ds._rawDescription || ds.description}</p>
 							</div>
 						</div>
 						
@@ -163,7 +164,7 @@
 									AGGIUNTO
 								</span>
 							{:else}
-								<button type="button" onclick={(e: Event) => { e.stopPropagation(); expandedId = expandedId === ds.id ? null : ds.id; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm transition-all duration-300 {expandedId === ds.id ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground hover:opacity-90'} focus:outline-none hover:scale-110">
+								<button type="button" onclick={(e: Event) => { e.stopPropagation(); expandedId = expandedId === ds.id ? null : ds.id; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm transition-all duration-300 {expandedId === ds.id ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground hover:opacity-90'} focus:outline-none hover:scale-110 edit-discovery-btn">
 									<div class="relative w-5 h-5">
 										<Pencil class="absolute top-0 left-0 w-4 h-4 transition-all duration-300 {expandedId === ds.id ? 'opacity-60' : ''}" strokeWidth={2.5} />
 										{#if expandedId === ds.id}
@@ -179,7 +180,7 @@
 					
 					{#if !ds.added && expandedId === ds.id}
 						<!-- svelte-ignore a11y_click_events_have_key_events -->
-						<div class="w-full mt-2 relative">
+						<div class="w-full mt-2 relative" use:clickOutside={{ enabled: expandedId === ds.id, handler: () => expandedId = null, ignore: '.edit-discovery-btn' }}>
 							<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-accent rounded-t-xl z-10"></div>
 							<div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border relative" onclick={(e) => e.stopPropagation()} role="presentation">
 								<ServiceForm 

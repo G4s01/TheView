@@ -14,6 +14,7 @@
 	import ServiceForm from '$lib/components/ServiceForm.svelte';
 	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
+	import { clickOutside } from '$lib/actions/clickOutside';
 
 	let { services, localCategories = $bindable() } = $props();
 
@@ -114,7 +115,7 @@
 
 <div class="space-y-8">
 	<!-- Add New Service Form -->
-	<div class="bg-card text-card-foreground shadow-md rounded-2xl border border-border">
+	<div class="bg-card text-card-foreground shadow-md rounded-2xl border border-border" use:clickOutside={{ enabled: isAddServiceExpanded, handler: () => isAddServiceExpanded = false }}>
 		<button 
 			onclick={() => isAddServiceExpanded = !isAddServiceExpanded}
 			class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted transition-colors"
@@ -184,7 +185,7 @@
 											</a>
 										{/if}
 										<ConfirmDeleteButton 
-											class="w-9 h-9"
+											class="shrink-0"
 											onConfirm={async () => {
 												const formData = new FormData();
 												formData.append('id', service.id.toString());
@@ -192,7 +193,7 @@
 												window.location.reload();
 											}} 
 										/>
-										<button type="button" onclick={() => editingServiceId = editingServiceId === service.id ? null : service.id} class="p-2 text-primary hover:text-primary/80 transition-colors bg-primary/10 hover:bg-primary/20 rounded-lg shadow-sm" title={editingServiceId === service.id ? "Chiudi Modifica" : "Modifica Servizio"}>
+										<button type="button" onclick={() => editingServiceId = editingServiceId === service.id ? null : service.id} class="p-2 text-primary hover:text-primary/80 transition-colors bg-primary/10 hover:bg-primary/20 rounded-lg shadow-sm edit-service-btn" title={editingServiceId === service.id ? "Chiudi Modifica" : "Modifica Servizio"}>
 											{#if editingServiceId === service.id}
 												<X class="w-5 h-5" strokeWidth={2} />
 											{:else}
@@ -203,7 +204,7 @@
 								</div>
 								
 								{#if editingServiceId === service.id}
-									<div transition:slide class="w-full mt-4 relative cursor-default" onclick={(e) => e.stopPropagation()} role="presentation">
+									<div transition:slide class="w-full mt-4 relative cursor-default" onclick={(e) => e.stopPropagation()} role="presentation" use:clickOutside={{ enabled: editingServiceId === service.id, handler: () => editingServiceId = null, ignore: '.edit-service-btn' }}>
 										<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-accent rounded-t-xl z-10"></div>
 										<div class="p-5 bg-card text-card-foreground border border-border rounded-xl shadow-md">
 											<ServiceForm 

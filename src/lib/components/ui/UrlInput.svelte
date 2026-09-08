@@ -63,11 +63,11 @@
     }
 </script>
 
-<div class="relative w-full h-10 flex flex-row items-center group {rest.class || ''}">
-    <div class="relative h-10 w-[85px] shrink-0" use:clickOutside={() => isProtocolOpen = false}>
+<div class="relative w-full h-10 flex flex-row items-center group/url {rest.class || ''}">
+    <div class="relative h-10 w-21.25 shrink-0" use:clickOutside={() => isProtocolOpen = false}>
         <button 
             type="button"
-            class="flex items-center justify-between h-10 w-full bg-transparent border border-input border-r-0 rounded-l-md pl-3 pr-2 text-sm font-medium text-muted-foreground focus:outline-none transition-colors group-focus-within:border-primary group-focus-within:border-y-2 group-focus-within:border-l-2 group-focus-within:text-foreground uppercase tracking-wider"
+            class="flex items-center justify-between h-10 w-full bg-transparent border border-input border-r-0 rounded-l-md pl-3 pr-2 text-sm font-medium text-muted-foreground focus:outline-none transition-colors group-focus-within/url:border-primary group-focus-within/url:border-y-2 group-focus-within/url:border-l-2 group-focus-within/url:text-foreground uppercase tracking-wider"
             onclick={(e) => { e.preventDefault(); isProtocolOpen = !isProtocolOpen; }}
         >
             <span>{protocol}</span>
@@ -76,7 +76,7 @@
         
         {#if isProtocolOpen}
             <div 
-                class="absolute z-50 w-[100px] mt-1 bg-popover border border-border rounded-md shadow-lg overflow-hidden origin-top-left"
+                class="absolute z-50 w-25 mt-1 bg-popover border border-border rounded-md shadow-lg overflow-hidden origin-top-left"
                 transition:scale={{ duration: 150, start: 0.95 }}
             >
                 <ul class="py-1">
@@ -100,14 +100,14 @@
             placeholder=" " 
             class="peer block px-3 py-2 w-full h-10 text-sm bg-transparent border-0 focus:outline-none focus:ring-0 transition-colors text-foreground placeholder-transparent z-10 relative" 
         />
-		<fieldset aria-hidden="true" class="absolute inset-0 m-0 p-0 px-2 border border-input border-l-0 rounded-r-md peer-focus:border-primary peer-focus:border-y-2 peer-focus:border-r-2 peer-focus:[&>legend]:max-w-full peer-[&:not(:placeholder-shown)]:[&>legend]:max-w-full transition-colors pointer-events-none z-0">
+		<fieldset aria-hidden="true" class="absolute inset-0 m-0 p-0 px-2 border border-input border-l-0 rounded-r-md peer-focus:border-primary peer-focus:border-y-2 peer-focus:border-r-2 peer-focus:[&>legend]:max-w-full peer-not-placeholder-shown:[&>legend]:max-w-full transition-colors pointer-events-none z-0">
 			<legend class="invisible px-1.5 text-[10px] font-bold uppercase tracking-wider h-0 overflow-hidden whitespace-nowrap max-w-0 transition-all duration-200">
 				{#if label}{label} {#if rest.required}*{/if}{/if}
 			</legend>
 		</fieldset>
         <Label 
             for={id} 
-            class="absolute left-2 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-focus:-top-2.5 peer-focus:text-[10px] peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-wider peer-focus:text-primary whitespace-nowrap pointer-events-none z-20 bg-transparent peer-[&:not(:placeholder-shown)]:-top-2.5"
+            class="absolute left-2 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-focus:-top-2.5 peer-focus:text-[10px] peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-wider peer-focus:text-primary whitespace-nowrap pointer-events-none z-20 bg-transparent peer-not-placeholder-shown:-top-2.5"
         >
             {label} {#if rest.required}<span class="text-destructive">*</span>{/if}
         </Label>

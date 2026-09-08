@@ -105,13 +105,13 @@
 			</h2>
 			
 			<div 
-				class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 min-h-[100px] grid-flow-dense auto-rows-[136px]"
+				class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 min-h-25 grid-flow-dense auto-rows-fr"
 				use:dndzone={{items: services, flipDurationMs, dragDisabled: !appState.isEditMode || editingServiceId !== null}}
 				onconsider={(e) => handleDndConsider(e, categoryName)}
 				onfinalize={(e) => handleDndFinalize(e, categoryName)}
 			>
 				{#each services as service (service.id)}
-					<div animate:flip={{duration: flipDurationMs}} class="transition-all duration-300 h-full w-full {editingServiceId === service.id ? 'overflow-visible' : 'overflow-hidden'} {editingServiceId === service.id ? 'col-span-full md:col-span-full lg:col-span-3 xl:col-span-3 2xl:col-span-3 row-span-3' : (service.size === '2x2' ? 'col-span-2 row-span-2' : service.size === '2x1' ? 'col-span-2 row-span-1' : service.size === '1x2' ? 'col-span-1 row-span-2' : 'col-span-1 row-span-1')}">
+					<div animate:flip={{duration: flipDurationMs}} class="transition-all duration-300 h-full w-full {editingServiceId === service.id ? 'overflow-visible' : 'overflow-hidden'} {editingServiceId === service.id ? 'col-span-full md:col-span-full lg:col-span-3 xl:col-span-3 2xl:col-span-3 row-span-2' : (service.size === '2x2' ? 'col-span-2 row-span-2' : service.size === '2x1' ? 'col-span-2 row-span-1' : service.size === '1x2' ? 'col-span-1 row-span-2' : 'col-span-1 row-span-1')}">
 						<ServiceCard {service} liveStatus={statuses[service.id]} categories={data.categories || []} isExpanded={editingServiceId === service.id} onExpandToggle={(val) => editingServiceId = val ? service.id : null} showDescription={data.showServiceDescriptions} iconStyle={data.iconStyle} />
 					</div>
 				{/each}

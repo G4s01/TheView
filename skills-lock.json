@@ -1,11 +1,29 @@
 {
   "version": 1,
   "skills": {
+    "drizzle": {
+      "source": "bobmatnyc/claude-mpm-skills",
+      "sourceType": "github",
+      "skillPath": "toolchains/typescript/data/drizzle/SKILL.md",
+      "computedHash": "1833b9288692060090de3e8ca1e772b5e3bbf928c9d44a20bb4d5b6766b019f2"
+    },
     "shadcn-svelte": {
       "source": "huntabyte/shadcn-svelte",
       "sourceType": "github",
       "skillPath": "skills/shadcn-svelte/SKILL.md",
       "computedHash": "d4f3f983a71466a86649985a8a7fbce47da29f44de3a9d02540bbcf3167134e0"
+    },
+    "tailwind-v4-shadcn": {
+      "source": "secondsky/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/tailwind-v4-shadcn/skills/tailwind-v4-shadcn/SKILL.md",
+      "computedHash": "f671120a57119a94f8a6447a760629878b8ead36750297697006136dbaac4355"
+    },
+    "tanstack-query-best-practices": {
+      "source": "deckardger/tanstack-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/tanstack-query/SKILL.md",
+      "computedHash": "21d2e8b7468a81d772b6527ad8ca178cc2f3f08af777bb9061333013ee88a0c9"
     }
   }
 }
