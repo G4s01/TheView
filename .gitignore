@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# SvelteKit/Vite Output
+.svelte-kit/
+build/
+dist/
+.output/
+.vercel/
+.netlify/
+.wrangler/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Database & Data
+data/
+sqlite.db
+sqlite.db-journal
+sqlite.db-shm
+sqlite.db-wal
+settings.json
+
+# Uploads
+static/uploads/
+uploads/
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+!.env.test
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+TheView.code-workspace
+
+# Agent Workspace & Temp Files
+.gemini/
+*.patch
+patch*.py
+patch*.txt
+patch*.cjs
+patch*.js
+*.log
+check_console.js
+*.pyc
+__pycache__/
+test_*
+test-*
+MCP.md
