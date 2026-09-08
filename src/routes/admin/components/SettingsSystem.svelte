@@ -101,11 +101,11 @@
 						{/if}
 					</Button>
 					<Button variant="outline" size="icon" href={versionInfo.url} target="_blank" rel="noopener noreferrer" title="Apri su GitHub">
-						<ServiceIcon icon="github" name="GitHub" size="sm" class="dark:invert opacity-80 hover:opacity-100 transition-opacity" />
+						<ServiceIcon icon="github" name="GitHub" size="sm" class="opacity-80 hover:opacity-100 transition-opacity" />
 					</Button>
 				</div>
 			</div>
-			<div class="prose prose-sm dark:prose-invert max-w-none max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+			<div class="prose prose-sm max-w-none max-h-64 overflow-y-auto pr-2 custom-scrollbar">
 				{@html DOMPurify.sanitize(marked.parse(versionInfo.releaseNotes) as string)}
 			</div>
 		</div>

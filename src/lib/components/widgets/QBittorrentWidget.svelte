@@ -39,24 +39,24 @@
 	}
 </script>
 
-<div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/50">
+<div class="mt-3 pt-3 border-t border-border">
 	{#if error}
-		<div class="text-xs text-red-500 truncate" title={error}>{error}</div>
+		<div class="text-xs text-destructive truncate" title={error}>{error}</div>
 	{:else if data}
 		<div class="flex items-center justify-between text-xs font-medium">
-			<div class="flex items-center text-emerald-600 dark:text-emerald-400">
+			<div class="flex items-center text-foreground">
 				<!-- Down arrow -->
 				<ArrowDown class="w-3 h-3 mr-1" strokeWidth={2.5} />
 				{formatBytes(data.dl_info_speed)}
 			</div>
-			<div class="flex items-center text-blue-600 dark:text-blue-400">
+			<div class="flex items-center text-foreground">
 				<!-- Up arrow -->
 				<ArrowUp class="w-3 h-3 mr-1" strokeWidth={2.5} />
 				{formatBytes(data.up_info_speed)}
 			</div>
 		</div>
 	{:else}
-		<div class="text-xs text-gray-400 animate-pulse">Caricamento widget...</div>
+		<div class="text-xs text-muted-foreground animate-pulse">Caricamento widget...</div>
 	{/if}
 </div>
 

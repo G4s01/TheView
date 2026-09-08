@@ -197,12 +197,12 @@
 			<div class="absolute top-4 right-4 flex items-center space-x-1.5 z-10" title={tooltipText}>
 				<span class="relative flex h-2.5 w-2.5">
 					{#if status === 'checking'}
-						<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
+						<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-muted-foreground opacity-75"></span>
+						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-muted-foreground"></span>
 					{:else if status === 'online'}
-						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
 					{:else}
-						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive"></span>
 					{/if}
 				</span>
 			</div>
@@ -212,7 +212,7 @@
 		<div class="relative shrink-0 {currentSize === '1x1' ? 'w-full flex items-start' : ''}">
 			<div 
 				class="{(currentSize !== '1x1') ? 'h-14 w-14' : 'h-10 w-10'} {iconStyle} flex items-center justify-center shadow-sm"
-				style="background-color: {iconBgColor || '#4B5563'}"
+				style="background-color: {iconBgColor || 'hsl(var(--muted-foreground))'}"
 			>
 				<ServiceIcon {iconStyle} name={service.name} icon={service.icon} size={(currentSize !== '1x1') ? 'lg' : 'md'} />
 			</div>
@@ -221,7 +221,7 @@
 				<!-- svelte-ignore a11y_click_events_have_key_events -->
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div 
-					class="absolute -top-1.5 -right-1.5 flex items-center justify-center z-20 cursor-pointer text-red-500 hover:text-red-600 transition-colors bg-card rounded-full shadow-sm" 
+					class="absolute -top-1.5 -right-1.5 flex items-center justify-center z-20 cursor-pointer text-destructive hover:text-destructive/80 transition-colors bg-card rounded-full shadow-sm" 
 					title="Aggiornamento disponibile online! Clicca per vedere la release."
 					onclick={(e) => {
 						e.preventDefault();
@@ -231,14 +231,14 @@
 						}
 					}}
 				>
-					<span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-40 animate-ping"></span>
+					<span class="absolute inline-flex h-full w-full rounded-full bg-destructive opacity-40 animate-ping"></span>
 					<ArrowUpCircle class="w-4 h-4 animate-pulse relative" />
 				</div>
 			{/if}
 		</div>
 
 		<div class="min-w-0 flex flex-col {currentSize === '1x1' ? 'text-left' : (currentSize === '2x1' ? 'flex-1 text-left' : 'mt-4 items-center text-center')}">
-			<h3 class="{(currentSize !== '1x1') ? 'text-xl font-bold' : 'text-base font-semibold'} text-foreground truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors w-full">
+			<h3 class="{(currentSize !== '1x1') ? 'text-xl font-bold' : 'text-base font-semibold'} text-foreground truncate group-hover:text-primary transition-colors w-full">
 				{service.name}
 			</h3>
 			
@@ -260,7 +260,7 @@
 		{#snippet iconSlot()}
 			<div 
 				class="h-10 w-10 {iconStyle} flex items-center justify-center shadow-sm"
-				style="background-color: {iconBgColor || '#4B5563'}"
+				style="background-color: {iconBgColor || 'hsl(var(--muted-foreground))'}"
 			>
 				<ServiceIcon {iconStyle} name={service.name} icon={service.icon} />
 			</div>

@@ -80,7 +80,7 @@
 
 	{#if isOpen}
 		<div 
-			class="absolute z-50 w-full mt-1 bg-popover border border-border rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-black/50 overflow-hidden origin-top"
+			class="absolute z-50 w-full mt-1 bg-popover border border-border rounded-xl shadow-lg overflow-hidden origin-top"
 			transition:scale={{ duration: 150, start: 0.95 }}
 		>
 			<ul class="max-h-60 overflow-y-auto no-scrollbar py-1">

@@ -195,7 +195,7 @@
 					required
 					options={[
 						...categories.map((c: any) => ({ value: c.id, label: c.name })),
-						{ value: 'new_category_trigger', label: '[+ NUOVA]', class: 'font-bold text-blue-600' }
+						{ value: 'new_category_trigger', label: '[+ NUOVA]', class: 'font-bold text-primary' }
 					]}
 					onchange={(val) => {
 						if (val === 'new_category_trigger') {
@@ -300,11 +300,11 @@
 						<SaveButton type="submit" isLoading={isSaving} class="shadow-sm shrink-0" text="" title="SALVA" />
 					{:else if mode === 'discovery'}
 						<BackButton onclick={handleCancel} text="" class="shadow-sm shrink-0" title="ANNULLA" />
-						<Button type="submit" disabled={isSaving} size="icon" class="bg-green-500 hover:bg-green-600 text-white shadow-sm shrink-0" title="AGGIUNGI">
+						<Button type="submit" disabled={isSaving} size="icon" class="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shrink-0" title="AGGIUNGI">
 							<Plus class="w-4 h-4" strokeWidth={2.5} />
 						</Button>
 					{:else if mode === 'add'}
-						<SaveButton type="submit" isLoading={isSaving} text="" class="bg-green-500 hover:bg-green-600 text-white shadow-sm shrink-0" title="SALVA" />
+						<SaveButton type="submit" isLoading={isSaving} text="" class="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shrink-0" title="SALVA" />
 					{/if}
 				</div>
 			</div>
