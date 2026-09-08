@@ -59,7 +59,7 @@
 			</div>
 
 			<div class="flex flex-row gap-3 w-full md:w-auto">
-				{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion && versionInfo.url}
+				{#if versionInfo.latestVersion && versionInfo.url}
 					<Button 
 						variant="default"
 						size="icon"
@@ -88,7 +88,7 @@
 			</div>
 		</div>
 		
-		{#if showChangelog && versionInfo.releaseNotes && versionInfo.latestVersion !== versionInfo.currentVersion}
+		{#if showChangelog && versionInfo.releaseNotes}
 		<div transition:slide class="mt-4 p-5 border border-border bg-muted/30 rounded-xl">
 			<div class="flex items-center justify-between mb-4">
 				<h4 class="text-sm font-bold uppercase tracking-wider text-foreground">Note di Rilascio v{versionInfo.latestVersion}</h4>

@@ -1,5 +1,5 @@
 import { rewriteUrlForDocker } from "$lib/server/dockerHost";
-import { Agent } from "undici";
+import { Agent, fetch as undiciFetch } from "undici";
 export async function pingService(
   url: string,
   timeoutMs: number = 3000,
@@ -12,7 +12,7 @@ export async function pingService(
     const agent = new Agent({ connect: { rejectUnauthorized: false } });
 
     // Preferire richieste HEAD per risparmiare banda e risorse
-    const response = await fetch(rewriteUrlForDocker(url), {
+    const response = await undiciFetch(rewriteUrlForDocker(url), {
       method: "HEAD",
       signal: controller.signal,
       dispatcher: agent,

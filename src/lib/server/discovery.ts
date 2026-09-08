@@ -2,7 +2,7 @@ import { resolveIcon } from "$lib/server/iconResolver";
 import { rewriteUrlForDocker } from "$lib/server/dockerHost";
 import { env } from "$env/dynamic/private";
 import http from "http";
-import { Agent } from "undici";
+import { Agent, fetch as undiciFetch } from "undici";
 
 export interface DiscoveredService {
   id: string;
@@ -40,7 +40,7 @@ export async function getNpmServices(
     const agent = new Agent({ connect: { rejectUnauthorized: false } });
 
     // 1. Get Token
-    const tokenRes = await fetch(new URL("/api/tokens", npmUrl).toString(), {
+    const tokenRes = await undiciFetch(new URL("/api/tokens", npmUrl).toString(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ identity: email, secret: plainPassword }),
@@ -52,11 +52,11 @@ export async function getNpmServices(
       return [];
     }
 
-    const tokenData = await tokenRes.json();
+    const tokenData = (await tokenRes.json()) as any;
     const token = tokenData.token;
 
     // 2. Get Proxy Hosts
-    const hostsRes = await fetch(
+    const hostsRes = await undiciFetch(
       rewriteUrlForDocker(
         `${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`,
       ),
@@ -71,7 +71,7 @@ export async function getNpmServices(
       return [];
     }
 
-    const hosts = await hostsRes.json();
+    const hosts = (await hostsRes.json()) as any;
 
     const services: DiscoveredService[] = [];
     for (const host of hosts) {
@@ -211,7 +211,7 @@ export async function discoverAllServices(
       const { decryptString } = await import("./crypto");
       const plainPassword = decryptString(npmPassword);
       const agent = new Agent({ connect: { rejectUnauthorized: false } });
-      const tokenRes = await fetch(
+      const tokenRes = await undiciFetch(
         rewriteUrlForDocker(`${npmUrl.replace(/\/$/, "")}/api/tokens`),
         {
           method: "POST",
@@ -224,8 +224,8 @@ export async function discoverAllServices(
       if (!tokenRes.ok) {
         npmError = `Authentication failed: ${tokenRes.status} ${tokenRes.statusText}`;
       } else {
-        const tokenData = await tokenRes.json();
-        const hostsRes = await fetch(
+        const tokenData = (await tokenRes.json()) as any;
+        const hostsRes = await undiciFetch(
           rewriteUrlForDocker(
             `${npmUrl.replace(/\/$/, "")}/api/nginx/proxy-hosts?expand=owner,access_list,certificate`,
           ),
@@ -238,7 +238,7 @@ export async function discoverAllServices(
         if (!hostsRes.ok) {
           npmError = `Failed to fetch proxy hosts: ${hostsRes.status}`;
         } else {
-          const hosts = await hostsRes.json();
+          const hosts = (await hostsRes.json()) as any;
           for (const host of hosts) {
             if (host.domain_names && host.domain_names.length > 0) {
               const primaryDomain = host.domain_names[0];
