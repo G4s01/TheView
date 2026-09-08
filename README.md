@@ -21,19 +21,19 @@
 
 ## ✨ Features
 
-**TheView** is a lightweight, highly customizable, and aesthetically pleasing alternative to dashboard projects like Homer, Heimdall, or Dashy. It is built natively for users who want a rich UI without the burden of manual configuration files. 
+**TheView** is a lightweight, highly customizable, and aesthetically pleasing alternative to dashboard projects like Homer, Heimdall, or Dashy. It is built natively for users who want a rich UI without the burden of manual configuration files.
 
 Recently completely **rewritten with `shadcn-svelte` and Tailwind v4**, TheView now boasts a pristine, highly-polished interface that feels like a native desktop app.
 
 - 🖥️ **100% Web UI Driven**: Forget editing YAML files. Add, edit, remove, and reorder categories and services using an intuitive drag-and-drop web interface.
 - 🍱 **Bento Grid Design**: A beautiful, modern Bento Box layout powered by CSS Grid and `shadcn-svelte` primitives. Cards can flexibly span 1x1, 1x2, 2x1, or 2x2 blocks that perfectly adapt to your screen size without empty gaps.
-- 🔍 **Smart Icon Search Engine**: The built-in icon picker works like a search engine. Start typing to get instant autocomplete suggestions with visual previews directly from the `homarr-labs/dashboard-icons` repository, or just paste a direct URL.
+- 🔍 **Hybrid Icon Search Engine**: The built-in icon picker works like a search engine. Start typing to get instant autocomplete suggestions with visual previews directly from the `homarr-labs/dashboard-icons` repository, **or fetch millions of icons directly from the Iconify API**. You can also paste a custom direct URL.
 - 📡 **Live Health Checks (Ping)**: Built-in pinging system. Shows live online/offline status and latency (ms) for all your tracked services with smooth pulsing indicators.
 - 📦 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click.
 - 🔄 **Docker Update Notifications**: Automatically checks if your Docker containers have new versions available on Docker Hub or GHCR by comparing image SHA256 digests. A notification badge will alert you directly on the dashboard!
 - ⚡ **Seamless In-Place Edit**: Click the edit icon on any service card, and it elegantly scales into a fully functional form directly on the grid, gracefully expanding its layout without annoying popups.
 - 🔌 **Interactive Widgets**: Rich integrations for your favorite services (e.g., live qBittorrent download/upload speeds) directly visible on the service cards.
-- 🌙 **Advanced Theming**: Pick your vibe. Full support for Dark/Light modes powered by semantic `shadcn` HSL variables for pixel-perfect contrast.
+- 🎨 **Advanced Theming**: Pick your vibe. Full support for Dark/Light modes powered by semantic `shadcn-svelte` HSL variables for pixel-perfect contrast. The entire UI is built on a clean, scalable Tailwind v4 design system.
 - 📱 **Fully Responsive**: Carefully designed to look stunning and function perfectly on desktops, tablets, and smartphones.
 
 ---
@@ -162,4 +162,4 @@ npx drizzle-kit push
 ## 🛡️ License & Credits
 
 TheView is open-source and free to use. Built with ❤️ for the self-hosting community.
-Icons automatically fetched from [Homarr-Labs](https://github.com/homarr-labs/dashboard-icons).
+Icons automatically fetched from [Homarr-Labs](https://github.com/homarr-labs/dashboard-icons) and [Iconify API](https://iconify.design/).
