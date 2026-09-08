@@ -1,10 +1,17 @@
+<script module lang="ts">
+	// Caching globale (condiviso tra tutte le istanze) per ridurre le richieste duplicate
+	const iconifyCache = new Map<string, {id: string, url: string}[]>();
+	// Mappa delle richieste in corso per evitare chiamate simultanee identiche (Deduplication)
+	const inFlightRequests = new Map<string, Promise<{id: string, url: string}[]>>();
+</script>
+
 <script lang="ts">
 	import * as Command from "$lib/components/ui/command";
 	import { Label } from "$lib/components/ui/label";
 	import { Search, Check, Loader2 } from "@lucide/svelte";
 	import { cn } from "$lib/utils";
 	import { clickOutside } from '$lib/actions/clickOutside';
-	import { onMount, tick } from "svelte";
+	import { onMount, tick, untrack } from "svelte";
 
 	let { value = $bindable(""), name = "icon", class: className = "" } = $props<{ value?: string; name?: string; class?: string }>();
 
@@ -16,6 +23,86 @@
 	let isSelecting = $state(false);
 	let previousValue = $state("");
 	let inputId = $derived(name + "-" + Math.random().toString(36).substring(7));
+	let iconifyIcons = $state<{id: string, url: string}[]>([]);
+	let iconifyLoading = $state(false);
+
+	$effect(() => {
+		const searchTerm = value.trim();
+		if (!open || isSelecting || searchTerm.length < 3 || searchTerm.startsWith('http') || searchTerm.startsWith('/')) {
+			iconifyIcons = [];
+			iconifyLoading = false;
+			return;
+		}
+		
+		if (iconifyCache.has(searchTerm)) {
+			iconifyIcons = iconifyCache.get(searchTerm)!;
+			iconifyLoading = false;
+			return;
+		}
+		
+		iconifyLoading = true;
+		const controller = new AbortController();
+		const timeoutId = setTimeout(async () => {
+			if (iconifyCache.has(searchTerm)) {
+				iconifyIcons = iconifyCache.get(searchTerm)!;
+				iconifyLoading = false;
+				return;
+			}
+
+			try {
+				let fetchPromise = inFlightRequests.get(searchTerm);
+				
+				if (!fetchPromise) {
+					fetchPromise = fetch(`https://api.iconify.design/search?query=${encodeURIComponent(searchTerm)}&limit=40`, {
+						signal: controller.signal
+					}).then(async (res) => {
+						if (!res.ok) {
+							if (res.status === 429 || res.status === 1015) {
+								// Rate limit raggiunto, cache vuota temporanea per evitare spam
+								console.warn("Iconify Rate Limit Reached");
+								return [];
+							}
+							throw new Error("Failed to fetch");
+						}
+						const data = await res.json();
+						const results = data.icons || [];
+						const mapped = results.map((iconName: string) => {
+							const [prefix, name] = iconName.split(':');
+							return {
+								id: iconName,
+								url: `https://api.iconify.design/${prefix}/${name || ''}.svg`
+							};
+						});
+						iconifyCache.set(searchTerm, mapped);
+						return mapped;
+					}).finally(() => {
+						inFlightRequests.delete(searchTerm);
+					});
+					
+					inFlightRequests.set(searchTerm, fetchPromise);
+				}
+
+				const mappedIcons = await fetchPromise;
+				
+				if (!controller.signal.aborted) {
+					iconifyIcons = mappedIcons;
+				}
+			} catch (e: any) {
+				if (e.name !== 'AbortError') {
+					console.error("Failed to fetch from Iconify", e);
+				}
+			} finally {
+				if (!controller.signal.aborted) {
+					iconifyLoading = false;
+				}
+			}
+		}, 600); // Aumentato il debounce a 600ms per mitigare il Rate Limit
+
+		return () => {
+			clearTimeout(timeoutId);
+			controller.abort();
+		};
+	});
 
 	onMount(async () => {
 		try {
@@ -116,6 +203,8 @@
 								>
 									Usa URL personalizzato: <span class="font-bold block truncate">{value}</span>
 								</button>
+							{:else if iconifyLoading}
+								Ricerca in corso...
 							{:else}
 								Nessuna icona trovata.
 							{/if}
@@ -143,6 +232,29 @@
 								</Command.Item>
 							{/each}
 						</Command.Group>
+						{#if iconifyIcons.length > 0}
+							<div class="h-px bg-border my-2"></div>
+							<div class="text-xs font-semibold text-muted-foreground px-2 py-1 mb-1">Iconify</div>
+							<Command.Group>
+								{#each iconifyIcons as icon}
+									<Command.Item
+										value={icon.url}
+										onSelect={() => handleSelect(icon.url)}
+										class="flex items-center gap-3 cursor-pointer"
+									>
+										<Check class={cn("mr-2 h-4 w-4 shrink-0", value === icon.url ? "opacity-100" : "opacity-0")} />
+										<img src={icon.url} class="w-6 h-6 object-contain shrink-0 rounded" alt={icon.id} loading="lazy" />
+										<span class="truncate">{icon.id}</span>
+									</Command.Item>
+								{/each}
+							</Command.Group>
+						{/if}
+						{#if iconifyLoading}
+							<div class="py-2 text-center text-xs flex items-center justify-center gap-2">
+								<Loader2 class="h-3 w-3 animate-spin text-muted-foreground" />
+								Ricerca Iconify...
+							</div>
+						{/if}
 					{/if}
 				</Command.List>
 			</Command.Root>
