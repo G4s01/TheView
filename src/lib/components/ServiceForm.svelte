@@ -11,6 +11,14 @@
 	import { enhance } from '$app/forms';
 	import type { Action } from 'svelte/action';
 	import { Button } from '$lib/components/ui/button';
+	import { WIDGET_SIZES } from '$lib/config/widgetConstraints';
+
+	const ALL_SIZES = [
+		{ value: '1x1', label: '1x1 (Singola)' },
+		{ value: '2x1', label: '2x1 (Larga)' },
+		{ value: '1x2', label: '1x2 (Verticale)' },
+		{ value: '2x2', label: '2x2 (Grande)' }
+	];
 
 	let {
 		mode = 'edit', // 'add', 'edit', 'discovery'
@@ -106,11 +114,19 @@
 		}
 	};
 
+	let allowedSizes = $derived(WIDGET_SIZES[service.widgetType || 'none'] || WIDGET_SIZES.default);
+	let sizeOptions = $derived(ALL_SIZES.filter(s => allowedSizes.includes(s.value)));
+
 	$effect(() => {
 		if (service) {
 			if (!service.widgetType) service.widgetType = 'none';
 			if (!service.size) service.size = '1x1';
 			if (service.pingEnabled === undefined) service.pingEnabled = true;
+
+			const valid = WIDGET_SIZES[service.widgetType] || WIDGET_SIZES.default;
+			if (!valid.includes(service.size)) {
+				service.size = valid[0];
+			}
 		}
 	});
 </script>
@@ -261,7 +277,8 @@
 				bind:value={service.widgetType}
 				options={[
 					{ value: 'none', label: 'NESSUNO' },
-					{ value: 'qbittorrent', label: 'qBittorrent' }
+					{ value: 'qbittorrent', label: 'qBittorrent' },
+					{ value: 'adguard', label: 'AdGuard Home' }
 				]}
 			/>
 		</div>
@@ -270,12 +287,7 @@
 				label="DIMENSIONE"
 				name="size"
 				bind:value={service.size}
-				options={[
-					{ value: '1x1', label: '1x1 (Singola)' },
-					{ value: '2x1', label: '2x1 (Larga)' },
-					{ value: '1x2', label: '1x2 (Verticale)' },
-					{ value: '2x2', label: '2x2 (Grande)' }
-				]}
+				options={sizeOptions}
 			/>
 		</div>
 		<div class="md:col-span-12 flex flex-col md:flex-row gap-4 h-auto md:h-10 w-full items-start md:items-center">
@@ -283,7 +295,7 @@
 				<TextInput label="DESCRIZIONE" name="description" bind:value={service.description} />
 			</div>
 			<div class="flex justify-between items-center w-full md:w-auto shrink-0 h-10 gap-4">
-				<div class="flex items-center">
+				<div class="flex items-center gap-2">
 					<ToggleInput label="Ping" bind:checked={service.pingEnabled} />
 					{#if service.pingEnabled}
 						<input type="hidden" name="pingEnabled" value="on" />

@@ -2,26 +2,45 @@
 	import * as Card from "$lib/components/ui/card";
 	import SettingsHeader from '$lib/components/ui/SettingsHeader.svelte';
 	import SettingsQBittorrentWidget from './SettingsQBittorrentWidget.svelte';
+	import SettingsAdGuardWidget from './SettingsAdGuardWidget.svelte';
 
 	let {
 		qbit_username = $bindable(),
 		qbit_password = $bindable(),
 		qbit_url = $bindable(),
+		qbit_require_auth = $bindable(),
+		qbit_separate_cells = $bindable(),
 		saveQbitSettings,
-		isSavingQbit
+		isSavingQbit,
+		adguard_username = $bindable(),
+		adguard_password = $bindable(),
+		adguard_url = $bindable(),
+		adguard_require_auth = $bindable(),
+		adguard_separate_cells = $bindable(),
+		saveAdGuardSettings,
+		isSavingAdGuard
 	} = $props<{
 		qbit_username: string;
 		qbit_password: string;
 		qbit_url: string;
+		qbit_require_auth: boolean;
+		qbit_separate_cells: boolean;
 		saveQbitSettings: () => void;
 		isSavingQbit: boolean;
+		adguard_username: string;
+		adguard_password: string;
+		adguard_url: string;
+		adguard_require_auth: boolean;
+		adguard_separate_cells: boolean;
+		saveAdGuardSettings: () => void;
+		isSavingAdGuard: boolean;
 	}>();
 </script>
 
 <Card.Root>
 	<SettingsHeader 
 		title="WIDGET" 
-		description="CONFIGURA I WINDGET DISPONIBILI"
+		description="CONFIGURA I WIDGET DISPONIBILI"
 	>
 		{#snippet icon()}
 			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,8 +54,19 @@
 				bind:qbit_username
 				bind:qbit_password
 				bind:qbit_url
+				bind:qbit_require_auth
+				bind:qbit_separate_cells
 				{saveQbitSettings}
 				{isSavingQbit}
+			/>
+			<SettingsAdGuardWidget
+				bind:adguard_username
+				bind:adguard_password
+				bind:adguard_url
+				bind:adguard_require_auth
+				bind:adguard_separate_cells
+				{saveAdGuardSettings}
+				{isSavingAdGuard}
 			/>
 		</ul>
 	</Card.Content>

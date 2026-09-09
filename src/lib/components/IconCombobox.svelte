@@ -1,14 +1,32 @@
 <script module lang="ts">
+	type CacheEntry = { icons: {id: string, url: string}[], hasMore: boolean };
 	// Caching globale (condiviso tra tutte le istanze) per ridurre le richieste duplicate
-	const iconifyCache = new Map<string, {id: string, url: string}[]>();
+	const iconifyCache = new Map<string, CacheEntry>();
 	// Mappa delle richieste in corso per evitare chiamate simultanee identiche (Deduplication)
-	const inFlightRequests = new Map<string, Promise<{id: string, url: string}[]>>();
+	const inFlightRequests = new Map<string, Promise<{icons: {id: string, url: string}[], total: number}>>();
+
+	export function intersection(node: HTMLElement, callback: () => void) {
+		const observer = new IntersectionObserver((entries) => {
+			for (const entry of entries) {
+				if (entry.isIntersecting) {
+					callback();
+				}
+			}
+		}, { root: null, rootMargin: "50px" });
+		observer.observe(node);
+		return {
+			destroy() {
+				observer.disconnect();
+			}
+		};
+	}
 </script>
 
 <script lang="ts">
 	import * as Command from "$lib/components/ui/command";
 	import { Label } from "$lib/components/ui/label";
 	import { Search, Check, Loader2 } from "@lucide/svelte";
+	import { Skeleton } from "$lib/components/ui/skeleton";
 	import { cn } from "$lib/utils";
 	import { clickOutside } from '$lib/actions/clickOutside';
 	import { onMount, tick, untrack } from "svelte";
@@ -25,84 +43,131 @@
 	let inputId = $derived(name + "-" + Math.random().toString(36).substring(7));
 	let iconifyIcons = $state<{id: string, url: string}[]>([]);
 	let iconifyLoading = $state(false);
+	let iconifyHasMore = $state(false);
+	let isFetchingMore = $state(false);
+	let iconifyHasFetched = $state(false);
+	let debouncedSearchTerm = $state("");
+
+	let currentSearchController = new AbortController();
+
+	let showIconifySection = $derived(
+		debouncedSearchTerm.length >= 3 && 
+		!debouncedSearchTerm.startsWith('http') && 
+		!debouncedSearchTerm.startsWith('/') && 
+		open && 
+		!isSelecting
+	);
 
 	$effect(() => {
-		const searchTerm = value.trim();
-		if (!open || isSelecting || searchTerm.length < 3 || searchTerm.startsWith('http') || searchTerm.startsWith('/')) {
-			iconifyIcons = [];
-			iconifyLoading = false;
-			return;
-		}
-		
-		if (iconifyCache.has(searchTerm)) {
-			iconifyIcons = iconifyCache.get(searchTerm)!;
-			iconifyLoading = false;
-			return;
-		}
-		
-		iconifyLoading = true;
-		const controller = new AbortController();
-		const timeoutId = setTimeout(async () => {
-			if (iconifyCache.has(searchTerm)) {
-				iconifyIcons = iconifyCache.get(searchTerm)!;
-				iconifyLoading = false;
-				return;
-			}
-
-			try {
-				let fetchPromise = inFlightRequests.get(searchTerm);
-				
-				if (!fetchPromise) {
-					fetchPromise = fetch(`https://api.iconify.design/search?query=${encodeURIComponent(searchTerm)}&limit=40`, {
-						signal: controller.signal
-					}).then(async (res) => {
-						if (!res.ok) {
-							if (res.status === 429 || res.status === 1015) {
-								// Rate limit raggiunto, cache vuota temporanea per evitare spam
-								console.warn("Iconify Rate Limit Reached");
-								return [];
-							}
-							throw new Error("Failed to fetch");
-						}
-						const data = await res.json();
-						const results = data.icons || [];
-						const mapped = results.map((iconName: string) => {
-							const [prefix, name] = iconName.split(':');
-							return {
-								id: iconName,
-								url: `https://api.iconify.design/${prefix}/${name || ''}.svg`
-							};
-						});
-						iconifyCache.set(searchTerm, mapped);
-						return mapped;
-					}).finally(() => {
-						inFlightRequests.delete(searchTerm);
-					});
-					
-					inFlightRequests.set(searchTerm, fetchPromise);
-				}
-
-				const mappedIcons = await fetchPromise;
-				
-				if (!controller.signal.aborted) {
-					iconifyIcons = mappedIcons;
-				}
-			} catch (e: any) {
-				if (e.name !== 'AbortError') {
-					console.error("Failed to fetch from Iconify", e);
-				}
-			} finally {
-				if (!controller.signal.aborted) {
+		const term = value.trim();
+		const timeoutId = setTimeout(() => {
+			untrack(() => {
+				if (debouncedSearchTerm !== term) {
+					debouncedSearchTerm = term;
+					iconifyIcons = [];
+					iconifyHasMore = false;
+					iconifyHasFetched = false;
 					iconifyLoading = false;
+					isFetchingMore = false;
+					currentSearchController.abort();
 				}
-			}
-		}, 600); // Aumentato il debounce a 600ms per mitigare il Rate Limit
-
-		return () => {
-			clearTimeout(timeoutId);
-			controller.abort();
-		};
+			});
+		}, 500);
+		return () => clearTimeout(timeoutId);
 	});
+
+	async function performIconifySearch(searchTerm: string, offset: number, controller: AbortController) {
+		const limit = 20;
+		const reqKey = `${searchTerm}:${offset}`;
+		let fetchPromise = inFlightRequests.get(reqKey);
+		
+		if (!fetchPromise) {
+			fetchPromise = fetch(`https://api.iconify.design/search?query=${encodeURIComponent(searchTerm)}&limit=${limit}&start=${offset}`, {
+				signal: controller.signal
+			}).then(async (res) => {
+				if (!res.ok) {
+					if (res.status === 429 || res.status === 1015) {
+						console.warn("Iconify Rate Limit Reached");
+						return { icons: [], total: 0 };
+					}
+					throw new Error("Failed to fetch");
+				}
+				const data = await res.json();
+				const results = data.icons || [];
+				const mapped = results.map((iconName: string) => {
+					const [prefix, name] = iconName.split(':');
+					return {
+						id: iconName,
+						url: `https://api.iconify.design/${prefix}/${name || ''}.svg`
+					};
+				});
+				const total = data.total || 0;
+				return { icons: mapped, total };
+			}).finally(() => {
+				inFlightRequests.delete(reqKey);
+			});
+			inFlightRequests.set(reqKey, fetchPromise);
+		}
+
+		return await fetchPromise;
+	}
+
+	async function loadInitialIconify() {
+		const searchTerm = debouncedSearchTerm;
+		if (!showIconifySection || iconifyHasFetched || iconifyLoading) return;
+
+		iconifyHasFetched = true;
+
+		if (iconifyCache.has(searchTerm)) {
+			const cached = iconifyCache.get(searchTerm)!;
+			iconifyIcons = cached.icons;
+			iconifyHasMore = cached.hasMore;
+			return;
+		}
+
+		iconifyLoading = true;
+		currentSearchController = new AbortController();
+		const controller = currentSearchController;
+
+		try {
+			const mappedIcons = await performIconifySearch(searchTerm, 0, controller);
+			
+			if (!controller.signal.aborted) {
+				iconifyIcons = mappedIcons.icons;
+				iconifyHasMore = mappedIcons.total > 0 && iconifyIcons.length < mappedIcons.total && mappedIcons.icons.length > 0;
+				iconifyCache.set(searchTerm, { icons: iconifyIcons, hasMore: iconifyHasMore });
+			}
+		} catch (e: any) {
+			if (e.name !== 'AbortError') {
+				console.error("Failed to fetch from Iconify", e);
+			}
+		} finally {
+			if (!controller.signal.aborted) {
+				iconifyLoading = false;
+			}
+		}
+	}
+
+	async function loadMore() {
+		const searchTerm = debouncedSearchTerm;
+		if (isFetchingMore || !iconifyHasMore || searchTerm.length < 3) return;
+		
+		isFetchingMore = true;
+		try {
+			const result = await performIconifySearch(searchTerm, iconifyIcons.length, currentSearchController);
+			if (!currentSearchController.signal.aborted) {
+				iconifyIcons = [...iconifyIcons, ...result.icons];
+				iconifyHasMore = result.total > 0 && iconifyIcons.length < result.total && result.icons.length > 0;
+				iconifyCache.set(searchTerm, { icons: iconifyIcons, hasMore: iconifyHasMore });
+			}
+		} catch (e: any) {
+			if (e.name !== 'AbortError') console.error("Failed to load more from Iconify", e);
+		} finally {
+			if (!currentSearchController.signal.aborted) {
+				isFetchingMore = false;
+			}
+		}
+	}
 
 	onMount(async () => {
 		try {
@@ -189,9 +254,13 @@
 			<Command.Root shouldFilter={false} class="max-h-75 overflow-hidden rounded-md">
 				<Command.List class="max-h-75 overflow-y-auto">
 					{#if loading}
-						<div class="py-6 text-center text-sm flex items-center justify-center gap-2">
-							<Loader2 class="h-4 w-4 animate-spin text-muted-foreground" />
-							Caricamento icone...
+						<div class="p-2 flex flex-col gap-1">
+							{#each Array(5) as _}
+								<div class="flex items-center gap-3 px-2 py-1.5">
+									<Skeleton class="w-6 h-6 shrink-0 rounded" />
+									<Skeleton class="h-4 w-32" />
+								</div>
+							{/each}
 						</div>
 					{:else}
 						<Command.Empty>
@@ -203,9 +272,7 @@
 								>
 									Usa URL personalizzato: <span class="font-bold block truncate">{value}</span>
 								</button>
-							{:else if iconifyLoading}
-								Ricerca in corso...
-							{:else}
+							{:else if !iconifyLoading}
 								Nessuna icona trovata.
 							{/if}
 						</Command.Empty>
@@ -220,7 +287,7 @@
 									<span class="font-bold">Usa URL:</span> <span class="truncate">{value}</span>
 								</Command.Item>
 							{/if}
-							{#each filteredIcons as icon}
+							{#each filteredIcons as icon (icon)}
 								<Command.Item
 									value={icon}
 									onSelect={() => handleSelect(icon)}
@@ -232,28 +299,57 @@
 								</Command.Item>
 							{/each}
 						</Command.Group>
-						{#if iconifyIcons.length > 0}
-							<div class="h-px bg-border my-2"></div>
-							<div class="text-xs font-semibold text-muted-foreground px-2 py-1 mb-1">Iconify</div>
-							<Command.Group>
-								{#each iconifyIcons as icon}
-									<Command.Item
-										value={icon.url}
-										onSelect={() => handleSelect(icon.url)}
-										class="flex items-center gap-3 cursor-pointer"
-									>
-										<Check class={cn("mr-2 h-4 w-4 shrink-0", value === icon.url ? "opacity-100" : "opacity-0")} />
-										<img src={icon.url} class="w-6 h-6 object-contain shrink-0 rounded" alt={icon.id} loading="lazy" />
-										<span class="truncate">{icon.id}</span>
-									</Command.Item>
-								{/each}
-							</Command.Group>
-						{/if}
-						{#if iconifyLoading}
-							<div class="py-2 text-center text-xs flex items-center justify-center gap-2">
-								<Loader2 class="h-3 w-3 animate-spin text-muted-foreground" />
-								Ricerca Iconify...
-							</div>
+						{#if showIconifySection}
+							{#key debouncedSearchTerm}
+								<div use:intersection={loadInitialIconify}>
+									<div class="h-px bg-border my-2"></div>
+									<div class="text-xs font-semibold text-muted-foreground px-2 py-1 mb-1">Risultati da Iconify</div>
+								</div>
+							{/key}
+							
+							{#if iconifyIcons.length > 0}
+								<Command.Group>
+									{#each iconifyIcons as icon (icon.id)}
+										<Command.Item
+											value={icon.url}
+											onSelect={() => handleSelect(icon.url)}
+											class="flex items-center gap-3 cursor-pointer"
+										>
+											<Check class={cn("mr-2 h-4 w-4 shrink-0", value === icon.url ? "opacity-100" : "opacity-0")} />
+											<img src={icon.url} class="w-6 h-6 object-contain shrink-0 rounded" alt={icon.id} loading="lazy" />
+											<span class="truncate">{icon.id}</span>
+										</Command.Item>
+									{/each}
+								</Command.Group>
+							{/if}
+							
+							{#if iconifyLoading}
+								<Command.Group>
+									{#each Array(5) as _}
+										<Command.Item disabled class="flex items-center gap-3">
+											<Check class="mr-2 h-4 w-4 shrink-0 opacity-0" />
+											<Skeleton class="w-6 h-6 shrink-0 rounded" />
+											<Skeleton class="h-4 w-24" />
+										</Command.Item>
+									{/each}
+								</Command.Group>
+							{/if}
+
+							{#if isFetchingMore}
+								<Command.Group>
+									{#each Array(3) as _}
+										<Command.Item disabled class="flex items-center gap-3">
+											<Check class="mr-2 h-4 w-4 shrink-0 opacity-0" />
+											<Skeleton class="w-6 h-6 shrink-0 rounded" />
+											<Skeleton class="h-4 w-24" />
+										</Command.Item>
+									{/each}
+								</Command.Group>
+							{/if}
+
+							{#if iconifyHasMore && !iconifyLoading && iconifyIcons.length > 0}
+								<div use:intersection={loadMore} class="h-1 w-full shrink-0 opacity-0 pointer-events-none"></div>
+							{/if}
 						{/if}
 					{/if}
 				</Command.List>

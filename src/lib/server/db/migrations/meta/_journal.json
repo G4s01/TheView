@@ -15,6 +15,13 @@
       "when": 1788816912466,
       "tag": "0001_tiny_fat_cobra",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788937773682,
+      "tag": "0002_dark_grim_reaper",
+      "breakpoints": true
     }
   ]
 }

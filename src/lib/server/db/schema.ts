@@ -28,6 +28,9 @@ export const services = sqliteTable("services", {
   requireAuth: integer("require_auth", { mode: "boolean" })
     .default(false)
     .notNull(),
+  widgetSize: text("widget_size", { enum: ["1x1", "2x1", "2x2", "1x2"] })
+    .default("1x1")
+    .notNull(),
 });
 
 export const settings = sqliteTable("settings", {

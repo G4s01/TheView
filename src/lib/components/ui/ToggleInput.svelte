@@ -6,11 +6,15 @@
 		label = '',
 		description = '',
 		checked = $bindable(false),
+		disabled = false,
+		onCheckedChange,
 		id = Math.random().toString(36).substring(7)
 	} = $props<{
 		label?: string;
 		description?: string;
 		checked?: boolean;
+		disabled?: boolean;
+		onCheckedChange?: (v: boolean) => void;
 		id?: string;
 	}>();
 </script>
@@ -35,5 +39,5 @@
 			<p class="text-[10px] text-muted-foreground leading-none mt-0.5">{description}</p>
 		{/if}
 	</div>
-	<Switch {id} bind:checked />
+	<Switch {id} bind:checked {disabled} {onCheckedChange} />
 </div>

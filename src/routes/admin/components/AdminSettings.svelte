@@ -4,7 +4,6 @@
 	
 	import SettingsTheme from './SettingsTheme.svelte';
 	import SettingsAppearance from './SettingsAppearance.svelte';
-	import SettingsWidgets from './SettingsWidgets.svelte';
 	import SettingsSecurity from './SettingsSecurity.svelte';
 	import SettingsBackup from './SettingsBackup.svelte';
 	import SettingsSystem from './SettingsSystem.svelte';
@@ -58,29 +57,6 @@
 		}
 	}
 
-	// State for Widgets
-	let qbit_url = $state('');
-	let qbit_username = $state('');
-	let qbit_password = $state('');
-	let isSavingQbit = $state(false);
-
-	async function saveQbitSettings() {
-		isSavingQbit = true;
-		try {
-			const res = await fetch('/api/settings', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ qbit_url, qbit_username, qbit_password })
-			});
-			if (res.ok) showAlert('Successo', 'Impostazioni qBittorrent salvate con successo!');
-			else showAlert('Errore', 'Errore durante il salvataggio.');
-		} catch (e) {
-			showAlert('Errore', 'Errore di rete.');
-		} finally {
-			isSavingQbit = false;
-		}
-	}
-
 	// State for System
 	let versionInfo = $state<any>({});
 	let isCheckingVersion = $state(false);
@@ -102,9 +78,6 @@
 			const res = await fetch('/api/settings');
 			if (res.ok) {
 				const data = await res.json();
-				qbit_url = data.qbit_url || '';
-				qbit_username = data.qbit_username || '';
-				qbit_password = data.qbit_password || '';
 				showCategoriesDesktop = data.showCategoriesDesktop !== false;
 				showCategoriesMobile = data.showCategoriesMobile !== false;
 				
@@ -138,14 +111,6 @@
 		bind:showEditButton
 		{saveAppearanceSettings}
 		{isSavingAppearance}
-	/>
-
-	<SettingsWidgets
-		bind:qbit_username
-		bind:qbit_password
-		bind:qbit_url
-		{saveQbitSettings}
-		{isSavingQbit}
 	/>
 
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-6">

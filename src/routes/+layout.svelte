@@ -7,13 +7,24 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	
 	let { children, data } = $props();
+
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: {
+				enabled: browser,
+			},
+		},
+	});
 
 	let hasInitializedEditMode = false;
 	let hasInitializedAdminTab = false;
 	
 	$effect(() => {
+		appState.isAdmin = data.isAdmin;
+		appState.settings = data.settings || {};
 		if (data.isAdmin && !hasInitializedEditMode) {
 			appState.isEditMode = true;
 			hasInitializedEditMode = true;
@@ -77,6 +88,7 @@
 
 <svelte:window onscroll={handleScroll} />
 
+<QueryClientProvider client={queryClient}>
 <div class="flex flex-col min-h-screen bg-background text-foreground">
 	{#if $page.url.pathname !== '/setup'}
 	<!-- Topbar Header -->
@@ -123,6 +135,9 @@
 						</button>
 						<button onclick={() => appState.adminTab = 'discovery'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'discovery' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 							Discovery
+						</button>
+						<button onclick={() => appState.adminTab = 'widgets'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'widgets' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+							Widgets
 						</button>
 						<button onclick={() => appState.adminTab = 'settings'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'settings' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 							Impostazioni
@@ -202,6 +217,9 @@
 			<button onclick={() => appState.adminTab = 'discovery'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'discovery' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 				Discovery
 			</button>
+			<button onclick={() => appState.adminTab = 'widgets'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'widgets' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+				Widgets
+			</button>
 			<button onclick={() => appState.adminTab = 'settings'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'settings' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 				Impostazioni
 			</button>
@@ -261,3 +279,4 @@
 		window.location.reload();
 	}} 
 />
+</QueryClientProvider>

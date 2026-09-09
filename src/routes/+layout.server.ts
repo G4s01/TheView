@@ -37,5 +37,6 @@ export async function load({ locals }) {
     iconStyle: settings.iconStyle || "rounded-xl",
     stickyNavbar: settings.stickyNavbar !== false,
     showEditButton: settings.showEditButton !== false,
+    settings,
   };
 }

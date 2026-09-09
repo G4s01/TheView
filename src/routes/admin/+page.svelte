@@ -3,6 +3,7 @@
 	import AdminCategories from './components/AdminCategories.svelte';
 	import AdminDiscovery from './components/AdminDiscovery.svelte';
 	import AdminSettings from './components/AdminSettings.svelte';
+	import AdminWidgets from './components/AdminWidgets.svelte';
 
 	let { data, form } = $props();
 	
@@ -42,6 +43,10 @@
 	{:else if appState.adminTab === 'discovery'}
 		<div class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
 			<AdminDiscovery bind:localCategories />
+		</div>
+	{:else if appState.adminTab === 'widgets'}
+		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
+			<AdminWidgets />
 		</div>
 	{:else if appState.adminTab === 'settings'}
 		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
