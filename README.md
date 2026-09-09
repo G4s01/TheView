@@ -14,6 +14,7 @@
     <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" /></a>
     <a href="https://orm.drizzle.team/"><img src="https://img.shields.io/badge/SQLite-Drizzle_ORM-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" /></a>
     <a href="https://ui.shadcn.com/"><img src="https://img.shields.io/badge/shadcn--svelte-latest-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="shadcn-svelte" /></a>
+    <a href="https://tanstack.com/query"><img src="https://img.shields.io/badge/TanStack_Query-latest-FF4154?style=for-the-badge&logo=reactquery&logoColor=white" alt="TanStack Query" /></a>
   </p>
 </div>
 
@@ -23,16 +24,19 @@
 
 **TheView** is a lightweight, highly customizable, and aesthetically pleasing alternative to dashboard projects like Homer, Heimdall, or Dashy. It is built natively for users who want a rich UI without the burden of manual configuration files.
 
-Recently completely **rewritten with `shadcn-svelte` and Tailwind v4**, TheView now boasts a pristine, highly-polished interface that feels like a native desktop app.
+Built with **Svelte 5 Runes**, `shadcn-svelte`, **Tailwind CSS v4**, and **TanStack Query**, TheView delivers a pristine, highly-polished interface that feels like a native desktop app.
 
 - 🖥️ **100% Web UI Driven**: Forget editing YAML files. Add, edit, remove, and reorder categories and services using an intuitive drag-and-drop web interface.
-- 🍱 **Bento Grid Design**: A beautiful, modern Bento Box layout powered by CSS Grid and `shadcn-svelte` primitives. Cards can flexibly span 1x1, 1x2, 2x1, or 2x2 blocks that perfectly adapt to your screen size without empty gaps.
+- 🍱 **Bento Grid Design**: A beautiful, modern Bento Box layout with responsive Flexbox wrapping. Cards can flexibly span 1x1, 1x2, 2x1, or 2x2 blocks that perfectly adapt to your screen size. Cells dynamically resize to fit widget content — no scrollbars, no clipping.
+- 🔀 **Drag & Drop Reordering**: Full drag-and-drop reordering powered by `svelte-dnd-action`. In edit mode, spacer items allow free vertical placement — stack services across multiple rows even when there aren't enough items to fill a row.
 - 🔍 **Hybrid Icon Search Engine**: The built-in icon picker works like a search engine. Start typing to get instant autocomplete suggestions with visual previews directly from the `homarr-labs/dashboard-icons` repository, **or fetch millions of icons directly from the Iconify API**. You can also paste a custom direct URL.
-- 📡 **Live Health Checks (Ping)**: Built-in pinging system. Shows live online/offline status and latency (ms) for all your tracked services with smooth pulsing indicators.
+- 📡 **Live Health Checks (Ping)**: Built-in pinging system powered by TanStack Query with 30-second polling. Shows live online/offline status and latency (ms) for all your tracked services with smooth pulsing indicators.
 - 📦 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click.
 - 🔄 **Docker Update Notifications**: Automatically checks if your Docker containers have new versions available on Docker Hub or GHCR by comparing image SHA256 digests. A notification badge will alert you directly on the dashboard!
 - ⚡ **Seamless In-Place Edit**: Click the edit icon on any service card, and it elegantly scales into a fully functional form directly on the grid, gracefully expanding its layout without annoying popups.
-- 🔌 **Interactive Widgets**: Rich integrations for your favorite services (e.g., live qBittorrent download/upload speeds) directly visible on the service cards.
+- 🔌 **Interactive Widgets**:
+  - **qBittorrent**: Live download/upload speeds, active torrent list with pause/resume controls, and torrent addition via magnet link or `.torrent` file upload — all directly on the dashboard.
+  - **AdGuard Home**: Real-time DNS query stats, protection toggle with timed pause via a scrollable time wheel picker, and automatic countdown to re-activation.
 - 🎨 **Advanced Theming**: Pick your vibe. Full support for Dark/Light modes powered by semantic `shadcn-svelte` HSL variables for pixel-perfect contrast. The entire UI is built on a clean, scalable Tailwind v4 design system.
 - 📱 **Fully Responsive**: Carefully designed to look stunning and function perfectly on desktops, tablets, and smartphones.
 
@@ -101,7 +105,7 @@ TheView stores all state (Categories, Services, uploaded Icons, and UI Settings)
 
 ### 🔐 Security & Encryption
 
-All sensitive data (Admin Password, NPM credentials, qBittorrent passwords) are **strongly encrypted or hashed** (AES-256-GCM / SHA-256) inside the database. The system automatically generates a unique `APP_SECRET` on first boot. TheView does not store plaintext passwords anywhere.
+All sensitive data (Admin Password, NPM credentials, Widget passwords) are **strongly encrypted or hashed** (AES-256-GCM / SHA-256) inside the database. The system automatically generates a unique `APP_SECRET` on first boot. TheView does not store plaintext passwords anywhere.
 
 ### 💾 Backup & Restore
 
@@ -121,13 +125,42 @@ To enable automatic discovery of your Nginx Proxy Manager hosts:
 3. Enter your NPM Email and Password.
 4. Navigate to the **Discovery** tab to see your proxy hosts merged with your Docker containers!
 
-### qBittorrent Widget Integration
+---
 
-To enable live torrent stats (download/upload speeds, active torrents) directly on a service card:
+## 🔌 Widget Integrations
 
-1. Go to **Settings** in the Admin panel and open the **Widget Integrations** section.
-2. Add your qBittorrent credentials (URL, Username, Password).
-3. In the Home dashboard, edit or create a service and select `qBittorrent` from the Widget dropdown.
+Widget settings are now managed in a **dedicated "Widgets" tab** in the Admin Panel, separated from general settings for clearer navigation.
+
+### qBittorrent
+
+Live torrent monitoring and management directly from your dashboard card.
+
+1. Go to the **Widgets** tab in the Admin panel.
+2. Expand the qBittorrent section and enter your credentials (URL, Username, Password).
+3. Create or edit a service, select `qBittorrent` as the Widget type.
+
+**Features:**
+
+- Real-time download/upload speeds with 3-second TanStack Query polling.
+- Active torrent list with individual pause/resume buttons.
+- Add new torrents via magnet link or `.torrent` file upload directly from the widget.
+- Configurable Bento Grid size constraints.
+- Optional "Separate Cells" mode for a split-view layout.
+
+### AdGuard Home
+
+Real-time DNS protection monitoring and control.
+
+1. Go to the **Widgets** tab in the Admin panel.
+2. Expand the AdGuard Home section and enter your credentials (URL, Username, Password).
+3. Create or edit a service, select `adguard` as the Widget type.
+
+**Features:**
+
+- DNS Queries count and Blocked Queries count — live stats.
+- Protection ON/OFF toggle with visual status indicator.
+- Timed pause via a custom **Time Wheel Picker** (Days / Hours / Minutes). Scroll to select a duration, disable protection, and watch the countdown timer for automatic re-activation.
+- All data powered by TanStack Query with smart polling.
 
 ---
 
@@ -156,6 +189,21 @@ To update the database schema after making changes to `src/lib/server/db/schema.
 ```bash
 npx drizzle-kit push
 ```
+
+---
+
+## 🧩 Tech Stack
+
+| Layer             | Technology                                           |
+| ----------------- | ---------------------------------------------------- |
+| **Framework**     | SvelteKit 5 (Runes)                                  |
+| **Styling**       | Tailwind CSS v4 + shadcn-svelte                      |
+| **Database**      | SQLite via Drizzle ORM                               |
+| **Data Fetching** | TanStack Query (Svelte)                              |
+| **Drag & Drop**   | svelte-dnd-action                                    |
+| **Icons**         | lucide-svelte + Homarr Dashboard Icons + Iconify API |
+| **Encryption**    | AES-256-GCM / SHA-256                                |
+| **Deployment**    | Docker / Docker Compose                              |
 
 ---
 
