@@ -18,9 +18,15 @@ export async function load({ locals }) {
   });
 
   const { getSettings } = await import("$lib/server/settings");
-  const settings = await getSettings();
+  const rawSettings = await getSettings();
   const needsSetup =
-    !settings.adminPassword || settings.adminPassword === "admin";
+    !rawSettings.adminPassword || rawSettings.adminPassword === "admin";
+
+  const settings = { ...rawSettings };
+  if (settings.adminPassword) delete settings.adminPassword;
+  if (settings.npmPassword) settings.npmPassword = "********";
+  if (settings.qbit_password) settings.qbit_password = "********";
+  if (settings.adguard_password) settings.adguard_password = "********";
 
   return {
     categories: categoriesWithCount,

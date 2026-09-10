@@ -275,10 +275,18 @@
 	onClose={() => appState.showLoginModal = false} 
 	onSuccess={() => {
 		appState.showLoginModal = false;
+		
+		let hasServices = false;
+		if (data.categories) {
+			hasServices = data.categories.some((c: any) => c.count > 0);
+		}
+
 		if (appState.loginRedirectUrl) {
 			const url = appState.loginRedirectUrl;
 			appState.loginRedirectUrl = null;
 			window.location.href = url;
+		} else if (!hasServices) {
+			window.location.href = '/admin?tab=discovery';
 		} else {
 			window.location.reload();
 		}

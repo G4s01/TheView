@@ -84,6 +84,7 @@ I widget seguono un pattern architetturale rigoroso a 4 livelli:
 4. **Modali e Dialoghi:** Mai modali custom sovrapposti. Usa i primitivi `<Dialog>` per UI o `<AlertDialog>` per conferme distruttive.
 5. **Componenti DRY:** L'icona va delegata a `<ServiceIcon>`. I form di inserimento/modifica devono condividere `<ServiceForm>`, differenziando per `mode`.
 6. **Iconografia:** Usa esclusivamente `lucide-svelte` per la UI strutturale.
+7. **Stati di Caricamento (Skeleton):** Qualsiasi caricamento UI in cui si attendono dati (fetch, refresh, queries TanStack, server-side data loading, ritardi di navigazione) DEVE essere sempre accompagnato da un'animazione Skeleton (`animate-pulse` di Tailwind o componenti simili) coerente con la forma del contenuto in arrivo. Vietati i semplici messaggi di testo grezzi ("Caricamento...").
 
 ## ⚙️ REGOLE DI VIBECODING
 

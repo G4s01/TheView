@@ -33,10 +33,28 @@
 
 <div class="flex flex-col gap-2 h-full min-h-0">
 	{#if query.isPending}
-		<div class="flex items-center justify-between">
-			<Skeleton class="h-4 w-16" />
-			<Skeleton class="h-4 w-8" />
-			<Skeleton class="h-4 w-16" />
+		<div class="flex flex-col gap-3 h-full animate-pulse w-full">
+			<div class="flex items-center justify-between text-xs w-full gap-2 shrink-0">
+				<div class="flex items-center flex-1"><div class="h-3 w-12 bg-muted rounded"></div></div>
+				<div class="flex items-center justify-center flex-1"><div class="h-3 w-8 bg-muted rounded"></div></div>
+				<div class="flex items-center justify-end flex-1"><div class="h-3 w-12 bg-muted rounded"></div></div>
+			</div>
+			{#if size === '2x1' || size === '1x2' || size === '2x2'}
+				<div class="flex flex-col gap-3 mt-2 flex-1">
+					<div class="flex flex-col gap-2 w-full">
+						<div class="h-3 w-3/4 bg-muted rounded"></div>
+						<div class="h-1.5 w-full bg-muted rounded"></div>
+					</div>
+					<div class="flex flex-col gap-2 w-full">
+						<div class="h-3 w-1/2 bg-muted rounded"></div>
+						<div class="h-1.5 w-full bg-muted rounded"></div>
+					</div>
+				</div>
+				<div class="mt-auto pt-2 flex gap-2 h-8 shrink-0">
+					<div class="flex-1 h-full bg-muted rounded-md"></div>
+					<div class="w-8 h-full bg-muted rounded-md"></div>
+				</div>
+			{/if}
 		</div>
 	{:else if query.isError}
 		<div class="text-xs text-destructive truncate flex items-center justify-center gap-1" title={query.error?.message || 'Errore'}>

@@ -31,13 +31,14 @@ Built with **Svelte 5 Runes**, `shadcn-svelte`, **Tailwind CSS v4**, and **TanSt
 - 🔀 **Drag & Drop Reordering**: Full drag-and-drop reordering powered by `svelte-dnd-action`. In edit mode, spacer items allow free vertical placement — stack services across multiple rows even when there aren't enough items to fill a row.
 - 🔍 **Hybrid Icon Search Engine**: The built-in icon picker works like a search engine. Start typing to get instant autocomplete suggestions with visual previews directly from the `homarr-labs/dashboard-icons` repository, **or fetch millions of icons directly from the Iconify API**. You can also paste a custom direct URL.
 - 📡 **Live Health Checks (Ping)**: Built-in pinging system powered by TanStack Query with 30-second polling. Shows live online/offline status and latency (ms) for all your tracked services with smooth pulsing indicators.
-- 📦 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click.
+- 📦 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click. The smart icon parser automatically matches services like AdGuard Home, Filebrowser, and Beszel.
 - 🔄 **Docker Update Notifications**: Automatically checks if your Docker containers have new versions available on Docker Hub or GHCR by comparing image SHA256 digests. A notification badge will alert you directly on the dashboard!
 - ⚡ **Seamless In-Place Edit**: Click the edit icon on any service card, and it elegantly scales into a fully functional form directly on the grid, gracefully expanding its layout without annoying popups.
 - 🔌 **Interactive Widgets**:
   - **qBittorrent**: Live download/upload speeds, active torrent list with pause/resume controls, and torrent addition via magnet link or `.torrent` file upload — all directly on the dashboard.
   - **AdGuard Home**: Real-time DNS query stats, protection toggle with timed pause via a scrollable time wheel picker, and automatic countdown to re-activation.
-- 🎨 **Advanced Theming**: Pick your vibe. Full support for Dark/Light modes powered by semantic `shadcn-svelte` HSL variables for pixel-perfect contrast. The entire UI is built on a clean, scalable Tailwind v4 design system.
+- 🎨 **Advanced Theming**: Pick your vibe. Full support for Dark/Light modes powered by semantic `shadcn-svelte` HSL variables for pixel-perfect contrast. The entire UI is built on a clean, scalable Tailwind v4 design system, with no hardcoded colors.
+- 🦴 **Beautiful Loading States**: Skeletons that match actual component layouts instead of basic spinners, providing a native application feel while TanStack Query fetches data in the background.
 - 📱 **Fully Responsive**: Carefully designed to look stunning and function perfectly on desktops, tablets, and smartphones.
 
 ---
@@ -96,6 +97,7 @@ services:
 2. Navigate to `http://your-homelab-ip:3001` (or your configured `ORIGIN`).
 3. Click the login icon ➜] in the top right corner of the navbar to access the **Admin Panel**.
 4. By default, there is no password. You will be prompted to set your secure **Admin Password** on your first login.
+5. If no services are set up, clicking "Accedi e Imposta i Tuoi Servizi" will conveniently redirect you directly to the **Discovery tab** to auto-populate your dashboard!
 
 ---
 
@@ -129,7 +131,7 @@ To enable automatic discovery of your Nginx Proxy Manager hosts:
 
 ## 🔌 Widget Integrations
 
-Widget settings are now managed in a **dedicated "Widgets" tab** in the Admin Panel, separated from general settings for clearer navigation.
+Widget settings are managed in a **dedicated "Widgets" tab** in the Admin Panel, separated from general settings for clearer navigation.
 
 ### qBittorrent
 

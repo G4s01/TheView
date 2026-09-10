@@ -19,12 +19,15 @@
 	let npmError = $state<string | null>(null);
 	let isDiscovering = $state(false);
 	let expandedId = $state<string | null>(null);
-	let isNpmEditing = $state(true);
-	let showNpmPassword = $state(false);
+	import { page } from '$app/stores';
 
-	let npmUrlCombined = $state('');
-	let npmEmail = $state('');
-	let npmPassword = $state('');
+	let npmUrlCombined = $state($page.data.settings?.npmUrl || '');
+	let npmEmail = $state($page.data.settings?.npmEmail || '');
+	let npmPassword = $state($page.data.settings?.npmPassword || '');
+	
+	const initialNpmConfigured = Boolean($page.data.settings?.npmUrl && $page.data.settings?.npmEmail && $page.data.settings?.npmPassword);
+	let isNpmEditing = $state(!initialNpmConfigured);
+	let showNpmPassword = $state(false);
 
 	async function confirmNpmDisconnect() {
 		npmUrlCombined = ''; npmEmail = ''; npmPassword = '';
@@ -34,15 +37,16 @@
 	}
 
 	onMount(async () => {
-		const res = await fetch('/api/settings');
-		const data = await res.json();
-		if (data.npmUrl) {
-			npmUrlCombined = data.npmUrl;
+		try {
+			const res = await fetch('/api/settings');
+			if (res.ok) {
+				const data = await res.json();
+				if (data.npmPassword) npmPassword = data.npmPassword;
+			}
+		} catch (e) {
+			console.error("Failed to load settings:", e);
 		}
-		npmEmail = data.npmEmail || '';
-		npmPassword = data.npmPassword || '';
-		if (npmUrlCombined && npmEmail && npmPassword) isNpmEditing = false;
-		
+
 		if (discoveredServices.length === 0 && !isDiscovering) {
 			fetchDiscovery();
 		}
@@ -121,24 +125,17 @@
 	<div class="bg-card text-card-foreground shadow-sm border border-border rounded-2xl">
 		<ul class="divide-y divide-border">
 			{#if isDiscovering}
-				<li class="px-6 py-8">
-					<div class="flex items-center space-x-4 animate-pulse">
-						<div class="w-12 h-12 rounded-xl bg-muted"></div>
-						<div class="flex-1 space-y-3">
-							<div class="h-4 bg-muted rounded w-1/4"></div>
-							<div class="h-3 bg-muted rounded w-1/2"></div>
+				{#each Array(5) as _, i}
+					<li class="px-6 py-8 {i > 0 ? 'border-t border-border' : ''}">
+						<div class="flex items-center space-x-4 animate-pulse">
+							<div class="w-12 h-12 rounded-xl bg-muted"></div>
+							<div class="flex-1 space-y-3">
+								<div class="h-4 bg-muted rounded {i % 2 === 0 ? 'w-1/4' : 'w-1/3'}"></div>
+								<div class="h-3 bg-muted rounded {i % 2 === 0 ? 'w-1/2' : 'w-2/5'}"></div>
+							</div>
 						</div>
-					</div>
-				</li>
-				<li class="px-6 py-8 border-t border-border">
-					<div class="flex items-center space-x-4 animate-pulse">
-						<div class="w-12 h-12 rounded-xl bg-muted"></div>
-						<div class="flex-1 space-y-3">
-							<div class="h-4 bg-muted rounded w-1/3"></div>
-							<div class="h-3 bg-muted rounded w-2/5"></div>
-						</div>
-					</div>
-				</li>
+					</li>
+				{/each}
 			{:else if discoveredServices.length === 0}
 				<li class="px-6 py-12 text-center text-sm text-muted-foreground">
 					<Search class="mx-auto h-12 w-12 text-muted-foreground mb-3" strokeWidth={1.5} />

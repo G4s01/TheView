@@ -5,8 +5,11 @@
 	import { flip } from 'svelte/animate';
 	import { untrack } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { navigating } from '$app/stores';
 
 	let { data } = $props();
+
+	let isLoading = $derived($navigating && $navigating.from?.url.pathname !== $navigating.to?.url.pathname);
 
 	// Server-synced state (no spacers, used in view mode)
 	let localGroups = $state<Record<string, any[]>>({});
@@ -109,6 +112,27 @@
 	<title>TheView - Homelab Portal</title>
 </svelte:head>
 
+{#if isLoading}
+	<div class="flex flex-col gap-8 w-full animate-pulse mt-4">
+		<div class="space-y-4">
+			<div class="h-6 w-32 bg-muted/50 rounded"></div>
+			<div class="flex flex-wrap gap-4 w-full">
+				<div class="h-36 w-64 bg-muted/20 rounded-xl border border-border/10"></div>
+				<div class="h-36 w-64 bg-muted/20 rounded-xl border border-border/10"></div>
+				<div class="h-36 w-64 bg-muted/20 rounded-xl border border-border/10"></div>
+				<div class="h-36 w-64 bg-muted/20 rounded-xl border border-border/10"></div>
+			</div>
+		</div>
+		<div class="space-y-4 pt-4">
+			<div class="h-6 w-40 bg-muted/50 rounded"></div>
+			<div class="flex flex-wrap gap-4 w-full">
+				<div class="h-36 w-64 bg-muted/20 rounded-xl border border-border/10"></div>
+				<div class="h-36 w-64 bg-muted/20 rounded-xl border border-border/10"></div>
+				<div class="h-36 w-64 bg-muted/20 rounded-xl border border-border/10"></div>
+			</div>
+		</div>
+	</div>
+{:else}
 <div class="space-y-6">
 	{#each Object.entries(appState.isEditMode ? dndGroups : localGroups) as [categoryName, services]}
 		{#if realItemCount(services) > 0 || appState.isEditMode}
@@ -193,6 +217,7 @@
 		</div>
 	{/if}
 </div>
+{/if}
 
 <style>
 	/*

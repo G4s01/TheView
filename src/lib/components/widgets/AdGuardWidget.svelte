@@ -79,9 +79,22 @@
 
 <div class="flex flex-col gap-2 h-full min-h-0">
 	{#if query.isPending}
-		<div class="flex items-center justify-between">
-			<Skeleton class="h-4 w-16" />
-			<Skeleton class="h-4 w-8" />
+		<div class="flex flex-wrap items-stretch justify-between w-full gap-2 min-h-0 flex-1 animate-pulse">
+			<div class="flex flex-col justify-center gap-2 items-center bg-muted/50 border border-border p-2 rounded-xl flex-1 min-w-35">
+				<div class="h-3 bg-muted rounded w-3/4"></div>
+				<div class="h-3 bg-muted rounded w-1/2"></div>
+			</div>
+			<div class="flex flex-col items-end gap-2 flex-1 min-w-35 max-w-full">
+				<div class="bg-card border border-border rounded-xl flex flex-col w-full overflow-hidden h-full">
+					<div class="flex items-center justify-between w-full p-2 px-3 h-10 border-b border-border bg-muted/30">
+						<div class="h-3 bg-muted rounded w-1/3"></div>
+						<div class="h-5 bg-muted rounded w-1/4"></div>
+					</div>
+					<div class="p-1.5 sm:p-2 bg-muted/20 w-full flex justify-center items-center flex-1 h-full">
+						<div class="h-16 w-16 rounded-full bg-muted/50"></div>
+					</div>
+				</div>
+			</div>
 		</div>
 	{:else if query.isError}
 		<div class="text-xs text-destructive truncate flex items-center justify-center gap-1" title={query.error?.message || 'Errore'}>

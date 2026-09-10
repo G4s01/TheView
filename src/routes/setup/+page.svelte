@@ -33,8 +33,7 @@
       
       if (res.ok) {
         // Redirige all'admin panel una volta salvato e loggato
-        goto('/admin');
-        window.location.reload(); // Per aggiornare i dati nel layout
+        goto('/admin?tab=discovery').then(() => window.location.reload());
       } else {
         const data = await res.json();
         error = data.error || 'Errore durante il salvataggio';

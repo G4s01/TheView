@@ -39,25 +39,35 @@
 	</SettingsHeader>
 	<Card.Content class="p-6">
 		<div class="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between py-3">
-			<div class="space-y-1">
-				<div class="flex items-center space-x-2">
-					<span class="text-sm font-bold uppercase tracking-wider text-muted-foreground">Versione Attuale:</span>
-					<span class="text-base font-bold text-foreground">v{versionInfo.currentVersion || '...'}</span>
-				</div>
-				{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
-					<div class="flex items-center space-x-2 text-destructive">
-						<ArrowUp class="w-4 h-4 animate-bounce" strokeWidth={1.5} />
-						<span class="text-sm font-bold uppercase tracking-wider">Nuova versione disponibile: v{versionInfo.latestVersion}</span>
+			<div class="space-y-1 w-full flex-1">
+				{#if isCheckingVersion}
+					<div class="flex flex-col gap-2 animate-pulse w-full max-w-75">
+						<div class="flex items-center gap-2">
+							<div class="h-4 bg-muted rounded w-32"></div>
+							<div class="h-5 bg-muted rounded w-16"></div>
+						</div>
+						<div class="h-4 bg-muted rounded w-48 mt-1"></div>
 					</div>
-				{:else if versionInfo.latestVersion === versionInfo.currentVersion}
-					<div class="flex items-center space-x-2 text-primary">
-						<Check class="w-4 h-4" strokeWidth={2} />
-						<span class="text-xs font-bold uppercase tracking-wider">Il sistema è aggiornato</span>
+				{:else}
+					<div class="flex items-center space-x-2">
+						<span class="text-sm font-bold uppercase tracking-wider text-muted-foreground">Versione Attuale:</span>
+						<span class="text-base font-bold text-foreground">v{versionInfo.currentVersion || '...'}</span>
 					</div>
+					{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
+						<div class="flex items-center space-x-2 text-destructive">
+							<ArrowUp class="w-4 h-4 animate-bounce" strokeWidth={1.5} />
+							<span class="text-sm font-bold uppercase tracking-wider">Nuova versione disponibile: v{versionInfo.latestVersion}</span>
+						</div>
+					{:else if versionInfo.latestVersion === versionInfo.currentVersion}
+						<div class="flex items-center space-x-2 text-primary">
+							<Check class="w-4 h-4" strokeWidth={2} />
+							<span class="text-xs font-bold uppercase tracking-wider">Il sistema è aggiornato</span>
+						</div>
+					{/if}
 				{/if}
 			</div>
 
-			<div class="flex flex-row gap-3 w-full md:w-auto">
+			<div class="flex flex-row gap-3 w-full md:w-auto mt-2 md:mt-0">
 				{#if versionInfo.latestVersion && versionInfo.url}
 					<Button 
 						variant="default"
@@ -87,27 +97,46 @@
 			</div>
 		</div>
 		
-		{#if showChangelog && versionInfo.releaseNotes}
-		<div transition:slide class="mt-4 p-5 border border-border bg-muted/30 rounded-xl">
-			<div class="flex items-center justify-between mb-4">
-				<h4 class="text-sm font-bold uppercase tracking-wider text-foreground">Note di Rilascio v{versionInfo.latestVersion}</h4>
-				<div class="flex items-center gap-2">
-					<Button variant="outline" size="icon" onclick={() => copyChangelog()} title="Copia Changelog">
-						{#if copiedChangelog}
-							<Check class="w-4 h-4 text-primary" strokeWidth={2} />
-						{:else}
-							<Copy class="w-4 h-4" strokeWidth={1.5} />
-						{/if}
-					</Button>
-					<Button variant="outline" size="icon" href={versionInfo.url} target="_blank" rel="noopener noreferrer" title="Apri su GitHub">
-						<ExternalLink class="size-4" strokeWidth={1.5} />
-					</Button>
+		{#if showChangelog}
+			{#if isCheckingVersion}
+				<div transition:slide class="mt-4 p-5 border border-border bg-muted/30 rounded-xl animate-pulse">
+					<div class="flex items-center justify-between mb-4">
+						<div class="h-4 bg-muted rounded w-48"></div>
+						<div class="flex gap-2">
+							<div class="h-9 w-9 bg-muted rounded-md"></div>
+							<div class="h-9 w-9 bg-muted rounded-md"></div>
+						</div>
+					</div>
+					<div class="space-y-3">
+						<div class="h-4 bg-muted rounded w-full"></div>
+						<div class="h-4 bg-muted rounded w-5/6"></div>
+						<div class="h-4 bg-muted rounded w-4/6"></div>
+						<div class="h-4 bg-muted rounded w-full mt-4"></div>
+						<div class="h-4 bg-muted rounded w-3/4"></div>
+					</div>
 				</div>
-			</div>
-			<div class="changelog-content max-h-64 overflow-y-auto pr-2 custom-scrollbar text-sm text-foreground">
-				{@html DOMPurify.sanitize(marked.parse(versionInfo.releaseNotes) as string)}
-			</div>
-		</div>
+			{:else if versionInfo.releaseNotes}
+				<div transition:slide class="mt-4 p-5 border border-border bg-muted/30 rounded-xl">
+					<div class="flex items-center justify-between mb-4">
+						<h4 class="text-sm font-bold uppercase tracking-wider text-foreground">Note di Rilascio v{versionInfo.latestVersion}</h4>
+						<div class="flex items-center gap-2">
+							<Button variant="outline" size="icon" onclick={() => copyChangelog()} title="Copia Changelog">
+								{#if copiedChangelog}
+									<Check class="w-4 h-4 text-primary" strokeWidth={2} />
+								{:else}
+									<Copy class="w-4 h-4" strokeWidth={1.5} />
+								{/if}
+							</Button>
+							<Button variant="outline" size="icon" href={versionInfo.url} target="_blank" rel="noopener noreferrer" title="Apri su GitHub">
+								<ExternalLink class="size-4" strokeWidth={1.5} />
+							</Button>
+						</div>
+					</div>
+					<div class="changelog-content max-h-64 overflow-y-auto pr-2 custom-scrollbar text-sm text-foreground">
+						{@html DOMPurify.sanitize(marked.parse(versionInfo.releaseNotes) as string)}
+					</div>
+				</div>
+			{/if}
 		{/if}
 	</Card.Content>
 </Card.Root>

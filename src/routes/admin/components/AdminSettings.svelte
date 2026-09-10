@@ -25,16 +25,18 @@
 		modalConfig = { show: true, title, message, type: 'confirm', onConfirm };
 	}
 
-	// State for Appearance
-	let showCategoriesDesktop = $state(true);
-	let showCategoriesMobile = $state(true);
-	let customNavbarTitleDesktop = $state('');
-	let customNavbarTitleMobile = $state('');
-	let showCategoryCounts = $state(true);
-	let showServiceDescriptions = $state(true);
-	let iconStyle = $state('rounded-xl');
-	let stickyNavbar = $state(true);
-	let showEditButton = $state(true);
+	import { page } from '$app/stores';
+
+	// State for Appearance initialized directly from server data
+	let showCategoriesDesktop = $state($page.data.settings?.showCategoriesDesktop !== false);
+	let showCategoriesMobile = $state($page.data.settings?.showCategoriesMobile !== false);
+	let customNavbarTitleDesktop = $state($page.data.settings?.customNavbarTitleDesktop || $page.data.settings?.customNavbarTitle || '');
+	let customNavbarTitleMobile = $state($page.data.settings?.customNavbarTitleMobile || $page.data.settings?.customNavbarTitle || '');
+	let showCategoryCounts = $state($page.data.settings?.showCategoryCounts !== false);
+	let showServiceDescriptions = $state($page.data.settings?.showServiceDescriptions !== false);
+	let iconStyle = $state($page.data.settings?.iconStyle || 'rounded-xl');
+	let stickyNavbar = $state($page.data.settings?.stickyNavbar !== false);
+	let showEditButton = $state($page.data.settings?.showEditButton !== false);
 	let isSavingAppearance = $state(false);
 
 	async function saveAppearanceSettings() {
@@ -74,25 +76,6 @@
 
 	onMount(async () => {
 		checkVersion();
-		try {
-			const res = await fetch('/api/settings');
-			if (res.ok) {
-				const data = await res.json();
-				showCategoriesDesktop = data.showCategoriesDesktop !== false;
-				showCategoriesMobile = data.showCategoriesMobile !== false;
-				
-				customNavbarTitleDesktop = data.customNavbarTitleDesktop || data.customNavbarTitle || '';
-				customNavbarTitleMobile = data.customNavbarTitleMobile || data.customNavbarTitle || '';
-				
-				showCategoryCounts = data.showCategoryCounts !== false;
-				showServiceDescriptions = data.showServiceDescriptions !== false;
-				iconStyle = data.iconStyle || 'rounded-xl';
-				stickyNavbar = data.stickyNavbar !== false;
-				showEditButton = data.showEditButton !== false;
-			}
-		} catch (e) {
-			console.error(e);
-		}
 	});
 </script>
 

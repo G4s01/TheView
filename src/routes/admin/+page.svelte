@@ -46,7 +46,7 @@
 	{#if isLoading}
 		<div class="space-y-4 animate-pulse">
 			<div class="h-12 bg-muted/50 rounded-xl w-1/4"></div>
-			<div class="h-[400px] bg-muted/20 rounded-xl w-full"></div>
+			<div class="h-100 bg-muted/20 rounded-xl w-full"></div>
 		</div>
 	{:else if currentTab === 'services'}
 
