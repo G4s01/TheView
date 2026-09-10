@@ -31,18 +31,31 @@ export async function load() {
     groupedServices[cat.name] = [];
   }
 
-  for (const service of allServices) {
-    if (!service.categoryId) continue;
-    const cat = cats.find((c) => c.id === service.categoryId);
-    if (cat) {
-      const s = { ...service, category: cat.name } as any;
-      s.iconDetails = resolveIcon(
-        s.icon,
-        s.dockerImage,
-        s.name, // we use service name as containerName fallback
-        s.url,
-      );
-      groupedServices[cat.name].push(s);
+  for (const cat of cats) {
+    const catServices = allServices.filter((s) => s.categoryId === cat.id);
+    if (catServices.length > 0) {
+      const maxPos = catServices[catServices.length - 1].position || 0;
+      const items = [];
+      for (let i = 0; i <= maxPos; i++) {
+        const s = catServices.find((service) => service.position === i);
+        if (s) {
+          const decorated = { ...s, category: cat.name } as any;
+          decorated.iconDetails = resolveIcon(
+            decorated.icon,
+            decorated.dockerImage,
+            decorated.name,
+            decorated.url
+          );
+          items.push(decorated);
+        } else {
+          items.push({
+            id: `__spacer_${cat.name}_${i}`,
+            _isSpacer: true,
+            size: "1x1",
+          });
+        }
+      }
+      groupedServices[cat.name] = items;
     }
   }
 

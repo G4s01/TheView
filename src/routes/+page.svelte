@@ -5,9 +5,6 @@
 	import { flip } from 'svelte/animate';
 	import { untrack } from 'svelte';
 	import { goto } from '$app/navigation';
-	import LoginModal from '$lib/components/LoginModal.svelte';
-
-	let showLogin = $state(false);
 
 	let { data } = $props();
 
@@ -25,8 +22,8 @@
 	}
 
 	function createSpacers(catKey: string): any[] {
-		return Array.from({ length: SPACER_COUNT }, (_, i) => ({
-			id: `__spacer_${catKey}_${i}`,
+		return Array.from({ length: SPACER_COUNT }, () => ({
+			id: `__spacer_${catKey}_${Math.random().toString(36).substring(2, 11)}`,
 			_isSpacer: true,
 			size: '1x1'
 		}));
@@ -47,6 +44,17 @@
 		}
 	});
 
+	function trimTrailingSpacers(items: any[]) {
+		let lastRealIndex = -1;
+		for (let i = items.length - 1; i >= 0; i--) {
+			if (!isSpacer(items[i])) {
+				lastRealIndex = i;
+				break;
+			}
+		}
+		return items.slice(0, lastRealIndex + 1);
+	}
+
 	// Manage spacers on edit mode transitions
 	let wasEditMode = false;
 	$effect.pre(() => {
@@ -60,11 +68,11 @@
 			}
 			dndGroups = result;
 		} else if (!isEdit && wasEditMode) {
-			// Exiting edit mode: sync reordered items back to localGroups (without spacers)
+			// Exiting edit mode: sync reordered items back to localGroups (keep internal spacers)
 			const result: Record<string, any[]> = {};
 			const groups = untrack(() => dndGroups);
 			for (const [cat, items] of Object.entries(groups)) {
-				result[cat] = items.filter(i => !isSpacer(i));
+				result[cat] = trimTrailingSpacers(items);
 			}
 			localGroups = result;
 			dndGroups = {};
@@ -80,15 +88,18 @@
 		dndGroups[categoryName] = e.detail.items;
 
 		if (appState.isEditMode) {
-			// Save only real items' order to DB
-			const realItems = dndGroups[categoryName].filter((i: any) => !isSpacer(i));
-			const orderedIds = realItems.map((s: any) => s.id);
+			// Save items and positions (including internal spacers)
+			const trimmedItems = trimTrailingSpacers(dndGroups[categoryName]);
+			const itemsWithPositions = trimmedItems.map((item, index) => ({
+				id: isSpacer(item) ? null : item.id,
+				position: index
+			})).filter(item => item.id !== null);
 			const cat = data.categories.find((c: any) => c.name === categoryName);
 
 			fetch('/api/services/reorder', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ orderedIds, categoryId: cat?.id })
+				body: JSON.stringify({ itemsWithPositions, categoryId: cat?.id })
 			}).catch(console.error);
 		}
 	}
@@ -143,7 +154,7 @@
 						class="bento-cell transition-all duration-300 {isSpacer(service) ? 'bento-spacer' : ''} {!isSpacer(service) && (editingServiceId === service.id ? 'overflow-visible w-full!' : 'overflow-hidden')} {!isSpacer(service) ? (service.size === '2x2' ? 'bento-2x2' : service.size === '2x1' ? 'bento-2x1' : service.size === '1x2' ? 'bento-1x2' : 'bento-1x1') : ''}"
 					>
 						{#if isSpacer(service)}
-							<div class="w-full h-full rounded-xl border-2 border-dashed border-border/20 bg-muted/5 opacity-40"></div>
+							<div class="w-full h-full rounded-xl {appState.isEditMode ? 'border-2 border-dashed border-border/20 bg-muted/5 opacity-40' : 'bg-transparent'}"></div>
 						{:else}
 							<ServiceCard {service} categories={data.categories || []} isExpanded={editingServiceId === service.id} onExpandToggle={(val) => editingServiceId = val ? service.id : null} showDescription={data.showServiceDescriptions} iconStyle={data.iconStyle} />
 						{/if}
@@ -162,7 +173,7 @@
 			</div>
 			{#if appState.isAdmin}
 				<a
-					href="/admin"
+					href="/admin?tab={appState.adminTab || 'services'}"
 					class="inline-flex items-center gap-3 px-8 py-4 text-base font-bold uppercase tracking-wider text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95"
 				>
 					Accedi e imposta i tuoi servizi
@@ -170,7 +181,10 @@
 			{:else}
 				<button
 					type="button"
-					onclick={() => appState.showLoginModal = true}
+					onclick={() => {
+						appState.loginRedirectUrl = '/admin?tab=discovery';
+						appState.showLoginModal = true;
+					}}
 					class="inline-flex items-center gap-3 px-8 py-4 text-base font-bold uppercase tracking-wider text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer"
 				>
 					Accedi e imposta i tuoi servizi
@@ -179,15 +193,6 @@
 		</div>
 	{/if}
 </div>
-
-<LoginModal 
-	show={showLogin} 
-	onClose={() => showLogin = false} 
-	onSuccess={() => {
-		showLogin = false;
-		goto('/admin');
-	}} 
-/>
 
 <style>
 	/*
@@ -221,9 +226,9 @@
 		min-height: 136px;
 	}
 
-	/* Spacer cells: same width, shorter height */
+	/* Spacer cells: same width, same height as normal cells to keep 2D layout */
 	.bento-cell.bento-spacer {
-		min-height: 80px;
+		min-height: 136px;
 	}
 
 	/* 2-wide items */

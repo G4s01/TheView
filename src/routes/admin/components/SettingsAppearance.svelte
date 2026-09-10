@@ -106,19 +106,19 @@
 							<div class="flex flex-col gap-3 p-4 border border-border rounded-xl bg-background shadow-sm">
 								<p class="text-xs font-bold text-foreground uppercase tracking-wider">Stile Icone Servizi</p>
 								<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-									<button type="button" onclick={() => iconStyle = 'rounded-xl'} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === 'rounded-xl' ? 'border-primary ring-2 ring-primary/20 bg-muted/50' : 'border border-border hover:bg-muted/50'} transition-all bg-card">
+									<button type="button" onclick={() => iconStyle = 'rounded-xl'} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === 'rounded-xl' ? 'border-2 border-primary bg-primary/10 shadow-sm' : 'border-2 border-transparent bg-card hover:bg-muted/50'} transition-all">
 										<div class="w-12 h-12 bg-primary rounded-xl shadow-sm flex items-center justify-center">
 											<svg class="w-6 h-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
 										</div>
 										<span class="text-[10px] font-bold text-foreground uppercase tracking-wider text-center">Arrotondato</span>
 									</button>
-									<button type="button" onclick={() => iconStyle = 'rounded-full'} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === 'rounded-full' ? 'border-primary ring-2 ring-primary/20 bg-muted/50' : 'border border-border hover:bg-muted/50'} transition-all bg-card">
+									<button type="button" onclick={() => iconStyle = 'rounded-full'} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === 'rounded-full' ? 'border-2 border-primary bg-primary/10 shadow-sm' : 'border-2 border-transparent bg-card hover:bg-muted/50'} transition-all">
 										<div class="w-12 h-12 bg-primary rounded-full shadow-sm flex items-center justify-center">
 											<svg class="w-6 h-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
 										</div>
 										<span class="text-[10px] font-bold text-foreground uppercase tracking-wider text-center">Circolare</span>
 									</button>
-									<button type="button" onclick={() => iconStyle = 'rounded-none'} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === 'rounded-none' ? 'border-primary ring-2 ring-primary/20 bg-muted/50' : 'border border-border hover:bg-muted/50'} transition-all bg-card">
+									<button type="button" onclick={() => iconStyle = 'rounded-none'} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === 'rounded-none' ? 'border-2 border-primary bg-primary/10 shadow-sm' : 'border-2 border-transparent bg-card hover:bg-muted/50'} transition-all">
 										<div class="w-12 h-12 bg-primary rounded-none shadow-sm flex items-center justify-center">
 											<svg class="w-6 h-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
 										</div>

@@ -15,7 +15,8 @@
 		npmPassword = $bindable(),
 		isNpmEditing = $bindable(),
 		showNpmPassword = $bindable(),
-		onDisconnect
+		onDisconnect,
+		onSave
 	} = $props<{
 		npmUrlCombined: string;
 		npmEmail: string;
@@ -23,6 +24,7 @@
 		isNpmEditing: boolean;
 		showNpmPassword: boolean;
 		onDisconnect: () => void;
+		onSave: () => Promise<void>;
 	}>();
 
 	let originalUrl = $state(npmUrlCombined);
@@ -107,6 +109,7 @@
 								await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: npmUrlCombined, npmEmail, npmPassword }) });
 								isNpmEditing = false;
 								showNpmPassword = false;
+								if (onSave) await onSave();
 							}}
 							title="SALVA"
 						/>

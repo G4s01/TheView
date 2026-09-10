@@ -10,22 +10,33 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   }
 
   try {
-    const { orderedIds, categoryId } = await request.json();
+    const payload = await request.json();
+    const { orderedIds, itemsWithPositions, categoryId } = payload;
 
-    if (!Array.isArray(orderedIds)) {
-      return json({ error: "Invalid payload" }, { status: 400 });
-    }
-
-    for (let i = 0; i < orderedIds.length; i++) {
-      const updateData: any = { position: i };
-      if (categoryId !== undefined) {
-        updateData.categoryId = categoryId;
+    if (Array.isArray(itemsWithPositions)) {
+      for (const item of itemsWithPositions) {
+        const updateData: any = { position: item.position };
+        if (categoryId !== undefined) {
+          updateData.categoryId = categoryId;
+        }
+        await db
+          .update(services)
+          .set(updateData)
+          .where(eq(services.id, item.id));
       }
-
-      await db
-        .update(services)
-        .set(updateData)
-        .where(eq(services.id, orderedIds[i]));
+    } else if (Array.isArray(orderedIds)) {
+      for (let i = 0; i < orderedIds.length; i++) {
+        const updateData: any = { position: i };
+        if (categoryId !== undefined) {
+          updateData.categoryId = categoryId;
+        }
+        await db
+          .update(services)
+          .set(updateData)
+          .where(eq(services.id, orderedIds[i]));
+      }
+    } else {
+      return json({ error: "Invalid payload" }, { status: 400 });
     }
 
     return json({ success: true });

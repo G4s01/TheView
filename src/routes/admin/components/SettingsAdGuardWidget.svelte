@@ -35,7 +35,7 @@
 	<div class="flex items-center justify-between w-full">
 		<div class="flex items-center gap-4 flex-1 min-w-0 mr-4">
 			<div class="shrink-0">
-				<ServiceIcon icon="adguard" name="AdGuard Home" size="lg" iconStyle="rounded-xl" class="shadow-sm border border-border bg-card" />
+				<ServiceIcon icon="adguard-home" name="AdGuard Home" size="lg" iconStyle="rounded-xl" class="shadow-sm border border-border bg-card" />
 			</div>
 			<div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 flex-1 min-w-0">
 				<p class="text-sm font-semibold text-foreground uppercase tracking-wider truncate">AdGuard Home</p>

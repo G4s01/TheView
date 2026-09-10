@@ -4,4 +4,5 @@ export const appState = $state({
   isAdmin: false,
   settings: {} as Record<string, any>,
   showLoginModal: false,
+  loginRedirectUrl: null as string | null,
 });

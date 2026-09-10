@@ -16,7 +16,17 @@
 		}
 	});
 
+	let isLoading = $derived($navigating && $navigating.from?.url.pathname !== $navigating.to?.url.pathname);
+
 	import { appState } from '$lib/client/state.svelte';
+	import { page, navigating } from '$app/stores';
+	let currentTab = $derived($page.url.searchParams.get('tab') || 'services');
+
+	$effect(() => {
+		if (currentTab !== appState.adminTab) {
+			appState.adminTab = currentTab;
+		}
+	});
 </script>
 
 <svelte:head>
@@ -32,23 +42,30 @@
 		</div>
 	{/if}
 
-	{#if appState.adminTab === 'services'}
+	
+	{#if isLoading}
+		<div class="space-y-4 animate-pulse">
+			<div class="h-12 bg-muted/50 rounded-xl w-1/4"></div>
+			<div class="h-[400px] bg-muted/20 rounded-xl w-full"></div>
+		</div>
+	{:else if currentTab === 'services'}
+
 		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
 			<AdminServices {services} bind:localCategories />
 		</div>
-	{:else if appState.adminTab === 'categories'}
+	{:else if currentTab === 'categories'}
 		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
 			<AdminCategories bind:localCategories {services} />
 		</div>
-	{:else if appState.adminTab === 'discovery'}
+	{:else if currentTab === 'discovery'}
 		<div class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
 			<AdminDiscovery bind:localCategories />
 		</div>
-	{:else if appState.adminTab === 'widgets'}
+	{:else if currentTab === 'widgets'}
 		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
 			<AdminWidgets />
 		</div>
-	{:else if appState.adminTab === 'settings'}
+	{:else if currentTab === 'settings'}
 		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
 			<AdminSettings />
 		</div>

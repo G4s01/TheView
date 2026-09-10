@@ -126,21 +126,21 @@
 			<div class="hidden md:flex w-full max-w-7xl shrink px-4">
 				{#if $page.url.pathname.startsWith('/admin')}
 					<nav class="flex items-center w-full space-x-3">
-						<button onclick={() => appState.adminTab = 'services'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'services' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-							Servizi
-						</button>
-						<button onclick={() => appState.adminTab = 'categories'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'categories' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-							Categorie
-						</button>
-						<button onclick={() => appState.adminTab = 'discovery'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'discovery' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-							Discovery
-						</button>
-						<button onclick={() => appState.adminTab = 'widgets'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'widgets' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-							Widgets
-						</button>
-						<button onclick={() => appState.adminTab = 'settings'} class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {appState.adminTab === 'settings' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-							Impostazioni
-						</button>
+						<a href="/admin?tab=services" data-sveltekit-replacestate data-sveltekit-noscroll class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {($page.url.searchParams.get('tab') || 'services') === 'services' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+																Servizi
+															</a>
+						<a href="/admin?tab=categories" data-sveltekit-replacestate data-sveltekit-noscroll class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {($page.url.searchParams.get('tab') || 'services') === 'categories' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+																Categorie
+															</a>
+						<a href="/admin?tab=discovery" data-sveltekit-replacestate data-sveltekit-noscroll class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {($page.url.searchParams.get('tab') || 'services') === 'discovery' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+																Discovery
+															</a>
+						<a href="/admin?tab=widgets" data-sveltekit-replacestate data-sveltekit-noscroll class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {($page.url.searchParams.get('tab') || 'services') === 'widgets' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+																Widgets
+															</a>
+						<a href="/admin?tab=settings" data-sveltekit-replacestate data-sveltekit-noscroll class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {($page.url.searchParams.get('tab') || 'services') === 'settings' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+																Impostazioni
+															</a>
 					</nav>
 				{:else}
 					<div class="relative w-full overflow-hidden flex items-center" style="-webkit-mask-image: linear-gradient(to right, transparent, black 32px, black calc(100% - 64px), transparent); mask-image: linear-gradient(to right, transparent, black 32px, black calc(100% - 64px), transparent);">
@@ -167,7 +167,7 @@
 			<div class="flex-1 flex items-center justify-end min-w-37.5 space-x-2 sm:space-x-4">
 				<div class="flex items-center bg-muted rounded-lg p-1 border border-border transition-colors {data.isAdmin && appState.isEditMode ? 'ring-2 ring-primary border-primary' : ''}">
 					{#if data.isAdmin}
-						<a href="/admin" class="relative p-1.5 text-muted-foreground hover:text-foreground transition-colors" title="ADMIN PANEL">
+						<a href="/admin?tab={appState.adminTab || 'services'}" class="relative p-1.5 text-muted-foreground hover:text-foreground transition-colors" title="ADMIN PANEL">
 							<Settings class="h-5 w-5" strokeWidth={1.5} />
 							{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
 								<div class="absolute -top-1 -right-1 bg-destructive rounded-full text-destructive-foreground p-0.5 animate-bounce shadow-sm ring-1 ring-background" title="Nuova versione disponibile!">
@@ -207,21 +207,21 @@
 		{#if $page.url.pathname.startsWith('/admin')}
 		<div class="md:hidden relative border-t border-border bg-card/90 w-full" style="-webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent);">
 			<nav class="flex items-center space-x-2 px-4 py-3 overflow-x-auto no-scrollbar relative z-0">
-			<button onclick={() => appState.adminTab = 'services'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'services' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-				Servizi
-			</button>
-			<button onclick={() => appState.adminTab = 'categories'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'categories' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-				Categorie
-			</button>
-			<button onclick={() => appState.adminTab = 'discovery'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'discovery' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-				Discovery
-			</button>
-			<button onclick={() => appState.adminTab = 'widgets'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'widgets' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-				Widgets
-			</button>
-			<button onclick={() => appState.adminTab = 'settings'} class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {appState.adminTab === 'settings' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-				Impostazioni
-			</button>
+			<a href="/admin?tab=services" data-sveltekit-replacestate data-sveltekit-noscroll class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {($page.url.searchParams.get('tab') || 'services') === 'services' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+																Servizi
+															</a>
+			<a href="/admin?tab=categories" data-sveltekit-replacestate data-sveltekit-noscroll class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {($page.url.searchParams.get('tab') || 'services') === 'categories' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+																Categorie
+															</a>
+			<a href="/admin?tab=discovery" data-sveltekit-replacestate data-sveltekit-noscroll class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {($page.url.searchParams.get('tab') || 'services') === 'discovery' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+																Discovery
+															</a>
+			<a href="/admin?tab=widgets" data-sveltekit-replacestate data-sveltekit-noscroll class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {($page.url.searchParams.get('tab') || 'services') === 'widgets' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+																Widgets
+															</a>
+			<a href="/admin?tab=settings" data-sveltekit-replacestate data-sveltekit-noscroll class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {($page.url.searchParams.get('tab') || 'services') === 'settings' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
+																Impostazioni
+															</a>
 			<!-- spacer for right padding scroll -->
 			<div class="w-1 shrink-0"></div>
 			</nav>
@@ -275,7 +275,13 @@
 	onClose={() => appState.showLoginModal = false} 
 	onSuccess={() => {
 		appState.showLoginModal = false;
-		window.location.reload();
+		if (appState.loginRedirectUrl) {
+			const url = appState.loginRedirectUrl;
+			appState.loginRedirectUrl = null;
+			window.location.href = url;
+		} else {
+			window.location.reload();
+		}
 	}} 
 />
 </QueryClientProvider>

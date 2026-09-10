@@ -4,8 +4,15 @@
 	import { Palette, SunMoon, Moon, Sun, Cat, Crosshair, Coffee, Zap } from "@lucide/svelte";
 
 	import { appState } from '$lib/client/state.svelte';
+	import { page } from '$app/stores';
 
-	let currentTheme = $state(appState.settings.theme || 'default');
+	let currentTheme = $state($page.data.settings?.theme || 'default');
+
+	$effect(() => {
+		if (appState.settings?.theme && appState.settings.theme !== currentTheme) {
+			currentTheme = appState.settings.theme;
+		}
+	});
 
 	async function setTheme(theme: string) {
 		currentTheme = theme;

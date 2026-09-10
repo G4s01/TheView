@@ -80,6 +80,7 @@
 		bind:isNpmEditing
 		bind:showNpmPassword
 		onDisconnect={confirmNpmDisconnect}
+		onSave={fetchDiscovery}
 	/>
 
 	<!-- Results Block -->
@@ -120,7 +121,24 @@
 	<div class="bg-card text-card-foreground shadow-sm border border-border rounded-2xl">
 		<ul class="divide-y divide-border">
 			{#if isDiscovering}
-				<li class="px-6 py-12 text-center text-sm text-muted-foreground">STO CERCANDO...</li>
+				<li class="px-6 py-8">
+					<div class="flex items-center space-x-4 animate-pulse">
+						<div class="w-12 h-12 rounded-xl bg-muted"></div>
+						<div class="flex-1 space-y-3">
+							<div class="h-4 bg-muted rounded w-1/4"></div>
+							<div class="h-3 bg-muted rounded w-1/2"></div>
+						</div>
+					</div>
+				</li>
+				<li class="px-6 py-8 border-t border-border">
+					<div class="flex items-center space-x-4 animate-pulse">
+						<div class="w-12 h-12 rounded-xl bg-muted"></div>
+						<div class="flex-1 space-y-3">
+							<div class="h-4 bg-muted rounded w-1/3"></div>
+							<div class="h-3 bg-muted rounded w-2/5"></div>
+						</div>
+					</div>
+				</li>
 			{:else if discoveredServices.length === 0}
 				<li class="px-6 py-12 text-center text-sm text-muted-foreground">
 					<Search class="mx-auto h-12 w-12 text-muted-foreground mb-3" strokeWidth={1.5} />

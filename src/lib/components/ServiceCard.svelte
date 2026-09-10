@@ -288,30 +288,29 @@
 			<!-- Icon -->
 			<div class="relative flex items-center justify-center {currentSize === '1x1' ? 'w-full flex-1 min-h-0' : 'shrink-0'}">
 				<div 
-					class="{(currentSize !== '1x1') ? 'h-14 w-14' : 'h-full w-full aspect-square max-h-20 max-w-20 min-h-10 min-w-10'} {iconStyle} flex items-center justify-center shadow-sm"
+					class="relative {(currentSize !== '1x1') ? 'h-14 w-14' : 'h-full w-full aspect-square max-h-20 max-w-20 min-h-10 min-w-10'} {iconStyle} flex items-center justify-center shadow-sm"
 					style="background-color: {iconBgColor || 'hsl(var(--muted-foreground))'}"
 				>
 					<ServiceIcon {iconStyle} name={service.name} icon={service.icon} size={(currentSize !== '1x1') ? 'lg' : 'md'} class={currentSize === '1x1' ? 'w-3/5! h-3/5!' : ''} />
+					{#if dockerVersionInfo && dockerVersionInfo.updateAvailable && !appState.isEditMode}
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<div 
+							class="absolute -top-1.5 -right-1.5 flex items-center justify-center z-20 cursor-pointer text-destructive hover:text-destructive/80 transition-colors bg-card rounded-full shadow-sm" 
+							title="Aggiornamento disponibile online! Clicca per vedere la release."
+							onclick={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
+								if (dockerVersionInfo?.updateUrl) {
+									window.open(dockerVersionInfo.updateUrl, '_blank');
+								}
+							}}
+						>
+							<span class="absolute inline-flex h-full w-full rounded-full bg-destructive opacity-40 animate-ping"></span>
+							<ArrowUpCircle class="w-4 h-4 animate-pulse relative" />
+						</div>
+					{/if}
 				</div>
-	
-				{#if dockerVersionInfo && dockerVersionInfo.updateAvailable && !appState.isEditMode}
-					<!-- svelte-ignore a11y_click_events_have_key_events -->
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<div 
-						class="absolute -top-1.5 -right-1.5 flex items-center justify-center z-20 cursor-pointer text-destructive hover:text-destructive/80 transition-colors bg-card rounded-full shadow-sm" 
-						title="Aggiornamento disponibile online! Clicca per vedere la release."
-						onclick={(e) => {
-							e.preventDefault();
-							e.stopPropagation();
-							if (dockerVersionInfo?.updateUrl) {
-								window.open(dockerVersionInfo.updateUrl, '_blank');
-							}
-						}}
-					>
-						<span class="absolute inline-flex h-full w-full rounded-full bg-destructive opacity-40 animate-ping"></span>
-						<ArrowUpCircle class="w-4 h-4 animate-pulse relative" />
-					</div>
-				{/if}
 			</div>
 	
 			<div class="min-w-0 flex flex-col flex-1 min-h-0 w-full {currentSize === '1x1' ? 'items-center text-center justify-center mt-2' : (currentSize === '2x1' ? 'text-left' : 'mt-2 sm:mt-4 items-center text-center')}">
