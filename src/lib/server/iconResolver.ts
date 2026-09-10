@@ -30,6 +30,25 @@ function getAliases(): Record<string, string> {
       if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
         throw new Error("Il file JSON non contiene un oggetto valido");
       }
+      
+      // Fonde i DEFAULT_ALIASES con le preferenze dell'utente. Se sono state aggiunte nuove voci
+      // in DEFAULT_ALIASES in un nuovo update, verranno inserite nel JSON esistente.
+      let hasMissingDefaults = false;
+      for (const [key, value] of Object.entries(DEFAULT_ALIASES)) {
+        if (!(key in parsed)) {
+          parsed[key] = value;
+          hasMissingDefaults = true;
+        }
+      }
+
+      if (hasMissingDefaults) {
+        fs.writeFileSync(
+          ALIASES_FILE_PATH,
+          JSON.stringify(parsed, null, 2),
+          "utf-8"
+        );
+      }
+
       cachedAliases = parsed as Record<string, string>;
     }
   } catch (error) {

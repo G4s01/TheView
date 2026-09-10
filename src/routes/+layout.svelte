@@ -25,9 +25,23 @@
 	$effect(() => {
 		appState.isAdmin = data.isAdmin;
 		appState.settings = data.settings || {};
-		if (data.isAdmin && !hasInitializedEditMode) {
-			appState.isEditMode = true;
+	});
+
+	$effect(() => {
+		if (browser && data.isAdmin && !hasInitializedEditMode) {
+			const saved = localStorage.getItem('isEditMode');
+			if (saved !== null) {
+				appState.isEditMode = saved === 'true';
+			} else {
+				appState.isEditMode = true;
+			}
 			hasInitializedEditMode = true;
+		}
+	});
+
+	$effect(() => {
+		if (browser && hasInitializedEditMode) {
+			localStorage.setItem('isEditMode', String(appState.isEditMode));
 		}
 	});
 
@@ -76,11 +90,6 @@
 	}
 
 	onMount(() => {
-		
-		if (data.isAdmin) {
-			appState.isEditMode = true;
-		}
-
 		fetch('/api/version').then(r => r.json()).then(v => versionInfo = v).catch(() => {});
 	});
 </script>
