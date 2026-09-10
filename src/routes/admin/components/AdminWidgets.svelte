@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import SettingsWidgets from './SettingsWidgets.svelte';
+	import * as Card from "$lib/components/ui/card";
+	import SettingsHeader from '$lib/components/ui/SettingsHeader.svelte';
+	import SettingsQBittorrentWidget from './SettingsQBittorrentWidget.svelte';
+	import SettingsAdGuardWidget from './SettingsAdGuardWidget.svelte';
 	import BaseModal from '$lib/components/ui/BaseModal.svelte';
 
 	let modalConfig = $state<{
@@ -85,23 +88,41 @@
 	});
 </script>
 
-<div class="space-y-6">
-	<SettingsWidgets
-		bind:qbit_username
-		bind:qbit_password
-		bind:qbit_url
-		bind:qbit_require_auth
-		bind:qbit_separate_cells
-		{saveQbitSettings}
-		{isSavingQbit}
-		bind:adguard_username
-		bind:adguard_password
-		bind:adguard_url
-		bind:adguard_require_auth
-		bind:adguard_separate_cells
-		{saveAdGuardSettings}
-		{isSavingAdGuard}
-	/>
+<div class="flex flex-col gap-6">
+	<Card.Root>
+		<SettingsHeader 
+			title="WIDGET" 
+			description="CONFIGURA I WIDGET DISPONIBILI"
+		>
+			{#snippet icon()}
+				<svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+				</svg>
+			{/snippet}
+		</SettingsHeader>
+		<Card.Content class="p-0">
+			<ul class="divide-y divide-border">
+				<SettingsQBittorrentWidget
+					bind:qbit_username
+					bind:qbit_password
+					bind:qbit_url
+					bind:qbit_require_auth
+					bind:qbit_separate_cells
+					{saveQbitSettings}
+					{isSavingQbit}
+				/>
+				<SettingsAdGuardWidget
+					bind:adguard_username
+					bind:adguard_password
+					bind:adguard_url
+					bind:adguard_require_auth
+					bind:adguard_separate_cells
+					{saveAdGuardSettings}
+					{isSavingAdGuard}
+				/>
+			</ul>
+		</Card.Content>
+	</Card.Root>
 </div>
 
 <BaseModal 
@@ -113,7 +134,7 @@
 		<div></div>
 	{/snippet}
 	{#snippet footer()}
-		<div class="flex justify-end space-x-3 w-full">
+		<div class="flex justify-end gap-3 w-full">
 			<button 
 				type="button" 
 				onclick={() => modalConfig.show = false}

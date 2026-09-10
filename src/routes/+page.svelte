@@ -32,6 +32,10 @@
 		return items.filter(i => !isSpacer(i)).length;
 	}
 
+	let totalRealServices = $derived(
+		Object.values(data.groupedServices).reduce((sum, items) => sum + items.length, 0)
+	);
+
 	// Sync from server data
 	$effect.pre(() => {
 		if (data.groupedServices) {
@@ -146,10 +150,18 @@
 		{/if}
 	{/each}
 
-	{#if Object.keys(appState.isEditMode ? dndGroups : localGroups).length === 0}
-		<div class="text-center py-20 bg-card rounded-xl border border-dashed border-border">
-			<h3 class="mt-2 text-sm font-bold uppercase tracking-wider text-foreground">NESSUN SERVIZIO</h3>
-			<p class="mt-1 text-sm text-muted-foreground">ACCEDI E VAI ALLE IMPOSTAZIONI</p>
+	{#if totalRealServices === 0 && !appState.isEditMode}
+		<div class="flex flex-col items-center justify-center py-24 gap-6">
+			<div class="text-center">
+				<h3 class="text-lg font-bold uppercase tracking-wider text-foreground">Nessun servizio configurato</h3>
+				<p class="mt-2 text-sm text-muted-foreground">Inizia aggiungendo i tuoi servizi dal pannello di amministrazione.</p>
+			</div>
+			<a
+				href="/admin"
+				class="inline-flex items-center gap-3 px-8 py-4 text-base font-bold uppercase tracking-wider text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95"
+			>
+				Accedi e imposta i tuoi servizi
+			</a>
 		</div>
 	{/if}
 </div>

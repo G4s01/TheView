@@ -6,7 +6,6 @@
 	import { marked } from "marked";
 	import DOMPurify from "isomorphic-dompurify";
 	import { Button } from "$lib/components/ui/button";
-	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
 
 	let {
 		versionInfo,
@@ -101,11 +100,11 @@
 						{/if}
 					</Button>
 					<Button variant="outline" size="icon" href={versionInfo.url} target="_blank" rel="noopener noreferrer" title="Apri su GitHub">
-						<ServiceIcon icon="github" name="GitHub" size="sm" class="opacity-80 hover:opacity-100 transition-opacity" />
+						<ExternalLink class="size-4" strokeWidth={1.5} />
 					</Button>
 				</div>
 			</div>
-			<div class="prose prose-sm max-w-none max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+			<div class="changelog-content max-h-64 overflow-y-auto pr-2 custom-scrollbar text-sm text-foreground">
 				{@html DOMPurify.sanitize(marked.parse(versionInfo.releaseNotes) as string)}
 			</div>
 		</div>
@@ -113,3 +112,56 @@
 	</Card.Content>
 </Card.Root>
 
+<style>
+	/* Changelog markdown content — use semantic colors for dark theme compatibility */
+	.changelog-content :global(h1),
+	.changelog-content :global(h2),
+	.changelog-content :global(h3),
+	.changelog-content :global(h4) {
+		color: hsl(var(--foreground));
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		margin-top: 1rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.changelog-content :global(p) {
+		color: hsl(var(--foreground));
+		margin-bottom: 0.5rem;
+	}
+
+	.changelog-content :global(a) {
+		color: hsl(var(--primary));
+		text-decoration: underline;
+	}
+
+	.changelog-content :global(ul),
+	.changelog-content :global(ol) {
+		color: hsl(var(--foreground));
+		padding-left: 1.25rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.changelog-content :global(li) {
+		margin-bottom: 0.25rem;
+	}
+
+	.changelog-content :global(code) {
+		color: hsl(var(--primary));
+		background: hsl(var(--muted));
+		padding: 0.125rem 0.375rem;
+		border-radius: 0.25rem;
+		font-size: 0.8em;
+	}
+
+	.changelog-content :global(strong) {
+		color: hsl(var(--foreground));
+		font-weight: 700;
+	}
+
+	.changelog-content :global(hr) {
+		border-color: hsl(var(--border));
+		margin: 0.75rem 0;
+	}
+</style>
