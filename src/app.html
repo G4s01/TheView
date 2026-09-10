@@ -22,11 +22,6 @@
       } else {
         document.documentElement.classList.remove("dark");
       }
-
-      const savedTheme = localStorage.getItem("theview-theme");
-      if (savedTheme && savedTheme !== "default") {
-        document.documentElement.setAttribute("data-theme", savedTheme);
-      }
     </script>
     %sveltekit.head%
   </head>

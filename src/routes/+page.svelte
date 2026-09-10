@@ -4,6 +4,10 @@
 	import { dndzone } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
 	import { untrack } from 'svelte';
+	import { goto } from '$app/navigation';
+	import LoginModal from '$lib/components/LoginModal.svelte';
+
+	let showLogin = $state(false);
 
 	let { data } = $props();
 
@@ -136,7 +140,7 @@
 				{#each services as service (service.id)}
 					<div
 						animate:flip={{duration: flipDurationMs}}
-						class="bento-cell transition-all duration-300 {isSpacer(service) ? 'bento-spacer' : ''} {!isSpacer(service) && (editingServiceId === service.id ? 'overflow-visible !w-full' : 'overflow-hidden')} {!isSpacer(service) ? (service.size === '2x2' ? 'bento-2x2' : service.size === '2x1' ? 'bento-2x1' : service.size === '1x2' ? 'bento-1x2' : 'bento-1x1') : ''}"
+						class="bento-cell transition-all duration-300 {isSpacer(service) ? 'bento-spacer' : ''} {!isSpacer(service) && (editingServiceId === service.id ? 'overflow-visible w-full!' : 'overflow-hidden')} {!isSpacer(service) ? (service.size === '2x2' ? 'bento-2x2' : service.size === '2x1' ? 'bento-2x1' : service.size === '1x2' ? 'bento-1x2' : 'bento-1x1') : ''}"
 					>
 						{#if isSpacer(service)}
 							<div class="w-full h-full rounded-xl border-2 border-dashed border-border/20 bg-muted/5 opacity-40"></div>
@@ -156,15 +160,34 @@
 				<h3 class="text-lg font-bold uppercase tracking-wider text-foreground">Nessun servizio configurato</h3>
 				<p class="mt-2 text-sm text-muted-foreground">Inizia aggiungendo i tuoi servizi dal pannello di amministrazione.</p>
 			</div>
-			<a
-				href="/admin"
-				class="inline-flex items-center gap-3 px-8 py-4 text-base font-bold uppercase tracking-wider text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95"
-			>
-				Accedi e imposta i tuoi servizi
-			</a>
+			{#if appState.isAdmin}
+				<a
+					href="/admin"
+					class="inline-flex items-center gap-3 px-8 py-4 text-base font-bold uppercase tracking-wider text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95"
+				>
+					Accedi e imposta i tuoi servizi
+				</a>
+			{:else}
+				<button
+					type="button"
+					onclick={() => appState.showLoginModal = true}
+					class="inline-flex items-center gap-3 px-8 py-4 text-base font-bold uppercase tracking-wider text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer"
+				>
+					Accedi e imposta i tuoi servizi
+				</button>
+			{/if}
 		</div>
 	{/if}
 </div>
+
+<LoginModal 
+	show={showLogin} 
+	onClose={() => showLogin = false} 
+	onSuccess={() => {
+		showLogin = false;
+		goto('/admin');
+	}} 
+/>
 
 <style>
 	/*

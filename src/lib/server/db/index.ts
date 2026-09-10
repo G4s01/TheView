@@ -34,7 +34,8 @@ sqlite.exec(`
     position INTEGER DEFAULT 0,
     size TEXT DEFAULT '1x1' NOT NULL,
     is_widget INTEGER DEFAULT 0 NOT NULL,
-    require_auth INTEGER DEFAULT 0 NOT NULL
+    require_auth INTEGER DEFAULT 0 NOT NULL,
+    widget_size TEXT DEFAULT '1x1' NOT NULL
   );
 
   CREATE TABLE IF NOT EXISTS settings (
@@ -104,6 +105,12 @@ try {
   if (!hasRequireAuth) {
     sqlite.exec(
       `ALTER TABLE services ADD COLUMN require_auth INTEGER DEFAULT 0 NOT NULL;`,
+    );
+  }
+  const hasWidgetSize = columns.some((c) => c.name === "widget_size");
+  if (!hasWidgetSize) {
+    sqlite.exec(
+      `ALTER TABLE services ADD COLUMN widget_size TEXT DEFAULT '1x1' NOT NULL;`,
     );
   }
 

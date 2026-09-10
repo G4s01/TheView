@@ -39,6 +39,18 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
   }
 
-  const response = await resolve(event);
+  const response = await resolve(event, {
+    transformPageChunk: ({ html }) => {
+      let transformed = html;
+      const theme = settings.theme || "default";
+      if (theme !== "default") {
+        transformed = transformed.replace(
+          '<html lang="en" class="dark">',
+          `<html lang="en" class="dark" data-theme="${theme}">`,
+        );
+      }
+      return transformed;
+    },
+  });
   return response;
 };

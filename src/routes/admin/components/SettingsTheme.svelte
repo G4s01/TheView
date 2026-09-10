@@ -3,11 +3,11 @@
 	import SettingsHeader from '$lib/components/ui/SettingsHeader.svelte';
 	import { Palette, SunMoon, Moon, Sun, Cat, Crosshair, Coffee, Zap } from "@lucide/svelte";
 
-	let currentTheme = $state(
-		typeof window !== 'undefined' ? localStorage.getItem('theview-theme') || 'default' : 'default'
-	);
+	import { appState } from '$lib/client/state.svelte';
 
-	function setTheme(theme: string) {
+	let currentTheme = $state(appState.settings.theme || 'default');
+
+	async function setTheme(theme: string) {
 		currentTheme = theme;
 		if (typeof document !== 'undefined') {
 			if (theme === 'default') {
@@ -19,7 +19,17 @@
 					localStorage.setItem('theview-color-scheme', 'dark');
 				}
 			}
-			localStorage.setItem('theview-theme', theme);
+		}
+		
+		try {
+			await fetch('/api/settings', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ theme })
+			});
+			appState.settings.theme = theme;
+		} catch (e) {
+			console.error('Errore nel salvataggio del tema', e);
 		}
 	}
 </script>

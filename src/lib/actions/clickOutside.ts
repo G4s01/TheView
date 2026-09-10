@@ -17,6 +17,11 @@ export function clickOutside(
       !event.defaultPrevented
     ) {
       const target = event.target as Element;
+      // Ignore clicks on elements that were detached from the DOM (e.g. popover items that unmount on click)
+      if (!document.contains(target)) {
+        return;
+      }
+
       // Ignore clicks on portalled Popover/floating content (rendered outside the component DOM by bits-ui Portal)
       if (
         target.closest?.('[data-slot="popover-content"]') ||

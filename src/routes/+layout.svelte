@@ -48,7 +48,6 @@
 	// We'll pass categories down to the sidebar
 	// data.categories will be populated by +layout.server.ts later
 	let categories = $derived(data.categories || []);
-	let showLogin = $state(false);
 	let versionInfo = $state<{currentVersion?: string, latestVersion?: string, url?: string}>({});
 	
 	let isNavbarHidden = $state(false);
@@ -168,7 +167,7 @@
 			<div class="flex-1 flex items-center justify-end min-w-37.5 space-x-2 sm:space-x-4">
 				<div class="flex items-center bg-muted rounded-lg p-1 border border-border transition-colors {data.isAdmin && appState.isEditMode ? 'ring-2 ring-primary border-primary' : ''}">
 					{#if data.isAdmin}
-						<a href="/admin" class="relative p-1.5 text-muted-foreground hover:text-foreground transition-colors" title="Pannello Amministrazione">
+						<a href="/admin" class="relative p-1.5 text-muted-foreground hover:text-foreground transition-colors" title="ADMIN PANEL">
 							<Settings class="h-5 w-5" strokeWidth={1.5} />
 							{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
 								<div class="absolute -top-1 -right-1 bg-destructive rounded-full text-destructive-foreground p-0.5 animate-bounce shadow-sm ring-1 ring-background" title="Nuova versione disponibile!">
@@ -191,7 +190,7 @@
 							<LogOut class="h-5 w-5" strokeWidth={1.5} />
 						</button>
 					{:else}
-						<button class="p-1.5 text-primary hover:text-primary/80 transition-colors" onclick={() => data.needsSetup ? goto('/setup') : showLogin = true} title="Accedi">
+						<button class="p-1.5 text-primary hover:text-primary/80 transition-colors" onclick={() => data.needsSetup ? goto('/setup') : appState.showLoginModal = true} title="Accedi">
 							<LogIn class="h-5 w-5" strokeWidth={1.5} />
 						</button>
 					{/if}
@@ -272,10 +271,10 @@
 </div>
 
 <LoginModal 
-	show={showLogin} 
-	onClose={() => showLogin = false} 
+	show={appState.showLoginModal} 
+	onClose={() => appState.showLoginModal = false} 
 	onSuccess={() => {
-		showLogin = false;
+		appState.showLoginModal = false;
 		window.location.reload();
 	}} 
 />
