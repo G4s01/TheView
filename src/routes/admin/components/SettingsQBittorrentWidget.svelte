@@ -80,7 +80,7 @@
 				
 				<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
 					<div class="md:col-span-10 h-10">
-						<UrlInput label="Indirizzo Base (es. 172.17.0.1:8080)" bind:value={qbit_url} />
+						<UrlInput label="ES. 172.17.0.1:8080" bind:value={qbit_url} />
 					</div>
 					<div class="md:col-span-2 h-10">
 						<SaveButton class="w-full h-10" onclick={saveQbitSettings} isLoading={isSavingQbit} />
