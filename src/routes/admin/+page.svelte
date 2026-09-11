@@ -1,18 +1,24 @@
 <script lang="ts">
 	import AdminServices from './components/AdminServices.svelte';
-	import AdminCategories from './components/AdminCategories.svelte';
 	import AdminDiscovery from './components/AdminDiscovery.svelte';
 	import AdminSettings from './components/AdminSettings.svelte';
 	import AdminWidgets from './components/AdminWidgets.svelte';
+	import { untrack } from 'svelte';
 
 	let { data, form } = $props();
 	
 	let services = $derived(data.services);
-	let localCategories = $state<any[]>([]);
+	let localCategories = $state<any[]>(untrack(() => data.categories ? JSON.parse(JSON.stringify(data.categories)) : []));
 	
 	$effect(() => {
 		if (data.categories) {
-			localCategories = JSON.parse(JSON.stringify(data.categories));
+			// Update if data changes (e.g. navigation), but don't react to localCategories changes (like drag and drop)
+			const serialized = JSON.stringify(data.categories);
+			untrack(() => {
+				if (JSON.stringify(localCategories) !== serialized) {
+					localCategories = JSON.parse(serialized);
+				}
+			});
 		}
 	});
 
@@ -52,10 +58,6 @@
 
 		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
 			<AdminServices {services} bind:localCategories />
-		</div>
-	{:else if currentTab === 'categories'}
-		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
-			<AdminCategories bind:localCategories {services} />
 		</div>
 	{:else if currentTab === 'discovery'}
 		<div class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">

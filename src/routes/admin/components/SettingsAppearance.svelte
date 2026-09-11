@@ -17,6 +17,7 @@
 		iconStyle = $bindable(),
 		stickyNavbar = $bindable(),
 		showEditButton = $bindable(),
+		enableCategories = $bindable(),
 		saveAppearanceSettings,
 		isSavingAppearance
 	} = $props<{
@@ -29,6 +30,7 @@
 		iconStyle: string;
 		stickyNavbar: boolean;
 		showEditButton: boolean;
+		enableCategories: boolean;
 		saveAppearanceSettings: () => void;
 		isSavingAppearance: boolean;
 	}>();
@@ -46,7 +48,8 @@
 			showServiceDescriptions, 
 			iconStyle, 
 			stickyNavbar, 
-			showEditButton
+			showEditButton,
+			enableCategories
 		];
 
 		if (isInitial) {
@@ -247,7 +250,23 @@
 				</div>
 			</div>
 
+			<div class="space-y-4">
+				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+					Funzionalità Globali
+				</h3>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<ToggleOptionCard 
+						title="ABILITA CATEGORIE" 
+						description="SE DISATTIVATO, I WIDGET VERRANNO MOSTRATI IN UN'UNICA GRIGLIA" 
+						bind:checked={enableCategories} 
+					>
+						{#snippet icon()}
+							<Home class="w-4 h-4" />
+						{/snippet}
+					</ToggleOptionCard>
+				</div>
+			</div>
+
 		</Card.Content>
 	</Card.Root>
 </div>
-

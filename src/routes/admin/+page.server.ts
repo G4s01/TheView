@@ -1,6 +1,6 @@
 import { db } from "$lib/server/db";
 import { services, categories } from "$lib/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, not } from "drizzle-orm";
 import { fail } from "@sveltejs/kit";
 import { resolveIcon } from "$lib/server/iconResolver";
 import type { Actions, PageServerLoad } from "./$types";
@@ -10,6 +10,7 @@ export const load: PageServerLoad = async () => {
   const allCategories = await db
     .select()
     .from(categories)
+    .where(not(eq(categories.id, -1)))
     .orderBy(categories.position);
 
   const servicesWithIcons = allServices.map((s) => {
@@ -32,11 +33,12 @@ export const actions: Actions = {
     const url = data.get("url")?.toString();
     const categoryIdStr = data.get("categoryId")?.toString();
 
-    if (!name || !url || !categoryIdStr) {
+    if (!name || !url) {
       return fail(400);
     }
 
-    const categoryId = parseInt(categoryIdStr);
+    const parsedCatId = parseInt(categoryIdStr || "");
+    const categoryId = isNaN(parsedCatId) ? -1 : parsedCatId;
     const icon = data.get("icon")?.toString() || null;
     let iconToSave = icon;
     if (iconToSave && iconToSave.startsWith("/http")) {
@@ -78,6 +80,7 @@ export const actions: Actions = {
       });
       return { success: true };
     } catch (error) {
+      console.error(error);
       return fail(500, { error: "Database error while creating service" });
     }
   },
@@ -89,11 +92,13 @@ export const actions: Actions = {
     const url = data.get("url")?.toString();
     const categoryIdStr = data.get("categoryId")?.toString();
 
-    if (!id || !name || !url || !categoryIdStr) {
+    if (!id || !name || !url) {
       return fail(400);
     }
 
-    const categoryId = parseInt(categoryIdStr);
+    const parsedCatId = parseInt(categoryIdStr || "");
+    const categoryId = isNaN(parsedCatId) ? -1 : parsedCatId;
+    console.log("updateService received categoryIdStr:", categoryIdStr, "parsed:", parsedCatId, "final:", categoryId);
     const icon = data.get("icon")?.toString() || null;
     let iconToSave = icon;
     if (iconToSave && iconToSave.startsWith("/http")) {
@@ -148,6 +153,11 @@ export const actions: Actions = {
   createCategory: async ({ request }) => {
     const data = await request.formData();
     const name = data.get("name")?.toString();
+    const icon = data.get("icon")?.toString() || null;
+    let iconToSave = icon;
+    if (iconToSave && iconToSave.startsWith("/http")) {
+      iconToSave = iconToSave.substring(1);
+    }
 
     if (!name) return fail(400, { error: "Nome categoria mancante" });
 
@@ -157,7 +167,7 @@ export const actions: Actions = {
         return fail(400, { error: "Esiste già una categoria con questo nome" });
       }
 
-      const [newCat] = await db.insert(categories).values({ name }).returning();
+      const [newCat] = await db.insert(categories).values({ name, icon: iconToSave }).returning();
       return { success: true, category: newCat };
     } catch (error) {
       return fail(500, {
@@ -170,6 +180,11 @@ export const actions: Actions = {
     const data = await request.formData();
     const id = data.get("id")?.toString();
     const name = data.get("name")?.toString();
+    const icon = data.get("icon")?.toString() || null;
+    let iconToSave = icon;
+    if (iconToSave && iconToSave.startsWith("/http")) {
+      iconToSave = iconToSave.substring(1);
+    }
 
     if (!id || !name) return fail(400, { error: "Dati mancanti" });
 
@@ -187,7 +202,7 @@ export const actions: Actions = {
 
       await db
         .update(categories)
-        .set({ name })
+        .set({ name, icon: iconToSave })
         .where(eq(categories.id, parseInt(id)));
       return { success: true };
     } catch (error) {
@@ -204,10 +219,8 @@ export const actions: Actions = {
     if (!id) return fail(400, { error: "ID mancante" });
 
     try {
-      // SvelteKit form actions. SQLite non supporta CASCADE di default o potremmo avere foreign key contraints.
-      // E' meglio eliminare anche i servizi figli, oppure potremmo avvisare l'utente prima (nella UI).
-      // Per semplicità eliminiamo i servizi collegati.
-      await db.delete(services).where(eq(services.categoryId, parseInt(id)));
+      // Imposta i servizi collegati alla categoria fantasma (-1) anziché eliminarli
+      await db.update(services).set({ categoryId: -1 }).where(eq(services.categoryId, parseInt(id)));
       await db.delete(categories).where(eq(categories.id, parseInt(id)));
       return { success: true };
     } catch (error) {

@@ -59,7 +59,7 @@
 	);
 
 	$effect(() => {
-		const term = value.trim();
+		const term = (value || '').trim();
 		const timeoutId = setTimeout(() => {
 			untrack(() => {
 				if (debouncedSearchTerm !== term) {

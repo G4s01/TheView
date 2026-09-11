@@ -6,6 +6,9 @@
 	import SaveButton from "$lib/components/ui/SaveButton.svelte";
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
 	import { clickOutside } from '$lib/actions/clickOutside';
+	import { page } from '$app/stores';
+
+	let iconStyle = $derived($page.data.settings?.iconStyle || "rounded-xl");
 
 	let {
 		adguard_username = $bindable(),
@@ -35,7 +38,7 @@
 	<div class="flex items-center justify-between w-full">
 		<div class="flex items-center gap-4 flex-1 min-w-0 mr-4">
 			<div class="shrink-0">
-				<ServiceIcon icon="adguard-home" name="AdGuard Home" size="lg" iconStyle="rounded-xl" class="shadow-sm border border-border bg-card" />
+				<ServiceIcon icon="adguard-home" name="AdGuard Home" size="lg" iconStyle={iconStyle} class="shadow-sm border border-border bg-card" />
 			</div>
 			<div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 flex-1 min-w-0">
 				<p class="text-sm font-semibold text-foreground uppercase tracking-wider truncate">AdGuard Home</p>

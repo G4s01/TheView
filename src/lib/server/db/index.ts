@@ -18,6 +18,7 @@ sqlite.exec(`
   CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
+    icon TEXT,
     position INTEGER DEFAULT 0
   );
 
@@ -124,14 +125,27 @@ try {
   if (hasRowSpan) {
     try {
       sqlite.exec(`ALTER TABLE services DROP COLUMN row_span;`);
-    } catch (e) {}
+    } catch (e) { }
   }
   const hasColSpan = columns.some((c) => c.name === "col_span");
   if (hasColSpan) {
     try {
       sqlite.exec(`ALTER TABLE services DROP COLUMN col_span;`);
-    } catch (e) {}
+    } catch (e) { }
   }
+
+  // Categories migrations
+  const categoryColumns = sqlite.prepare(`PRAGMA table_info(categories);`).all() as {
+    name: string;
+  }[];
+  const hasCategoryIcon = categoryColumns.some((c) => c.name === "icon");
+  if (!hasCategoryIcon) {
+    sqlite.exec(`ALTER TABLE categories ADD COLUMN icon TEXT;`);
+  }
+
+  // Assicurati che esista la categoria fantasma (-1)
+  sqlite.exec(`INSERT OR IGNORE INTO categories (id, name, position) VALUES (-1, 'CATEGORIA FANTASMA', -1);`);
+
 } catch (e: any) {
   console.error("Migration error:", e.message);
 }

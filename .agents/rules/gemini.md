@@ -61,8 +61,8 @@ I widget seguono un pattern architetturale rigoroso a 4 livelli:
 ### Drag & Drop (Bento Grid)
 
 - **Libreria:** `svelte-dnd-action` v0.9.x.
-- **Layout:** Flexbox con `flex-wrap` (NON CSS Grid) per compatibilità DnD. Larghezze celle calcolate via CSS custom property `--cols`.
-- **Spacer Items:** In edit mode, 10 item invisibili (`_isSpacer: true`) vengono iniettati per creare target di rilascio su righe aggiuntive. Vengono filtrati nel salvataggio (`handleDndFinalize`).
+- **Layout:** CSS Grid con `grid-auto-flow: row dense` per creare un vero e proprio Tetris ("Bento Grid").
+- **Spacer Items:** In edit mode, item invisibili (`_isSpacer: true`) vengono iniettati per mantenere la stabilità. Vengono filtrati nel salvataggio (`handleDndFinalize`).
 - **Stato separato:** `localGroups` (view mode, senza spacer) e `dndGroups` (edit mode, con spacer). Transizione gestita da `$effect.pre` con `untrack()`.
 
 ## 🛡️ REGOLE BACKEND E SICUREZZA (TASSATIVE)

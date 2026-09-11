@@ -37,6 +37,7 @@
 	let iconStyle = $state($page.data.settings?.iconStyle || 'rounded-xl');
 	let stickyNavbar = $state($page.data.settings?.stickyNavbar !== false);
 	let showEditButton = $state($page.data.settings?.showEditButton !== false);
+	let enableCategories = $state($page.data.settings?.enableCategories !== false);
 	let isSavingAppearance = $state(false);
 
 	async function saveAppearanceSettings() {
@@ -45,7 +46,7 @@
 			const res = await fetch('/api/settings', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ showCategoriesDesktop, showCategoriesMobile, customNavbarTitleDesktop, customNavbarTitleMobile, showCategoryCounts, showServiceDescriptions, iconStyle, stickyNavbar, showEditButton })
+				body: JSON.stringify({ showCategoriesDesktop, showCategoriesMobile, customNavbarTitleDesktop, customNavbarTitleMobile, showCategoryCounts, showServiceDescriptions, iconStyle, stickyNavbar, showEditButton, enableCategories })
 			});
 			if (res.ok) {
 				await invalidateAll();
@@ -92,6 +93,7 @@
 		bind:iconStyle
 		bind:stickyNavbar
 		bind:showEditButton
+		bind:enableCategories
 		{saveAppearanceSettings}
 		{isSavingAppearance}
 	/>

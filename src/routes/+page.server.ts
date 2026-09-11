@@ -34,27 +34,22 @@ export async function load() {
   for (const cat of cats) {
     const catServices = allServices.filter((s) => s.categoryId === cat.id);
     if (catServices.length > 0) {
-      const maxPos = catServices[catServices.length - 1].position || 0;
-      const items = [];
-      for (let i = 0; i <= maxPos; i++) {
-        const s = catServices.find((service) => service.position === i);
-        if (s) {
-          const decorated = { ...s, category: cat.name } as any;
-          decorated.iconDetails = resolveIcon(
-            decorated.icon,
-            decorated.dockerImage,
-            decorated.name,
-            decorated.url
-          );
-          items.push(decorated);
-        } else {
-          items.push({
-            id: `__spacer_${cat.name}_${i}`,
-            _isSpacer: true,
-            size: "1x1",
-          });
+      const items = catServices.map(s => {
+        const decorated = { ...s, category: cat.name } as any;
+        
+        // Sanitize legacy sizes for widgets (except spacers)
+        if (decorated.widgetType && decorated.widgetType !== 'spacer' && decorated.size === '1x1') {
+           decorated.size = '2x1';
         }
-      }
+        
+        decorated.iconDetails = resolveIcon(
+          decorated.icon,
+          decorated.dockerImage,
+          decorated.name,
+          decorated.url
+        );
+        return decorated;
+      });
       groupedServices[cat.name] = items;
     }
   }

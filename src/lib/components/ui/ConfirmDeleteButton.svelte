@@ -19,6 +19,7 @@
         <Button 
             variant="destructive" 
             size="icon" 
+            type="button"
             class={cn("shrink-0", className)}
             onclick={() => { showConfirm = false; onConfirm(); }} 
             title="CONFERMA"
@@ -28,6 +29,7 @@
         <Button 
             variant="outline" 
             size="icon"
+            type="button"
             class={cn("shrink-0", className)}
             onclick={() => (showConfirm = false)} 
             title="ANNULLA"
@@ -39,6 +41,7 @@
     <Button 
         variant="destructive" 
         size="icon" 
+        type="button"
         onclick={() => (showConfirm = true)} 
         class={cn("shrink-0", className)} 
         title="ELIMINA"

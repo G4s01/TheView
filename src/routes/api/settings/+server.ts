@@ -104,6 +104,31 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       );
     }
 
+    if (newSettings.enableCategories !== undefined) {
+      const currentEnable = currentSettings.enableCategories !== false;
+      const newEnable = newSettings.enableCategories !== false;
+      
+      if (currentEnable !== newEnable) {
+        const { db } = await import("$lib/server/db");
+        const { services, categories } = await import("$lib/server/db/schema");
+        const { eq } = await import("drizzle-orm");
+        
+        const allServices = await db.select().from(services);
+        const allCats = await db.select().from(categories);
+        const catIds = [...allCats.map(c => c.id), -1];
+
+        for (const catId of catIds) {
+           const catServices = allServices.filter(s => s.categoryId === catId);
+           catServices.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+           for (let i = 0; i < catServices.length; i++) {
+             await db.update(services)
+               .set({ size: '1x1', position: i })
+               .where(eq(services.id, catServices[i].id));
+           }
+        }
+      }
+    }
+
     const merged = await saveSettings(newSettings);
     return json({ success: true });
   } catch (e) {

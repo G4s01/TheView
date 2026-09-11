@@ -21,6 +21,7 @@
 	let expandedId = $state<string | null>(null);
 	import { page } from '$app/stores';
 
+	let iconStyle = $derived($page.data.settings?.iconStyle || "rounded-xl");
 	let npmUrlCombined = $state($page.data.settings?.npmUrl || '');
 	let npmEmail = $state($page.data.settings?.npmEmail || '');
 	let npmPassword = $state($page.data.settings?.npmPassword || '');
@@ -150,7 +151,7 @@
 					<div class="flex items-center justify-between w-full">
 						<div class="flex items-center space-x-4 flex-1 min-w-0 mr-4">
 							<div class="shrink-0">
-								<ServiceIcon icon={ds.iconDetails?.value || ds.icon} name={ds.name} size="lg" iconStyle="rounded-xl" class="shadow-sm border border-border" />
+								<ServiceIcon icon={ds.iconDetails?.value || ds.icon} name={ds.name} size="lg" iconStyle={iconStyle} class="shadow-sm border border-border" />
 							</div>
 							<div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 flex-1 min-w-0">
 								<div class="flex items-center gap-2">

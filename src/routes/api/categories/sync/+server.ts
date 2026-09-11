@@ -20,10 +20,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			if (!item.name || item.name.trim() === '') continue; // Skip empty names
 
 			if (typeof item.id === 'string' && item.id.startsWith('new_')) {
-				await db.insert(categories).values({ name: item.name, position: i });
+				await db.insert(categories).values({ name: item.name, icon: item.icon || null, position: i });
 			} else {
 				await db.update(categories)
-					.set({ name: item.name, position: i })
+					.set({ name: item.name, icon: item.icon || null, position: i })
 					.where(eq(categories.id, parseInt(item.id.toString())));
 			}
 		}

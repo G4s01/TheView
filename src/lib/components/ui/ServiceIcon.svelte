@@ -40,6 +40,10 @@
         if (icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('/')) {
             return icon;
         }
+        if (icon.includes(':')) {
+            const [prefix, name] = icon.split(':');
+            return `https://api.iconify.design/${prefix}/${name || ''}.svg`;
+        }
         return `https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/${icon}.png`;
     });
 

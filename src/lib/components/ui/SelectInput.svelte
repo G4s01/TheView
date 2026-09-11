@@ -39,18 +39,12 @@
 		isOpen = false;
 	}
 
-	let inputEl = $state<HTMLInputElement | null>(null);
-	$effect(() => {
-		if (inputEl) {
-			inputEl.value = value == null || value === '' ? '' : String(value);
-		}
-	});
 </script>
 
 <div class="relative w-full h-10 {className}" use:clickOutside={onClickOutside}>
 	{#if name}
 		<!-- Visually hidden text input so HTML5 required validation works -->
-		<input bind:this={inputEl} type="text" tabindex="-1" class="absolute opacity-0 pointer-events-none -z-10 w-full h-full inset-0" {name} {required} />
+		<input type="text" tabindex="-1" class="absolute opacity-0 pointer-events-none -z-10 w-full h-full inset-0" {name} {required} value={value == null ? '' : value} />
 	{/if}
 	
 	<button 

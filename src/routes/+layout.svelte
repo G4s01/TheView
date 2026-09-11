@@ -136,11 +136,8 @@
 				{#if $page.url.pathname.startsWith('/admin')}
 					<nav class="flex items-center w-full space-x-3">
 						<a href="/admin?tab=services" data-sveltekit-replacestate data-sveltekit-noscroll class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {($page.url.searchParams.get('tab') || 'services') === 'services' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-																Servizi
-															</a>
-						<a href="/admin?tab=categories" data-sveltekit-replacestate data-sveltekit-noscroll class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {($page.url.searchParams.get('tab') || 'services') === 'categories' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-																Categorie
-															</a>
+							Servizi
+						</a>
 						<a href="/admin?tab=discovery" data-sveltekit-replacestate data-sveltekit-noscroll class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {($page.url.searchParams.get('tab') || 'services') === 'discovery' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 																Discovery
 															</a>
@@ -217,11 +214,8 @@
 		<div class="md:hidden relative border-t border-border bg-card/90 w-full" style="-webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent);">
 			<nav class="flex items-center space-x-2 px-4 py-3 overflow-x-auto no-scrollbar relative z-0">
 			<a href="/admin?tab=services" data-sveltekit-replacestate data-sveltekit-noscroll class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {($page.url.searchParams.get('tab') || 'services') === 'services' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-																Servizi
-															</a>
-			<a href="/admin?tab=categories" data-sveltekit-replacestate data-sveltekit-noscroll class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {($page.url.searchParams.get('tab') || 'services') === 'categories' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
-																Categorie
-															</a>
+				Servizi
+			</a>
 			<a href="/admin?tab=discovery" data-sveltekit-replacestate data-sveltekit-noscroll class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {($page.url.searchParams.get('tab') || 'services') === 'discovery' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 																Discovery
 															</a>
