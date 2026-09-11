@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
     try {
       const secretBytes = decodeBase32IgnorePadding(secret);
       const { verifyTOTPWithGracePeriod } = await import("@oslojs/otp");
-      const isValid = verifyTOTPWithGracePeriod(secretBytes, 30, 6, code, 1);
+      const isValid = verifyTOTPWithGracePeriod(secretBytes, 30, 6, code, 2);
 
       if (!isValid)
         return json(
@@ -52,7 +52,7 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
 
       // Validazione con grace period per evitare problemi di sincronia leggeri
       const { verifyTOTPWithGracePeriod } = await import("@oslojs/otp");
-      const isValid = verifyTOTPWithGracePeriod(secretBytes, 30, 6, code, 1);
+      const isValid = verifyTOTPWithGracePeriod(secretBytes, 30, 6, code, 2);
 
       if (!isValid)
         return json(

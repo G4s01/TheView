@@ -167,7 +167,7 @@
 
 					{#if !setupSecret && !isDisabling2FA}
 						<div class="flex items-center gap-3 px-3 py-1.5 border border-border rounded-lg bg-card/50 shrink-0">
-							<span class="text-[11px] font-black uppercase tracking-wider w-6 text-center transition-colors {totpEnabled ? 'text-primary [text-shadow:_0_0_8px_var(--color-primary)]' : 'text-muted-foreground'}">
+							<span class="text-[11px] font-black uppercase tracking-wider w-6 text-center transition-colors {totpEnabled ? 'text-primary [text-shadow:0_0_8px_var(--color-primary)]' : 'text-muted-foreground'}">
 								{totpEnabled ? 'ON' : 'OFF'}
 							</span>
 							<Switch checked={totpEnabled} onCheckedChange={(v) => {

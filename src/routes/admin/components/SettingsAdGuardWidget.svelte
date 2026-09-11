@@ -88,8 +88,8 @@
 				</div>
 
 				<div class="flex gap-4 items-center mt-2">
-					<ToggleInput label="Nascondi se non admin" bind:checked={adguard_require_auth} />
-					<ToggleInput label="Celle separate (Bento)" bind:checked={adguard_separate_cells} />
+					<ToggleInput label="AUTENTICAZIONE ATTESA" bind:checked={adguard_require_auth} />
+					<ToggleInput label="SEPARAZIONE VISIVA" bind:checked={adguard_separate_cells} />
 				</div>
 			</div>
 		</div>

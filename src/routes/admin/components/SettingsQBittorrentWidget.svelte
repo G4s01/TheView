@@ -88,8 +88,8 @@
 				</div>
 
 				<div class="flex gap-4 items-center mt-2">
-					<ToggleInput label="Nascondi se non admin" bind:checked={qbit_require_auth} />
-					<ToggleInput label="Celle separate (Bento)" bind:checked={qbit_separate_cells} />
+					<ToggleInput label="AUTENTICAZIONE ATTESA" bind:checked={qbit_require_auth} />
+					<ToggleInput label="SEPARAZIONE VISIVA" bind:checked={qbit_separate_cells} />
 				</div>
 			</div>
 		</div>

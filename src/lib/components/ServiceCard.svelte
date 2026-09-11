@@ -56,6 +56,85 @@
 	let isAnimating = $state(false);
 	let animationTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
+	// --- Drag & Snap Resize Logic ---
+	let isResizing = $state(false);
+	let resizeStartX = 0;
+	let resizeStartY = 0;
+	let initialDragSize = '1x1';
+	let resizeDirection = 'both';
+
+	function startResize(e: PointerEvent, dir: string = 'both') {
+		if (!appState.isEditMode || isExpanded) return;
+		e.preventDefault();
+		e.stopPropagation(); // Previene il DnD di svelte-dnd-action
+		resizeStartX = e.clientX;
+		resizeStartY = e.clientY;
+		initialDragSize = service.size || '1x1';
+		resizeDirection = dir;
+		isResizing = true;
+		
+		// Rimuove temporaneamente le transizioni per il resizing fluido
+		document.body.style.cursor = dir === 'x' ? 'ew-resize' : dir === 'y' ? 'ns-resize' : 'se-resize';
+		
+		window.addEventListener('pointermove', onResizeMove);
+		window.addEventListener('pointerup', onResizeUp);
+	}
+
+	function onResizeMove(e: PointerEvent) {
+		if (!isResizing) return;
+		const dx = e.clientX - resizeStartX;
+		const dy = e.clientY - resizeStartY;
+
+		// Threshold di snap (es. 60px)
+		const THRESHOLD = 60;
+		let newW = initialDragSize === '2x1' ? 2 : 1;
+		let newH = initialDragSize === '1x2' ? 2 : 1;
+
+		if (resizeDirection === 'x' || resizeDirection === 'both') {
+			if (dx > THRESHOLD) newW = 2;
+			else if (dx < -THRESHOLD) newW = 1;
+		}
+
+		if (resizeDirection === 'y' || resizeDirection === 'both') {
+			if (dy > THRESHOLD) newH = 2;
+			else if (dy < -THRESHOLD) newH = 1;
+		}
+
+		let newSize = `${newW}x${newH}` as string;
+		// Poiché 2x2 è rimosso, limitiamo le direzioni
+		if (newSize === '2x2') {
+			if (Math.abs(dx) > Math.abs(dy)) newSize = '2x1';
+			else newSize = '1x2';
+		}
+
+		if (service.size !== newSize) {
+			service.size = newSize; // Optimistic UI update
+		}
+	}
+
+	async function onResizeUp(e: PointerEvent) {
+		isResizing = false;
+		document.body.style.cursor = '';
+		window.removeEventListener('pointermove', onResizeMove);
+		window.removeEventListener('pointerup', onResizeUp);
+
+		// Salva nel db
+		if (service.size !== initialDragSize) {
+			try {
+				await fetch('/api/services/quick-edit', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(service)
+				});
+				await invalidateAll();
+			} catch (err) {
+				console.error(err);
+				service.size = initialDragSize; // rollback
+			}
+		}
+	}
+	// ---------------------------------
+
 	import { onMount, untrack } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 
@@ -359,6 +438,14 @@
 				onDelete={deleteService} 
 			/>
 		</div>
+	{/if}
+
+	<!-- Resize Handles (4 borders) -->
+	{#if appState.isEditMode && !isExpanded}
+		<div class="absolute top-2 bottom-2 right-0 w-3 cursor-ew-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'x')}></div>
+		<div class="absolute top-2 bottom-2 left-0 w-3 cursor-ew-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'x')}></div>
+		<div class="absolute bottom-0 left-2 right-2 h-3 cursor-ns-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'y')}></div>
+		<div class="absolute top-0 left-2 right-2 h-3 cursor-ns-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'y')}></div>
 	{/if}
 </svelte:element>
 </div>

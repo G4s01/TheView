@@ -16,8 +16,7 @@
 	const ALL_SIZES = [
 		{ value: '1x1', label: '1x1 (Singola)' },
 		{ value: '2x1', label: '2x1 (Larga)' },
-		{ value: '1x2', label: '1x2 (Verticale)' },
-		{ value: '2x2', label: '2x2 (Grande)' }
+		{ value: '1x2', label: '1x2 (Verticale)' }
 	];
 
 	let {

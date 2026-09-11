@@ -51,13 +51,13 @@ export const POST: RequestHandler = async ({ locals, request }) => {
           return json({ error: "Errore interno 2FA." }, { status: 500 });
         }
         const { verifyTOTPWithGracePeriod } = await import("@oslojs/otp");
-        const { decodeBase32 } = await import("@oslojs/encoding");
+        const { decodeBase32IgnorePadding } = await import("@oslojs/encoding");
         const { decryptString } = await import("$lib/server/crypto");
 
         const decryptedSecret = decryptString(secret as string);
         try {
-          const key = decodeBase32(decryptedSecret);
-          const isValid = verifyTOTPWithGracePeriod(key, 30, 6, otpCode, 1);
+          const key = decodeBase32IgnorePadding(decryptedSecret);
+          const isValid = verifyTOTPWithGracePeriod(key, 30, 6, otpCode, 2);
           if (!isValid) {
             return json(
               { error: "Codice OTP non valido o scaduto." },
