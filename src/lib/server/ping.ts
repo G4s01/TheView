@@ -1,5 +1,6 @@
 import { rewriteUrlForDocker } from "$lib/server/dockerHost";
 import { Agent, fetch as undiciFetch } from "undici";
+
 export async function pingService(
   url: string,
   timeoutMs: number = 3000,
@@ -11,16 +12,16 @@ export async function pingService(
   try {
     const agent = new Agent({ connect: { rejectUnauthorized: false } });
 
-    // Preferire richieste HEAD per risparmiare banda e risorse
+    // Try GET instead of HEAD. GET is universally supported and less prone to being dropped by WAFs or reverse proxies.
+    // The amount of data transferred for a simple HTML page is negligible for a 30s interval ping.
     const response = await undiciFetch(rewriteUrlForDocker(url), {
-      method: "HEAD",
+      method: "GET",
       signal: controller.signal,
       dispatcher: agent,
     } as any);
 
     clearTimeout(id);
 
-    // Un servizio è online se risponde con 2xx, 3xx (redirect), e perfino 401/403 (significa che c'è un server web che risponde, ma l'endpoint richiede auth).
     if (response.status >= 200 && response.status < 500) {
       return { isOnline: true, latencyMs: Date.now() - start };
     }
@@ -28,12 +29,6 @@ export async function pingService(
     return { isOnline: false };
   } catch (error) {
     clearTimeout(id);
-
-    // Fallback su GET se HEAD non è supportato (alcuni server web droppano HEAD)
-    if (error instanceof Error && error.message.includes("HEAD")) {
-      // omit fallback for brevity in this first iteration
-    }
-
     return { isOnline: false };
   }
 }

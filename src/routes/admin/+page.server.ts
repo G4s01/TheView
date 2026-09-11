@@ -54,6 +54,16 @@ export const actions: Actions = {
       | "1x2";
 
     try {
+      const existing = await db
+        .select({ position: services.position })
+        .from(services)
+        .where(eq(services.categoryId, categoryId));
+      const maxPos =
+        existing.length > 0
+          ? Math.max(...existing.map((s) => s.position || 0))
+          : -1;
+      const nextPos = maxPos + 1;
+
       await db.insert(services).values({
         name,
         url,
@@ -64,6 +74,7 @@ export const actions: Actions = {
         pingEnabled,
         dockerImage,
         size,
+        position: nextPos,
       });
       return { success: true };
     } catch (error) {

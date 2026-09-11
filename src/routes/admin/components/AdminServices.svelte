@@ -6,11 +6,9 @@
 
 	import { enhance } from '$app/forms';
 	import { slide } from 'svelte/transition';
-	import { dndzone } from 'svelte-dnd-action';
-	import { flip } from 'svelte/animate';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { ArrowUpCircle, Box, GripHorizontal, Plus, AlertTriangle, Upload, Check, Trash2, X } from "@lucide/svelte";
+	import { ArrowUpCircle, Box, Plus, AlertTriangle, Upload, Check, Trash2, X } from "@lucide/svelte";
 	import ServiceForm from '$lib/components/ServiceForm.svelte';
 	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
@@ -51,9 +49,6 @@
 	
 	let groupedServices = $state<Record<number, any[]>>({});
 	
-	// Create an untracked local copy to prevent infinite loops during drag
-	let isDragging = $state(false);
-
 	let isAddServiceExpanded = $state(false);
 	let isCreatingCategory = $state(false);
 	let newCategoryName = $state("");
@@ -61,8 +56,6 @@
 	let newPingEnabled = $state(true);
 
 	$effect(() => {
-		if (isDragging) return;
-		
 		const newGrouped: Record<number, any[]> = {};
 		for (const cat of localCategories) {
 			newGrouped[cat.id] = [];
@@ -72,45 +65,15 @@
 			if (!newGrouped[s.categoryId]) {
 				newGrouped[s.categoryId] = [];
 			}
-			// Only add if not already in the array (though we recreate newGrouped entirely)
 			newGrouped[s.categoryId].push(s);
 		}
 		
 		for (const catId in newGrouped) {
-			newGrouped[catId].sort((a, b) => (a.position || 0) - (b.position || 0));
+			newGrouped[catId].sort((a, b) => a.name.localeCompare(b.name));
 		}
 		
 		groupedServices = newGrouped;
 	});
-
-	const flipDurationMs = 200;
-
-	function handleDndConsider(e: CustomEvent, categoryId: number) {
-		isDragging = true;
-		groupedServices[categoryId] = e.detail.items;
-	}
-	
-	async function handleDndFinalize(e: CustomEvent, categoryId: number) {
-		groupedServices[categoryId] = e.detail.items;
-		
-		const orderedIds = groupedServices[categoryId].map((s: any) => s.id);
-		
-		try {
-			await fetch('/api/services/reorder', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ orderedIds, categoryId })
-			});
-		} catch (err) {
-			console.error(err);
-		} finally {
-			// After a short delay, turn off dragging flag and refresh data
-			setTimeout(async () => {
-				isDragging = false;
-				await invalidateAll();
-			}, 100);
-		}
-	}
 </script>
 
 <div class="space-y-8">
@@ -154,23 +117,17 @@
 					<span class="text-xs font-bold text-muted-foreground bg-muted px-2 py-1 rounded-lg">{groupedServices[catId].length}</span>
 				</div>
 				
-				<ul 
-					class="divide-y divide-border min-h-15"
-					use:dndzone={{items: groupedServices[catId], flipDurationMs, dropTargetStyle: { outline: '2px dashed hsl(var(--primary))', backgroundColor: 'hsl(var(--primary) / 0.05)' }}}
-					onconsider={(e) => handleDndConsider(e, catId)}
-					onfinalize={(e) => handleDndFinalize(e, catId)}
-				>
+				<ul class="divide-y divide-border min-h-15">
 					{#if groupedServices[catId].length === 0}
 						<li class="px-5 py-8 text-center text-sm font-medium text-muted-foreground uppercase tracking-wider opacity-70">
-							Trascina qui un servizio
+							Nessun servizio in questa categoria
 						</li>
 					{/if}
 					
 					{#each groupedServices[catId] as service, i (service.id)}
-						<li animate:flip={{duration: flipDurationMs}} class="px-5 py-4 hover:bg-accent hover:text-accent-foreground transition-colors bg-card text-card-foreground cursor-move">
+						<li class="px-5 py-4 hover:bg-accent hover:text-accent-foreground transition-colors bg-card text-card-foreground">
 								<div class="flex items-center justify-between w-full">
 									<div class="flex items-center">
-										<GripHorizontal class="h-5 w-5 text-muted-foreground mr-3 hidden sm:block cursor-grab" strokeWidth={1.5} />
 										<ServiceIcon icon={service.iconDetails?.value || service.icon} name={service.name} size="lg" iconStyle="rounded-xl" class="mr-3 shadow-sm border border-border" />
 										<div>
 											<p class="text-sm font-bold text-foreground uppercase tracking-wider">{service.name}</p>
