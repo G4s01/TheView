@@ -2,7 +2,7 @@ import { json } from "@sveltejs/kit";
 import { getSettings } from "$lib/server/settings";
 import { decryptString } from "$lib/server/crypto";
 import type { RequestHandler } from "./$types";
-import { Agent } from "undici";
+import { Agent, fetch as undiciFetch } from "undici";
 
 // Inietta l'Agent per chiamate con certificati self-signed
 const agent = new Agent({ connect: { rejectUnauthorized: false } });
@@ -32,11 +32,11 @@ export const GET: RequestHandler = async () => {
 
   try {
     const [statsRes, statusRes] = await Promise.all([
-      fetch(`${config.url}/control/stats`, {
+      undiciFetch(`${config.url}/control/stats`, {
         headers: { Authorization: authHeader },
         dispatcher: agent,
       } as any),
-      fetch(`${config.url}/control/status`, {
+      undiciFetch(`${config.url}/control/status`, {
         headers: { Authorization: authHeader },
         dispatcher: agent,
       } as any),
@@ -74,7 +74,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const authHeader = `Basic ${Buffer.from(`${config.username}:${config.password}`).toString("base64")}`;
 
   try {
-    const res = await fetch(`${config.url}/control/protection`, {
+    const res = await undiciFetch(`${config.url}/control/protection`, {
       method: "POST",
       headers: {
         Authorization: authHeader,
