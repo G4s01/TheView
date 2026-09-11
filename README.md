@@ -69,6 +69,7 @@ services:
       - NODE_ENV=production
       - PORT=3001
       - ORIGIN=http://your-homelab-ip:3001 # Or your public domain
+      - SECURE_COOKIE=false # Set to true ONLY if you are accessing via HTTPS
 ```
 
 ### Advanced Setup (Bridge Network)
@@ -92,6 +93,7 @@ services:
       - PORT=3001
       # Essential when running behind a proxy:
       - ORIGIN=https://dashboard.yourdomain.com
+      - SECURE_COOKIE=true # Set to true because we are using HTTPS
 ```
 
 ### First Access & Admin Setup
