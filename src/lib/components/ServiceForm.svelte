@@ -262,14 +262,14 @@
 		</div>
 
 		<!-- ROW 3 -->
-		<div class="md:col-span-5 h-10">
+		<div class="md:col-span-8 h-10">
 			<TextInput
 				label="IMMAGINE DOCKER"
 				name="dockerImage"
 				bind:value={service.dockerImage}
 			/>
 		</div>
-		<div class="md:col-span-3 h-10 w-full">
+		<div class="md:col-span-4 h-10 w-full">
 			<SelectInput
 				label="WIDGET"
 				name="widgetType"
@@ -281,14 +281,7 @@
 				]}
 			/>
 		</div>
-		<div class="md:col-span-4 h-10 w-full">
-			<SelectInput
-				label="DIMENSIONE"
-				name="size"
-				bind:value={service.size}
-				options={sizeOptions}
-			/>
-		</div>
+
 		<div class="md:col-span-12 flex flex-col md:flex-row gap-4 h-auto md:h-10 w-full items-start md:items-center">
 			<div class="flex-1 w-full min-w-0 h-10">
 				<TextInput label="DESCRIZIONE" name="description" bind:value={service.description} />

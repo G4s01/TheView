@@ -259,7 +259,7 @@
 </script>
 
 <div class="relative h-full w-full group" use:clickOutside={{ enabled: isExpanded, handler: () => { if (isExpanded && onExpandToggle) onExpandToggle(false); } }}>
-	{#if appState.isEditMode && !isExpanded && (!separateCells || (currentSize !== '2x1' && currentSize !== '2x2'))}
+	{#if appState.isEditMode && !isExpanded && (!separateCells || (currentSize !== '2x1' && currentSize !== '1x2'))}
 		<div class="absolute top-2 right-2 flex space-x-1.5 z-20">
 			<Button variant="outline" size="icon" onclick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(); }} class="bg-card/90 text-muted-foreground" title="Impostazioni Servizio">
 				<Pencil strokeWidth={1.5} />
@@ -277,14 +277,14 @@
 	target={appState.isEditMode ? undefined : '_blank'} 
 	rel={appState.isEditMode ? undefined : "noopener noreferrer"}
 	class="relative {
-		separateCells && !isExpanded && (currentSize === '2x1' || currentSize === '2x2')
-		? 'bg-transparent border-none shadow-none grid gap-1.5 grid-cols-2 ' + (currentSize === '2x2' ? 'grid-rows-2' : '')
+		separateCells && !isExpanded && (currentSize === '2x1' || currentSize === '1x2')
+		? 'bg-transparent border-none shadow-none grid gap-1.5 ' + (currentSize === '2x1' ? 'grid-cols-2' : 'grid-rows-2')
 		: 'bg-card text-card-foreground rounded-xl border border-border p-4 shadow-sm hover:shadow-md'
 	} transition-all duration-500 ease-in-out w-full h-full {isExpanded && !isAnimating ? 'overflow-visible' : 'overflow-hidden'} {
 		!isExpanded 
-		? (separateCells && (currentSize === '2x1' || currentSize === '2x2') ? '' 
+		? (separateCells && (currentSize === '2x1' || currentSize === '1x2') ? '' 
 			: (currentSize === '2x1' ? 'flex flex-row items-center gap-4' 
-			: (currentSize === '2x2' || currentSize === '1x2' ? 'flex flex-col items-center justify-between text-center' 
+			: (currentSize === '1x2' ? 'flex flex-col items-center justify-between text-center' 
 			: 'flex flex-col justify-between'))) 
 		: 'flex flex-col'
 	}"
@@ -292,8 +292,8 @@
 	onclick={(e: Event) => { if (appState.isEditMode) e.preventDefault(); }}
 >
 	{#if !isExpanded}
-		{#if separateCells && (currentSize === '2x1' || currentSize === '2x2')}
-				<div class="bg-card text-card-foreground rounded-xl rounded-r-none border border-border border-r-0 p-4 shadow-sm hover:shadow-md transition-all duration-500 relative flex flex-col justify-center items-center text-center {currentSize === '2x2' ? 'col-span-1 row-span-2' : 'col-span-1'}">
+		{#if separateCells && (currentSize === '2x1' || currentSize === '1x2')}
+				<div class="bg-card text-card-foreground rounded-xl {currentSize === '2x1' ? 'rounded-r-none border-r-0' : 'rounded-b-none border-b-0'} border border-border p-4 shadow-sm hover:shadow-md transition-all duration-500 relative flex flex-col justify-center items-center text-center col-span-1 row-span-1">
 					{#if appState.isEditMode}
 						<div class="absolute top-2 right-2 flex gap-1 z-20">
 							<Button variant="outline" size="icon" class="h-8 w-8 bg-card/90 hover:bg-muted shadow-sm" onclick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(); }}>
@@ -335,7 +335,7 @@
 				</div>
 			
 			{#if !requireAuth || appState.isAdmin}
-				<div class="bg-card border border-border p-4 rounded-xl rounded-l-none shadow-sm hover:shadow-md transition-all duration-500 flex flex-col h-full w-full overflow-hidden {currentSize === '2x2' ? 'col-span-1 row-span-2' : 'col-span-1'}">
+				<div class="bg-card border border-border p-4 rounded-xl {currentSize === '2x1' ? 'rounded-l-none' : 'rounded-t-none'} shadow-sm hover:shadow-md transition-all duration-500 flex flex-col h-full w-full overflow-hidden col-span-1 row-span-1">
 					{#if service.widgetType === 'qbittorrent'}
 						<div class="w-full h-full flex flex-col min-h-0" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
 							<QBittorrentWidget size={currentSize} />
@@ -440,12 +440,21 @@
 		</div>
 	{/if}
 
-	<!-- Resize Handles (4 borders) -->
+	<!-- Resize Handles (4 borders + corner) -->
 	{#if appState.isEditMode && !isExpanded}
 		<div class="absolute top-2 bottom-2 right-0 w-3 cursor-ew-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'x')}></div>
 		<div class="absolute top-2 bottom-2 left-0 w-3 cursor-ew-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'x')}></div>
 		<div class="absolute bottom-0 left-2 right-2 h-3 cursor-ns-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'y')}></div>
 		<div class="absolute top-0 left-2 right-2 h-3 cursor-ns-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'y')}></div>
+		
+		<div 
+			class="absolute bottom-0 right-0 w-8 h-8 cursor-se-resize z-40 flex items-end justify-end p-1 hover:bg-muted/30 rounded-tl-xl transition-colors"
+			onpointerdown={(e) => startResize(e, 'both')}
+		>
+			<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-muted-foreground">
+				<path d="M12 0L12 12L0 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+			</svg>
+		</div>
 	{/if}
 </svelte:element>
 </div>
