@@ -28,7 +28,9 @@ Built with **Svelte 5 Runes**, `shadcn-svelte`, **Tailwind CSS v4**, and **TanSt
 
 - 🖥️ **100% Web UI Driven**: Forget editing YAML files. Add, edit, remove, and reorder categories and services using an intuitive drag-and-drop web interface.
 - 🍱 **Bento Grid Design**: A beautiful, modern Bento Box layout with responsive Flexbox wrapping. Cards can flexibly span 1x1, 1x2, 2x1, or 2x2 blocks that perfectly adapt to your screen size. Cells dynamically resize to fit widget content — no scrollbars, no clipping.
+- 📐 **Interactive Drag & Resize**: In Edit Mode, you can effortlessly resize any service card by dragging its borders (top, bottom, left, right) or the bottom-right corner to snap it into different dimensions!
 - 🔀 **Drag & Drop Reordering**: Full drag-and-drop reordering powered by `svelte-dnd-action`. In edit mode, spacer items allow free vertical placement — stack services across multiple rows even when there aren't enough items to fill a row.
+- 🔐 **Two-Factor Authentication (2FA)**: Secure your admin panel with TOTP-based 2FA. Fully integrated with your favorite authenticator apps (Google Authenticator, Authy, etc.) for maximum security.
 - 🔍 **Hybrid Icon Search Engine**: The built-in icon picker works like a search engine. Start typing to get instant autocomplete suggestions with visual previews directly from the `homarr-labs/dashboard-icons` repository, **or fetch millions of icons directly from the Iconify API**. You can also paste a custom direct URL.
 - 📡 **Live Health Checks (Ping)**: Built-in pinging system powered by TanStack Query with 30-second polling. Shows live online/offline status and latency (ms) for all your tracked services with smooth pulsing indicators.
 - 📦 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click. The smart icon parser automatically matches services like AdGuard Home, Filebrowser, and Beszel.
@@ -37,6 +39,7 @@ Built with **Svelte 5 Runes**, `shadcn-svelte`, **Tailwind CSS v4**, and **TanSt
 - 🔌 **Interactive Widgets**:
   - **qBittorrent**: Live download/upload speeds, active torrent list with pause/resume controls, and torrent addition via magnet link or `.torrent` file upload — all directly on the dashboard.
   - **AdGuard Home**: Real-time DNS query stats, protection toggle with timed pause via a scrollable time wheel picker, and automatic countdown to re-activation.
+  - _Both widgets support a "Separate Cells" layout mode that looks stunning in both horizontal (2x1) and vertical (1x2) sizes._
 - 🎨 **Advanced Theming**: Pick your vibe. Full support for Dark/Light modes powered by semantic `shadcn-svelte` HSL variables for pixel-perfect contrast. The entire UI is built on a clean, scalable Tailwind v4 design system, with no hardcoded colors.
 - 🦴 **Beautiful Loading States**: Skeletons that match actual component layouts instead of basic spinners, providing a native application feel while TanStack Query fetches data in the background.
 - 📱 **Fully Responsive**: Carefully designed to look stunning and function perfectly on desktops, tablets, and smartphones.
@@ -107,7 +110,7 @@ TheView stores all state (Categories, Services, uploaded Icons, and UI Settings)
 
 ### 🔐 Security & Encryption
 
-All sensitive data (Admin Password, NPM credentials, Widget passwords) are **strongly encrypted or hashed** (AES-256-GCM / SHA-256) inside the database. The system automatically generates a unique `APP_SECRET` on first boot. TheView does not store plaintext passwords anywhere.
+All sensitive data (Admin Password, NPM credentials, Widget passwords, and 2FA secrets) are **strongly encrypted or hashed** (AES-256-GCM / SHA-256) inside the database. The system automatically generates a unique `APP_SECRET` on first boot. This secret is safely stored inside the persistent `/app/data/secret.key` file to survive Docker updates flawlessly. TheView does not store plaintext passwords anywhere.
 
 ### 💾 Backup & Restore
 
