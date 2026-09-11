@@ -67,7 +67,7 @@ export async function GET() {
 
         if (!loginRes.ok) {
           clearTimeout(timeoutId);
-          return json({ error: "Autenticazione fallita" }, { status: 401 });
+          return json({ error: "AUTENTICAZIONE FALLITA" }, { status: 401 });
         }
 
         const cookies = loginRes.headers.getSetCookie

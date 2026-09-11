@@ -21,6 +21,12 @@ export async function load({ locals }) {
   const rawSettings = await getSettings();
   const needsSetup =
     !rawSettings.adminPassword || rawSettings.adminPassword === "admin";
+  console.log(
+    "DEBUG: rawSettings.adminPassword =",
+    rawSettings.adminPassword,
+    "needsSetup =",
+    needsSetup,
+  );
 
   const settings = { ...rawSettings };
   if (settings.adminPassword) delete settings.adminPassword;

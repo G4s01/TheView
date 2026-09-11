@@ -11,6 +11,7 @@ export const GET: RequestHandler = async ({ locals }) => {
   // Decrypt passwords for the admin client
   const { decryptString } = await import("$lib/server/crypto");
   if (safeSettings.adminPassword) delete safeSettings.adminPassword; // Never send admin hash
+  if (safeSettings.totp_secret) delete safeSettings.totp_secret; // Never send TOTP secret to frontend
   if (safeSettings.npmPassword)
     safeSettings.npmPassword = decryptString(safeSettings.npmPassword);
   if (safeSettings.qbit_password)
@@ -28,6 +29,54 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 
   try {
     const newSettings = await request.json();
+
+    // Secure actions: se 2FA è attiva, le azioni sensibili richiedono otpCode
+    const currentSettings = await getSettings();
+    const is2FAActive =
+      currentSettings.totp_enabled === "true" ||
+      currentSettings.totp_enabled === true;
+
+    if (is2FAActive) {
+      const isSensitiveAction =
+        newSettings.adminPassword ||
+        newSettings.totp_enabled === false ||
+        newSettings.totp_enabled === "false";
+      if (isSensitiveAction) {
+        const otpCode = newSettings.otpCode;
+        if (!otpCode) {
+          return json({ error: "Codice OTP mancante." }, { status: 400 });
+        }
+        const secret = currentSettings.totp_secret;
+        if (!secret) {
+          return json({ error: "Errore interno 2FA." }, { status: 500 });
+        }
+        const { verifyTOTPWithGracePeriod } = await import("@oslojs/otp");
+        const { decodeBase32 } = await import("@oslojs/encoding");
+        const { decryptString } = await import("$lib/server/crypto");
+
+        const decryptedSecret = decryptString(secret as string);
+        try {
+          const key = decodeBase32(decryptedSecret);
+          const isValid = verifyTOTPWithGracePeriod(key, 30, 6, otpCode, 1);
+          if (!isValid) {
+            return json(
+              { error: "Codice OTP non valido o scaduto." },
+              { status: 400 },
+            );
+          }
+        } catch (e) {
+          return json(
+            { error: "Errore nella validazione TOTP." },
+            { status: 500 },
+          );
+        }
+      }
+    }
+
+    // Rimuovi otpCode dal payload per non salvarlo nel database KV
+    if (newSettings.otpCode !== undefined) {
+      delete newSettings.otpCode;
+    }
 
     // Non sovrascrivere se il client reinvia la maschera
     if (newSettings.adminPassword === "********")

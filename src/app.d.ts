@@ -5,6 +5,7 @@ declare global {
     // interface Error {}
     interface Locals {
       isAdmin: boolean;
+      session: { id: string; expiresAt: Date } | null;
     }
     // interface PageData {}
     // interface PageState {}

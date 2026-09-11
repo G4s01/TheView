@@ -1,16 +1,22 @@
 import { json } from "@sveltejs/kit";
 import { getSettings } from "$lib/server/settings";
 import { hashPassword, verifyPassword } from "$lib/server/crypto";
+import {
+  generateSessionToken,
+  createSession,
+  invalidateSession,
+} from "$lib/server/auth";
+import { env } from "$env/dynamic/private";
 
 export async function POST({ request, cookies }) {
   const body = await request.json();
   const { action, password } = body;
+  const isSecure = env.SECURE_COOKIE === "true";
 
   if (action === "login") {
     const settings = await getSettings();
     const correctPasswordHash = settings.adminPassword;
 
-    // Se non c'è una password impostata, il default "admin" è hardcoded
     let isValid = false;
 
     if (correctPasswordHash) {
@@ -18,7 +24,6 @@ export async function POST({ request, cookies }) {
         isValid = true;
       } else if (password === correctPasswordHash) {
         // FALLBACK: La password in settings è ancora in chiaro.
-        // Eseguiamo la migrazione silenziosa crittografandola ora.
         isValid = true;
         const { saveSettings } = await import("$lib/server/settings");
         await saveSettings({ adminPassword: hashPassword(password) });
@@ -28,12 +33,19 @@ export async function POST({ request, cookies }) {
     }
 
     if (isValid) {
-      cookies.set("admin_session", "active", {
+      if (settings.totp_enabled === true) {
+        return json({ success: true, require2FA: true });
+      }
+
+      const token = generateSessionToken();
+      const session = await createSession(token);
+
+      cookies.set("admin_session", token, {
         path: "/",
         httpOnly: true,
-        sameSite: "strict",
-        secure: false, // Serve a permettere il login su IP HTTP locale senza SSL
-        maxAge: 60 * 60 * 24 * 7, // 1 settimana
+        sameSite: "lax",
+        secure: isSecure,
+        expires: session.expiresAt,
       });
       return json({ success: true });
     } else {
@@ -43,13 +55,15 @@ export async function POST({ request, cookies }) {
       );
     }
   } else if (action === "logout") {
-    cookies.delete("admin_session", { path: "/", secure: false });
+    const token = cookies.get("admin_session");
+    if (token && token !== "active") {
+      await invalidateSession(token);
+    }
+    cookies.delete("admin_session", { path: "/", secure: isSecure });
 
-    // Eseguiamo la pulizia delle icone orfane in background (non bloccante)
+    // Pulizia icone in background
     import("$lib/server/icons")
-      .then(({ cleanOrphanIcons }) => {
-        cleanOrphanIcons().catch(console.error);
-      })
+      .then(({ cleanOrphanIcons }) => cleanOrphanIcons().catch(console.error))
       .catch(console.error);
 
     return json({ success: true });
@@ -65,12 +79,15 @@ export async function POST({ request, cookies }) {
     const { saveSettings } = await import("$lib/server/settings");
     await saveSettings({ adminPassword: hashPassword(password) });
 
-    cookies.set("admin_session", "active", {
+    const token = generateSessionToken();
+    const session = await createSession(token);
+
+    cookies.set("admin_session", token, {
       path: "/",
       httpOnly: true,
-      sameSite: "strict",
-      secure: false,
-      maxAge: 60 * 60 * 24 * 7,
+      sameSite: "lax",
+      secure: isSecure,
+      expires: session.expiresAt,
     });
     return json({ success: true });
   }

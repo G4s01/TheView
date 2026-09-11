@@ -2,18 +2,44 @@ import type { Handle } from "@sveltejs/kit";
 import { redirect } from "@sveltejs/kit";
 import { getSettings } from "$lib/server/settings";
 import { setDefaultResultOrder } from "node:dns";
+import { validateSession } from "$lib/server/auth";
+import { env } from "$env/dynamic/private";
 
 // Fix per network in Docker (risolve localhost ad IPv4 invece che IPv6)
 setDefaultResultOrder("ipv4first");
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const sessionCookie = event.cookies.get("admin_session");
+  const sessionToken = event.cookies.get("admin_session");
 
-  // Impostiamo isAdmin in event.locals per poterlo leggere ovunque (server-side)
-  if (sessionCookie === "active") {
-    event.locals.isAdmin = true;
-  } else {
+  if (!sessionToken) {
     event.locals.isAdmin = false;
+    event.locals.session = null;
+  } else {
+    // Gestione transizione se c'è ancora un cookie legacy
+    if (sessionToken === "active") {
+      event.locals.isAdmin = false;
+      event.locals.session = null;
+      event.cookies.delete("admin_session", { path: "/" });
+    } else {
+      const { session } = await validateSession(sessionToken);
+      if (session) {
+        event.locals.isAdmin = true;
+        event.locals.session = session;
+        // Estensione del cookie sul client in caso di sessione estesa
+        const isSecure = env.SECURE_COOKIE === "true";
+        event.cookies.set("admin_session", sessionToken, {
+          path: "/",
+          httpOnly: true,
+          sameSite: "lax",
+          secure: isSecure,
+          expires: session.expiresAt,
+        });
+      } else {
+        event.locals.isAdmin = false;
+        event.locals.session = null;
+        event.cookies.delete("admin_session", { path: "/" });
+      }
+    }
   }
 
   const settings = await getSettings();

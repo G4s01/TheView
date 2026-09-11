@@ -11,6 +11,9 @@
 		required = false,
 		pattern = undefined,
 		disabled = false,
+		onkeydown,
+		autofocus = false,
+		tabindex,
 		id = Math.random().toString(36).substring(7),
 		class: className = '',
 		children
@@ -23,10 +26,20 @@
 		required?: boolean;
 		pattern?: string;
 		disabled?: boolean;
+		onkeydown?: (e: KeyboardEvent) => void;
+		autofocus?: boolean;
+		tabindex?: number;
 		id?: string;
 		class?: string;
 		children?: Snippet;
 	}>();
+
+	function autofocusAction(node: HTMLInputElement) {
+		if (autofocus) {
+			// setTimeout helps ensure the element is focusable (e.g. within transitions)
+			setTimeout(() => node.focus(), 50);
+		}
+	}
 </script>
 
 <div class="relative w-full h-10 {className}">
@@ -35,6 +48,9 @@
 		{id}
 		{name}
 		bind:value
+		{onkeydown}
+		{tabindex}
+		use:autofocusAction
 		placeholder=" " 
 		{required}
 		{pattern}

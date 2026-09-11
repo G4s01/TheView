@@ -42,6 +42,11 @@ sqlite.exec(`
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS sessions (
+    id TEXT PRIMARY KEY,
+    expires_at INTEGER NOT NULL
+  );
 `);
 
 // Eseguiamo la migrazione da settings.json a database se esiste ancora il file
