@@ -100,7 +100,7 @@
                                                 </span>
                                             {/if}
                                             <Button variant="ghost" size="icon" class="size-6 rounded-md {container.updateAvailable ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'hover:bg-primary/20 text-primary'} ml-1" onclick={() => handleAction(container, 'update')} disabled={actions.isPending} title="Aggiorna / Redeploy">
-                                                <RefreshCw class="size-3.5" />
+                                                <RefreshCw class="size-3.5 {actions.isPending && actions.variables?.id === container.id && actions.variables?.action === 'update' ? 'animate-spin' : ''}" />
                                             </Button>
                                         </div>
                                     {/if}

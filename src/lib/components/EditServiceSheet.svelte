@@ -66,7 +66,7 @@
 </script>
 
 <Sheet.Root {open} {onOpenChange}>
-    <Sheet.Content side={sidePosition} class="!w-[95vw] sm:!w-[90vw] sm:!max-w-none md:!w-[800px] md:!max-w-[800px] overflow-y-auto p-4 sm:p-6 bg-muted/20">
+    <Sheet.Content side={sidePosition} class="w-[95vw]! sm:w-[90vw]! sm:max-w-none! md:w-200! md:max-w-200! overflow-y-auto p-4 sm:p-6 bg-muted/20">
         {#if appState.editingService}
             <div class="bg-card border border-border rounded-3xl p-6 shadow-sm flex flex-col gap-6">
                 <Sheet.Header>
