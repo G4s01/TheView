@@ -1,0 +1,41 @@
+{
+  "items": [
+    {
+      "collectionId": "2hz5ncl8tizk5nx",
+      "collectionName": "systems",
+      "created": "2026-09-13 07:35:59.794Z",
+      "host": "10.0.0.1",
+      "id": "eyz41h1u33dojv8",
+      "info": {
+        "t": 4,
+        "u": 822216,
+        "cpu": 3.92,
+        "mp": 17.21,
+        "dp": 19.46,
+        "v": "0.19.0",
+        "p": false,
+        "g": 0,
+        "dt": 41,
+        "os": 0,
+        "bb": 4619757,
+        "la": [
+          0.08,
+          0.18,
+          0.19
+        ],
+        "ct": 1
+      },
+      "name": "G4sWRT",
+      "port": "45876",
+      "status": "up",
+      "updated": "2026-09-13 07:48:25.899Z",
+      "users": [
+        "c0avomikki0eian"
+      ]
+    }
+  ],
+  "page": 1,
+  "perPage": 500,
+  "totalItems": 1,
+  "totalPages": 1
+}

@@ -58,12 +58,13 @@ I widget seguono un pattern architetturale rigoroso a 4 livelli:
 3. **TanStack Query Hook** (`src/lib/queries/use*.ts`): `createQuery` con `refetchInterval` configurato (3s per velocità, 30s per ping). Gestisce `isPending`, `isError`, `isSuccess`.
 4. **Widget UI** (`src/lib/components/widgets/*Widget.svelte`): Componente Svelte 5 che consuma il query hook e renderizza stati (Skeleton → Errore → Dati).
 
-### Drag & Drop (Bento Grid)
+### Multi-Grid Drag & Drop (Gridstack.js)
 
-- **Libreria:** `svelte-dnd-action` v0.9.x.
-- **Layout:** CSS Grid con `grid-auto-flow: row dense` per creare un vero e proprio Tetris ("Bento Grid").
-- **Spacer Items:** In edit mode, item invisibili (`_isSpacer: true`) vengono iniettati per mantenere la stabilità. Vengono filtrati nel salvataggio (`handleDndFinalize`).
-- **Stato separato:** `localGroups` (view mode, senza spacer) e `dndGroups` (edit mode, con spacer). Transizione gestita da `$effect.pre` con `untrack()`.
+- **Libreria:** `gridstack` (engine primario) integrato nativamente in Svelte 5.
+- **Architettura Multi-Grid:** Ogni categoria sulla dashboard è un'istanza Gridstack separata, isolata all'interno di un `GridContainer.svelte`. I widget possono essere spostati all'interno della propria categoria.
+- **Bento Grid:** Layout fluido a 12 colonne (`cellHeight: '136px'`). Ogni servizio definisce i vincoli di dimensione (`1x1`, `2x2`, `2x1`, ecc.).
+- **Resize Dinamico:** Durante l'Edit Mode, i widget espongono le maniglie di ridimensionamento per essere alterati fluidamente, salvando le coordinate (`w`, `h`, `x`, `y`) su SQLite.
+- **Edit Service Sheet:** L'apertura del form di modifica NON espande più il widget inline (causando layout shift), ma sfrutta un elegante `EditServiceSheet` (Shadcn Sheet) sovrapposto a destra/sinistra per modificare configurazioni e widget comodamente.
 
 ## 🛡️ REGOLE BACKEND E SICUREZZA (TASSATIVE)
 
@@ -89,7 +90,7 @@ I widget seguono un pattern architetturale rigoroso a 4 livelli:
 ## ⚙️ REGOLE DI VIBECODING
 
 1. **Zero Regex:** Vietato usare `sed`, `awk` o script Python per iniettare codice. Analizza, comprendi il contesto e sovrascrivi l'intero componente in modo pulito.
-2. **Lavoro Modulare & Verifica:** Lavora su un file alla volta. Prima di alterare lo stato reattivo (`$state`), valuta sempre l'impatto sulle librerie terze (come `svelte-dnd-action` o TanStack Query).
+2. **Lavoro Modulare & Verifica:** Lavora su un file alla volta. Prima di alterare lo stato reattivo (`$state`), valuta sempre l'impatto sulle librerie terze (come `gridstack` o TanStack Query).
 3. **Inizializza con la Ricerca:** Prima di ipotizzare come implementare una feature in Svelte 5 o Tailwind v4, usa i tool a tua disposizione (Skill + MCP) per verificare la sintassi corretta ed evitare allucinazioni su versioni vecchie dei framework.
 4. **Root Pulita (Zero Spazzatura):** È SEVERAMENTE VIETATO creare file temporanei, script di test/debug, documenti di appoggio, lock file o qualsiasi artefatto IA nella directory principale del progetto. Se hai bisogno di file scratch, test one-off, note, o qualsiasi file di supporto, creali ESCLUSIVAMENTE nella directory `.gemini/` (es. `.gemini/scratch/`). La root del progetto deve contenere solo file che fanno parte integrante del codebase.
 5. **Widget Pattern:** Per aggiungere un nuovo widget, segui SEMPRE il pattern a 4 livelli (Admin Settings → Proxy API → TanStack Hook → Widget UI). Non deviare dalla separazione delle responsabilità.

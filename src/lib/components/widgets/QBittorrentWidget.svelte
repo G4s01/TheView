@@ -4,7 +4,11 @@
 	import { Skeleton } from "$lib/components/ui/skeleton";
 	import { Progress } from "$lib/components/ui/progress";
 	
-	let { size = '1x1' } = $props<{ size?: string }>();
+	let { size = 'gs-2x2' } = $props<{ size?: string }>();
+
+	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
+	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
+	let isWidgetLayout = $derived(nodeW !== nodeH || (nodeW >= 4 && nodeH >= 4));
 	
 	const query = useQbittorrent();
 	const pauseMutation = useQbittorrentPause();
@@ -39,7 +43,7 @@
 				<div class="flex items-center justify-center flex-1"><div class="h-3 w-8 bg-muted rounded"></div></div>
 				<div class="flex items-center justify-end flex-1"><div class="h-3 w-12 bg-muted rounded"></div></div>
 			</div>
-			{#if size === '2x1' || size === '1x2' || size === '2x2'}
+			{#if isWidgetLayout}
 				<div class="flex flex-col gap-3 mt-2 flex-1">
 					<div class="flex flex-col gap-2 w-full">
 						<div class="h-3 w-3/4 bg-muted rounded"></div>
@@ -77,7 +81,7 @@
 			</div>
 		</div>
 
-		{#if size === '2x1' || size === '1x2' || size === '2x2'}
+		{#if isWidgetLayout}
 			{#if query.data?.torrents && query.data.torrents.length > 0}
 				<div class="flex flex-col gap-2 mt-2 flex-1">
 					{#each query.data.torrents as torrent}

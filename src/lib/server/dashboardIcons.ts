@@ -663,6 +663,7 @@ export const dashboardIcons = [
 "docker",
 "dockge",
 "dockhand-svg",
+"dockhand",
 "docking-station",
 "dockpeek-dark",
 "dockpeek",

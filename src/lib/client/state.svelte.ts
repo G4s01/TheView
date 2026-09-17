@@ -5,4 +5,6 @@ export const appState = $state({
   settings: {} as Record<string, any>,
   showLoginModal: false,
   loginRedirectUrl: null as string | null,
+  editingServiceId: null as number | null,
+  editingService: null as any,
 });

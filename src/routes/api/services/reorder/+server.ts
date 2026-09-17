@@ -11,32 +11,37 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
   try {
     const payload = await request.json();
-    const { orderedIds, itemsWithPositions, categoryId } = payload;
+    const { itemsWithPositions, gridId, categoryId } = payload;
+
+    const targetGridId = gridId !== undefined ? gridId : categoryId; // retrocompatibilità durante transizione
 
     if (Array.isArray(itemsWithPositions)) {
       for (const item of itemsWithPositions) {
-        const updateData: any = { position: item.position };
-        if (categoryId !== undefined) {
-          updateData.categoryId = categoryId;
+        const updateData: any = {};
+
+        // Manteniamo anche position e size per retrocompatibilità temporanea se serve
+        if (item.position !== undefined) updateData.position = item.position;
+        if (item.size !== undefined) updateData.size = item.size;
+
+        if (targetGridId !== undefined) {
+          updateData.grid_id = targetGridId === -1 ? null : targetGridId;
         }
+
+        if (item.x !== undefined) updateData.x = item.x;
+        if (item.y !== undefined) updateData.y = item.y;
+        if (item.w !== undefined) updateData.w = item.w;
+        if (item.h !== undefined) updateData.h = item.h;
+
         await db
           .update(services)
           .set(updateData)
           .where(eq(services.id, item.id));
       }
-    } else if (Array.isArray(orderedIds)) {
-      for (let i = 0; i < orderedIds.length; i++) {
-        const updateData: any = { position: i };
-        if (categoryId !== undefined) {
-          updateData.categoryId = categoryId;
-        }
-        await db
-          .update(services)
-          .set(updateData)
-          .where(eq(services.id, orderedIds[i]));
-      }
     } else {
-      return json({ error: "Invalid payload" }, { status: 400 });
+      return json(
+        { error: "Invalid payload, itemsWithPositions is required" },
+        { status: 400 },
+      );
     }
 
     return json({ success: true });

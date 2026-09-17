@@ -13,6 +13,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { WIDGET_SIZES } from "$lib/config/widgetConstraints";
 	import { page } from "$app/stores";
+	import { toast } from "svelte-sonner";
 
 	const ALL_SIZES = [
 		{ value: "1x1", label: "1x1 (Singola)" },
@@ -34,7 +35,6 @@
 			widgetType: "none",
 			size: "1x1",
 		}),
-		categories = $bindable([]),
 		isSaving = false,
 		action = undefined,
 		useEnhance = false,
@@ -48,7 +48,6 @@
 	} = $props<{
 		mode?: "add" | "edit" | "discovery";
 		service?: any;
-		categories?: any[];
 		isSaving?: boolean;
 		action?: string;
 		useEnhance?: boolean;
@@ -61,39 +60,7 @@
 		iconSlot?: import("svelte").Snippet;
 	}>();
 
-	let isCreatingCategory = $state(false);
-	let newCategoryName = $state("");
-
-	async function createCategory() {
-		if (!newCategoryName) {
-			isCreatingCategory = false;
-			return;
-		}
-		try {
-			const res = await fetch("/api/categories/create", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name: newCategoryName }),
-			});
-			if (res.ok) {
-				const data = await res.json();
-				categories = [...categories, data.category];
-				service.categoryId = data.category.id;
-				isCreatingCategory = false;
-				newCategoryName = "";
-			} else {
-				const data = await res.json();
-				alert(
-					data.error || "ERRORE DURANTE LA CREAZIONE DELLA CATEGORIA",
-				);
-			}
-		} catch (e) {
-			console.error(e);
-		}
-	}
-
 	function handleCancel() {
-		isCreatingCategory = false;
 		if (onCancel) onCancel();
 	}
 
@@ -153,17 +120,6 @@
 		const form = e.currentTarget;
 		form.classList.remove("show-errors");
 
-		if (isCreatingCategory && newCategoryName) {
-			e.preventDefault();
-			createCategory().then(async () => {
-				if (!isCreatingCategory) {
-					await import("svelte").then((m) => m.tick());
-					form.requestSubmit();
-				}
-			});
-			return;
-		}
-
 		if (!form.checkValidity()) {
 			e.preventDefault();
 			void form.offsetWidth;
@@ -191,7 +147,7 @@
 					class="flex items-center gap-3 bg-card p-4 rounded-xl shadow-lg border border-border"
 				>
 					<div
-						class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"
+						class="size-5 border-2 border-primary border-t-transparent rounded-full animate-spin"
 					></div>
 					<span
 						class="text-sm font-bold uppercase tracking-wider text-primary"
@@ -202,7 +158,7 @@
 		{/if}
 
 		<!-- ROW 1 -->
-		<div class="{enableCategories ? 'md:col-span-6' : 'md:col-span-12'} h-10">
+		<div class="{enableCategories ? 'md:col-span-12' : 'md:col-span-12'} h-10">
 			{#if iconSlot}
 				<div class="flex items-center gap-4 h-full">
 					<div class="shrink-0 hidden md:block">
@@ -226,63 +182,6 @@
 				/>
 			{/if}
 		</div>
-		{#if enableCategories}
-			<div class="md:col-span-6 flex flex-col gap-2 h-10">
-				{#if isCreatingCategory}
-					<div class="flex gap-4 h-10">
-						<div class="flex-1 min-w-0 h-10">
-							<TextInput
-								label="NUOVA CATEGORIA"
-								bind:value={newCategoryName}
-							/>
-						</div>
-						<SaveButton
-							type="button"
-							onclick={createCategory}
-							class="shadow-sm shrink-0"
-							text=""
-							title="SALVA"
-						/>
-						<BackButton
-							onclick={() => {
-								isCreatingCategory = false;
-								newCategoryName = "";
-							}}
-							text=""
-							class="shadow-sm shrink-0"
-							title="ANNULLA"
-						/>
-					</div>
-				{:else}
-					<SelectInput
-						label="CATEGORIA"
-						bind:value={service.categoryId}
-						options={[
-							...categories.map((c: any) => ({
-								value: c.id,
-								label: c.name,
-							})),
-							{
-								value: -1,
-								label: "CATEGORIA FANTASMA",
-								class: "italic text-muted-foreground",
-							},
-							{
-								value: "new_category_trigger",
-								label: "[+ NUOVA]",
-								class: "font-bold text-primary",
-							},
-						]}
-						onchange={(val) => {
-							if (val === "new_category_trigger") {
-								isCreatingCategory = true;
-								service.categoryId = "";
-							}
-						}}
-					/>
-				{/if}
-			</div>
-		{/if}
 
 		<!-- ROW 2 -->
 		<div class="md:col-span-6 h-10">
@@ -298,10 +197,10 @@
 				<IconCombobox name="icon" bind:value={service.icon} />
 			</div>
 			<label
-				class="cursor-pointer bg-transparent text-foreground border border-input rounded-md w-10 h-10 flex items-center justify-center transition-colors shadow-none shrink-0 hover:bg-accent hover:text-accent-foreground"
+				class="cursor-pointer bg-transparent text-foreground border border-input rounded-md size-10 flex items-center justify-center transition-colors shadow-none shrink-0 hover:bg-accent hover:text-accent-foreground"
 				title="Carica un'immagine"
 			>
-				<Upload class="h-4 w-4 opacity-70" strokeWidth={2} />
+				<Upload class="size-4 opacity-70" strokeWidth={2} />
 				<input
 					type="file"
 					accept="image/png, image/svg+xml, image/jpeg"
@@ -323,6 +222,7 @@
 							if (data.url) service.icon = data.url;
 						} catch (err) {
 							console.error(err);
+							toast.error("Errore durante il caricamento dell'icona.");
 						} finally {
 							btn.classList.remove("opacity-50");
 						}
@@ -348,6 +248,11 @@
 					{ value: "none", label: "NESSUNO" },
 					{ value: "qbittorrent", label: "qBittorrent" },
 					{ value: "adguard", label: "AdGuard Home" },
+					{ value: "beszel", label: "Beszel" },
+					{ value: "wgeasy", label: "Wg-easy" },
+					{ value: "duplicati", label: "Duplicati" },
+					{ value: "docker", label: "Docker" },
+					{ value: "dockhand", label: "Dockhand" },
 				]}
 			/>
 		</div>
@@ -412,7 +317,7 @@
 							class="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shrink-0"
 							title="AGGIUNGI"
 						>
-							<Plus class="w-4 h-4" strokeWidth={2.5} />
+							<Plus class="size-4" strokeWidth={2.5} />
 						</Button>
 					{:else if mode === "add"}
 						<SaveButton

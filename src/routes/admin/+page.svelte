@@ -8,20 +8,7 @@
 	let { data, form } = $props();
 	
 	let services = $derived(data.services);
-	let localCategories = $state<any[]>(untrack(() => data.categories ? JSON.parse(JSON.stringify(data.categories)) : []));
 	
-	$effect(() => {
-		if (data.categories) {
-			// Update if data changes (e.g. navigation), but don't react to localCategories changes (like drag and drop)
-			const serialized = JSON.stringify(data.categories);
-			untrack(() => {
-				if (JSON.stringify(localCategories) !== serialized) {
-					localCategories = JSON.parse(serialized);
-				}
-			});
-		}
-	});
-
 	let isLoading = $derived($navigating && $navigating.from?.url.pathname !== $navigating.to?.url.pathname);
 
 	import { appState } from '$lib/client/state.svelte';
@@ -57,11 +44,11 @@
 	{:else if currentTab === 'services'}
 
 		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
-			<AdminServices {services} bind:localCategories />
+			<AdminServices {services} />
 		</div>
 	{:else if currentTab === 'discovery'}
 		<div class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-			<AdminDiscovery bind:localCategories />
+			<AdminDiscovery />
 		</div>
 	{:else if currentTab === 'widgets'}
 		<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">

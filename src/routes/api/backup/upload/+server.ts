@@ -3,8 +3,8 @@ import { env } from "$env/dynamic/private";
 import fs from "fs";
 import path from "path";
 
-export async function POST({ request, cookies }) {
-  if (cookies.get("admin_session") !== "active") {
+export async function POST({ request, locals }) {
+  if (!locals.isAdmin) {
     return json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 

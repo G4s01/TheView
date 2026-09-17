@@ -4,7 +4,7 @@
 	import SettingsHeader from '$lib/components/ui/SettingsHeader.svelte';
 	import { slide } from "svelte/transition";
 	import * as Card from "$lib/components/ui/card";
-	import { Palette, MonitorSmartphone, Home, Paintbrush, Pencil, Save, Loader2 } from "@lucide/svelte";
+	import { Paintbrush, MonitorSmartphone, Home, Pencil, Save, Loader2 } from "@lucide/svelte";
 	import { untrack } from "svelte";
 
 	let {
@@ -17,7 +17,8 @@
 		iconStyle = $bindable(),
 		stickyNavbar = $bindable(),
 		showEditButton = $bindable(),
-		enableCategories = $bindable(),
+		editModeSidebarPosition = $bindable(),
+		editServiceSheetPosition = $bindable(),
 		saveAppearanceSettings,
 		isSavingAppearance
 	} = $props<{
@@ -30,7 +31,8 @@
 		iconStyle: string;
 		stickyNavbar: boolean;
 		showEditButton: boolean;
-		enableCategories: boolean;
+		editModeSidebarPosition: string;
+		editServiceSheetPosition: string;
 		saveAppearanceSettings: () => void;
 		isSavingAppearance: boolean;
 	}>();
@@ -40,17 +42,15 @@
 	let isInitial = true;
 
 	$effect(() => {
-		// Track auto-save dependencies
-		const _ = [
-			showCategoriesDesktop, 
-			showCategoriesMobile, 
-			showCategoryCounts, 
-			showServiceDescriptions, 
-			iconStyle, 
-			stickyNavbar, 
-			showEditButton,
-			enableCategories
-		];
+		showCategoriesDesktop;
+		showCategoriesMobile;
+		showCategoryCounts;
+		showServiceDescriptions;
+		iconStyle;
+		stickyNavbar;
+		showEditButton;
+		editModeSidebarPosition;
+		editServiceSheetPosition;
 
 		if (isInitial) {
 			isInitial = false;
@@ -61,9 +61,20 @@
 			saveAppearanceSettings();
 		});
 	});
+
+	const iconStyles = [
+		{ id: 'rounded-xl', label: 'Arrotondato', radius: 'rx-2' },
+		{ id: 'rounded-full', label: 'Circolare', radius: 'rx-full' },
+		{ id: 'rounded-none', label: 'Quadrato', radius: 'rx-none' }
+	];
+
+	const sidebarPositions = [
+		{ id: 'left', label: 'Sinistra' },
+		{ id: 'right', label: 'Destra' }
+	];
 </script>
 
-<div class="space-y-6">
+<div class="flex flex-col gap-6">
 
 	<!-- Appearance Section -->
 	<Card.Root>
@@ -72,25 +83,25 @@
 			description="PERSONALIZZA L'ASPETTO DELL'INTERFACCIA"
 		>
 			{#snippet icon()}
-				<Paintbrush class="w-6 h-6" />
+				<Paintbrush class="size-6" />
 			{/snippet}
 		</SettingsHeader>
 		<Card.Content class="p-6">
 			
-			<div class="space-y-10">
+			<div class="flex flex-col gap-10">
 				
 				<!-- Macro Category: HOME -->
-				<div class="space-y-6">
+				<div class="flex flex-col gap-6">
 					
 					<div class="flex items-center gap-2 border-b border-border pb-2">
-						<Home class="w-5 h-5 text-muted-foreground" />
+						<Home class="size-5 text-muted-foreground" />
 						<h3 class="text-lg font-bold uppercase tracking-wider text-foreground">Home</h3>
 					</div>
 
 					<!-- Group: Generali -->
-					<div class="space-y-3">
+					<div class="flex flex-col gap-3">
 						<h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Generali</h4>
-						<div class="p-5 border border-border rounded-xl bg-card/50 space-y-6">
+						<div class="p-5 border border-border rounded-xl bg-card/50 flex flex-col gap-6">
 							
 							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<ToggleOptionCard 
@@ -109,33 +120,23 @@
 							<div class="flex flex-col gap-3 p-4 border border-border rounded-xl bg-background shadow-sm">
 								<p class="text-xs font-bold text-foreground uppercase tracking-wider">Stile Icone Servizi</p>
 								<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-									<button type="button" onclick={() => iconStyle = 'rounded-xl'} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === 'rounded-xl' ? 'border-2 border-primary bg-primary/10 shadow-sm' : 'border-2 border-transparent bg-card hover:bg-muted/50'} transition-all">
-										<div class="w-12 h-12 bg-primary rounded-xl shadow-sm flex items-center justify-center">
-											<svg class="w-6 h-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-										</div>
-										<span class="text-[10px] font-bold text-foreground uppercase tracking-wider text-center">Arrotondato</span>
-									</button>
-									<button type="button" onclick={() => iconStyle = 'rounded-full'} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === 'rounded-full' ? 'border-2 border-primary bg-primary/10 shadow-sm' : 'border-2 border-transparent bg-card hover:bg-muted/50'} transition-all">
-										<div class="w-12 h-12 bg-primary rounded-full shadow-sm flex items-center justify-center">
-											<svg class="w-6 h-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-										</div>
-										<span class="text-[10px] font-bold text-foreground uppercase tracking-wider text-center">Circolare</span>
-									</button>
-									<button type="button" onclick={() => iconStyle = 'rounded-none'} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === 'rounded-none' ? 'border-2 border-primary bg-primary/10 shadow-sm' : 'border-2 border-transparent bg-card hover:bg-muted/50'} transition-all">
-										<div class="w-12 h-12 bg-primary rounded-none shadow-sm flex items-center justify-center">
-											<svg class="w-6 h-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-										</div>
-										<span class="text-[10px] font-bold text-foreground uppercase tracking-wider text-center">Quadrato</span>
-									</button>
+									{#each iconStyles as style}
+										<button type="button" onclick={() => iconStyle = style.id} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === style.id ? 'border-2 border-primary bg-primary/10 shadow-sm' : 'border-2 border-transparent bg-card hover:bg-muted/50'} transition-all">
+											<div class="size-12 bg-primary shadow-sm flex items-center justify-center {style.id}">
+												<svg class="size-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+											</div>
+											<span class="text-[10px] font-bold text-foreground uppercase tracking-wider text-center">{style.label}</span>
+										</button>
+									{/each}
 								</div>
 							</div>
 						</div>
 					</div>
 
 					<!-- Group: Navbar / Topbar -->
-					<div class="space-y-3">
+					<div class="flex flex-col gap-3">
 						<h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Navbar / Topbar</h4>
-						<div class="p-5 border border-border rounded-xl bg-card/50 space-y-8">
+						<div class="p-5 border border-border rounded-xl bg-card/50 flex flex-col gap-8">
 							
 							<!-- Subgroup 1: Settings Generali Navbar -->
 							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -149,17 +150,38 @@
 									description="MATITA PER COMMUTARE LA MODIFICA RAPIDA" 
 									bind:checked={showEditButton} 
 								/>
+								<div class="flex flex-col gap-3 p-4 border border-border rounded-xl bg-background shadow-sm mt-4">
+									<p class="text-xs font-bold text-foreground uppercase tracking-wider">Posizione Sidebar Edit Mode</p>
+									<div class="grid grid-cols-2 gap-4">
+										{#each sidebarPositions as pos}
+											<button type="button" onclick={() => editModeSidebarPosition = pos.id} class="flex flex-col items-center gap-3 p-4 rounded-xl {editModeSidebarPosition === pos.id ? 'border-2 border-primary bg-primary/10 shadow-sm' : 'border-2 border-transparent bg-card hover:bg-muted/50'} transition-all">
+												<span class="text-[10px] font-bold text-foreground uppercase tracking-wider text-center">{pos.label}</span>
+											</button>
+										{/each}
+									</div>
+								</div>
+								
+								<div class="flex flex-col gap-3 p-4 border border-border rounded-xl bg-background shadow-sm mt-4">
+									<p class="text-xs font-bold text-foreground uppercase tracking-wider">Posizione Pannello Servizi</p>
+									<div class="grid grid-cols-2 gap-4">
+										{#each sidebarPositions as pos}
+											<button type="button" onclick={() => editServiceSheetPosition = pos.id} class="flex flex-col items-center gap-3 p-4 rounded-xl {editServiceSheetPosition === pos.id ? 'border-2 border-primary bg-primary/10 shadow-sm' : 'border-2 border-transparent bg-card hover:bg-muted/50'} transition-all">
+												<span class="text-[10px] font-bold text-foreground uppercase tracking-wider text-center">{pos.label}</span>
+											</button>
+										{/each}
+									</div>
+								</div>
 							</div>
 
-							<!-- Subgroup 2: Categorie e Titoli -->
+							<!-- Subgroup 2: Indice Griglie e Titoli -->
 							<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t border-border/50">
 								<ToggleOptionCard 
-									title="CATEGORIE DESKTOP" 
-									description="MOSTRA LE CATEGORIE NELLA TOPBAR SU SCHERMI GRANDI" 
+									title="INDICE GRIGLIE DESKTOP" 
+									description="MOSTRA INDICE GRIGLIE NELLA TOPBAR SU SCHERMI GRANDI" 
 									bind:checked={showCategoriesDesktop} 
 								>
 									{#snippet icon()}
-										<MonitorSmartphone class="w-4 h-4" />
+										<MonitorSmartphone class="size-4" />
 									{/snippet}
 
 									{#if !showCategoriesDesktop || !showCategoriesMobile}
@@ -186,11 +208,11 @@
 													disabled={showCategoriesDesktop || isSavingAppearance}
 												>
 													{#if isSavingAppearance && !isEditingDesktop}
-														<Loader2 class="h-4 w-4 animate-spin" strokeWidth={1.5} />
+														<Loader2 class="size-4 animate-spin" strokeWidth={1.5} />
 													{:else if isEditingDesktop}
-														<Save class="h-4 w-4" strokeWidth={1.5} />
+														<Save class="size-4" strokeWidth={1.5} />
 													{:else}
-														<Pencil class="h-4 w-4" strokeWidth={1.5} />
+														<Pencil class="size-4" strokeWidth={1.5} />
 													{/if}
 												</button>
 											</TextInput>
@@ -199,12 +221,12 @@
 								</ToggleOptionCard>
 
 								<ToggleOptionCard 
-									title="CATEGORIE MOBILE" 
-									description="MOSTRA LE CATEGORIE NELLA TOPBAR SU SCHERMI PICCOLI" 
+									title="INDICE GRIGLIE MOBILE" 
+									description="MOSTRA INDICE GRIGLIE NELLA TOPBAR SU SCHERMI PICCOLI" 
 									bind:checked={showCategoriesMobile} 
 								>
 									{#snippet icon()}
-										<MonitorSmartphone class="w-4 h-4" />
+										<MonitorSmartphone class="size-4" />
 									{/snippet}
 
 									{#if !showCategoriesDesktop || !showCategoriesMobile}
@@ -231,11 +253,11 @@
 													disabled={showCategoriesMobile || isSavingAppearance}
 												>
 													{#if isSavingAppearance && !isEditingMobile}
-														<Loader2 class="h-4 w-4 animate-spin" strokeWidth={1.5} />
+														<Loader2 class="size-4 animate-spin" strokeWidth={1.5} />
 													{:else if isEditingMobile}
-														<Save class="h-4 w-4" strokeWidth={1.5} />
+														<Save class="size-4" strokeWidth={1.5} />
 													{:else}
-														<Pencil class="h-4 w-4" strokeWidth={1.5} />
+														<Pencil class="size-4" strokeWidth={1.5} />
 													{/if}
 												</button>
 											</TextInput>
@@ -250,22 +272,7 @@
 				</div>
 			</div>
 
-			<div class="space-y-4">
-				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-					Funzionalità Globali
-				</h3>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<ToggleOptionCard 
-						title="ABILITA CATEGORIE" 
-						description="SE DISATTIVATO, I WIDGET VERRANNO MOSTRATI IN UN'UNICA GRIGLIA" 
-						bind:checked={enableCategories} 
-					>
-						{#snippet icon()}
-							<Home class="w-4 h-4" />
-						{/snippet}
-					</ToggleOptionCard>
-				</div>
-			</div>
+
 
 		</Card.Content>
 	</Card.Root>

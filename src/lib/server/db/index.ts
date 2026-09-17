@@ -22,9 +22,17 @@ sqlite.exec(`
     position INTEGER DEFAULT 0
   );
 
+  CREATE TABLE IF NOT EXISTS dashboard_grids (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    show_header INTEGER DEFAULT 1 NOT NULL,
+    position INTEGER DEFAULT 0
+  );
+
   CREATE TABLE IF NOT EXISTS services (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    category_id INTEGER NOT NULL REFERENCES categories(id),
+    grid_id INTEGER REFERENCES dashboard_grids(id),
+    category_id INTEGER REFERENCES categories(id),
     name TEXT NOT NULL,
     description TEXT,
     url TEXT NOT NULL,
@@ -36,7 +44,11 @@ sqlite.exec(`
     size TEXT DEFAULT '1x1' NOT NULL,
     is_widget INTEGER DEFAULT 0 NOT NULL,
     require_auth INTEGER DEFAULT 0 NOT NULL,
-    widget_size TEXT DEFAULT '1x1' NOT NULL
+    widget_size TEXT DEFAULT '1x1' NOT NULL,
+    x INTEGER DEFAULT 0 NOT NULL,
+    y INTEGER DEFAULT 0 NOT NULL,
+    w INTEGER DEFAULT 2 NOT NULL,
+    h INTEGER DEFAULT 2 NOT NULL
   );
 
   CREATE TABLE IF NOT EXISTS settings (
@@ -125,17 +137,19 @@ try {
   if (hasRowSpan) {
     try {
       sqlite.exec(`ALTER TABLE services DROP COLUMN row_span;`);
-    } catch (e) { }
+    } catch (e) {}
   }
   const hasColSpan = columns.some((c) => c.name === "col_span");
   if (hasColSpan) {
     try {
       sqlite.exec(`ALTER TABLE services DROP COLUMN col_span;`);
-    } catch (e) { }
+    } catch (e) {}
   }
 
   // Categories migrations
-  const categoryColumns = sqlite.prepare(`PRAGMA table_info(categories);`).all() as {
+  const categoryColumns = sqlite
+    .prepare(`PRAGMA table_info(categories);`)
+    .all() as {
     name: string;
   }[];
   const hasCategoryIcon = categoryColumns.some((c) => c.name === "icon");
@@ -144,10 +158,76 @@ try {
   }
 
   // Assicurati che esista la categoria fantasma (-1)
-  sqlite.exec(`INSERT OR IGNORE INTO categories (id, name, position) VALUES (-1, 'CATEGORIA FANTASMA', -1);`);
+  sqlite.exec(
+    `INSERT OR IGNORE INTO categories (id, name, position) VALUES (-1, 'CATEGORIA FANTASMA', -1);`,
+  );
 
+  // --- MIGRAZIONE MULTI-GRID ---
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS dashboard_grids (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      show_header INTEGER DEFAULT 1 NOT NULL,
+      position INTEGER DEFAULT 0
+    );
+  `);
+
+  // Se dashboard_grids è vuoto, proviamo a popolarlo con le vecchie categorie
+  const gridsCount = sqlite
+    .prepare("SELECT count(*) as count FROM dashboard_grids")
+    .get() as { count: number };
+  if (gridsCount.count === 0) {
+    const hasCategories = sqlite
+      .prepare(
+        "SELECT count(*) as count FROM sqlite_master WHERE type='table' AND name='categories'",
+      )
+      .get() as { count: number };
+    if (hasCategories.count > 0) {
+      sqlite.exec(`
+        INSERT INTO dashboard_grids (id, name, position, show_header)
+        SELECT id, name, position, 1 FROM categories WHERE id != -1;
+      `);
+    }
+  }
+
+  // Aggiunta nuove colonne a services
+  const hasGridId = columns.some((c) => c.name === "grid_id");
+  if (!hasGridId) {
+    sqlite.exec(
+      `ALTER TABLE services ADD COLUMN grid_id INTEGER REFERENCES dashboard_grids(id);`,
+    );
+    // Imposta il grid_id uguale al vecchio category_id se esiste in dashboard_grids (ignoriamo la categoria fantasma)
+    sqlite.exec(
+      `UPDATE services SET grid_id = category_id WHERE category_id != -1;`,
+    );
+  }
+  const hasX = columns.some((c) => c.name === "x");
+  if (!hasX)
+    sqlite.exec(
+      `ALTER TABLE services ADD COLUMN x INTEGER DEFAULT 0 NOT NULL;`,
+    );
+  const hasY = columns.some((c) => c.name === "y");
+  if (!hasY)
+    sqlite.exec(
+      `ALTER TABLE services ADD COLUMN y INTEGER DEFAULT 0 NOT NULL;`,
+    );
+  const hasW = columns.some((c) => c.name === "w");
+  if (!hasW)
+    sqlite.exec(
+      `ALTER TABLE services ADD COLUMN w INTEGER DEFAULT 2 NOT NULL;`,
+    );
+  const hasH = columns.some((c) => c.name === "h");
+  if (!hasH)
+    sqlite.exec(
+      `ALTER TABLE services ADD COLUMN h INTEGER DEFAULT 2 NOT NULL;`,
+    );
+
+  // Inizializza w, h basandosi su size se w è ancora 2 e size indica altro
+  // size format: "gs-2x2", "2x1", etc.
+  // We can just rely on the new frontend logic or set a basic default, we'll keep w/h as 2/2 initially.
 } catch (e: any) {
   console.error("Migration error:", e.message);
 }
 
 export const db = drizzle(sqlite, { schema });
+export const sqliteInstance = sqlite;

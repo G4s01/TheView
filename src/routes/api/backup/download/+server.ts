@@ -2,8 +2,8 @@ import { env } from "$env/dynamic/private";
 import fs from "fs";
 import path from "path";
 
-export async function GET({ cookies }) {
-  if (cookies.get("admin_session") !== "active") {
+export async function GET({ locals }) {
+  if (!locals.isAdmin) {
     return new Response("Unauthorized", { status: 401 });
   }
 

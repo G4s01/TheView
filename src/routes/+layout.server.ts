@@ -2,19 +2,39 @@ import { db } from "$lib/server/db";
 import { categories, services } from "$lib/server/db/schema";
 
 export async function load({ locals }) {
-  // Fetch categories for the sidebar
-  const allCategories = await db
-    .select()
-    .from(categories)
-    .orderBy(categories.position);
+  let allGrids = [];
+  try {
+    const { dashboard_grids } = await import("$lib/server/db/schema");
+    allGrids = await db
+      .select()
+      .from(dashboard_grids)
+      .orderBy(dashboard_grids.position);
+
+    if (allGrids.length === 0) {
+      const inserted = await db
+        .insert(dashboard_grids)
+        .values({
+          name: "MAIN",
+          position: 0,
+          show_header: false,
+        })
+        .returning();
+      allGrids = inserted;
+    }
+  } catch (e) {
+    // Fallback if not yet migrated
+    allGrids = await db.select().from(categories).orderBy(categories.position);
+  }
 
   const allServices = await db
-    .select({ categoryId: services.categoryId })
+    .select({ categoryId: services.categoryId, grid_id: services.grid_id })
     .from(services);
 
-  const categoriesWithCount = allCategories.map((c) => {
-    const count = allServices.filter((s) => s.categoryId === c.id).length;
-    return { ...c, count };
+  const gridsWithCount = allGrids.map((g) => {
+    const count = allServices.filter(
+      (s) => (s.grid_id ?? s.categoryId) === g.id,
+    ).length;
+    return { ...g, count };
   });
 
   const { getSettings } = await import("$lib/server/settings");
@@ -35,7 +55,7 @@ export async function load({ locals }) {
   if (settings.adguard_password) settings.adguard_password = "********";
 
   return {
-    categories: categoriesWithCount,
+    grids: gridsWithCount,
     isAdmin: locals.isAdmin,
     needsSetup,
     showCategoriesDesktop: settings.showCategoriesDesktop !== false,
@@ -49,6 +69,8 @@ export async function load({ locals }) {
     iconStyle: settings.iconStyle || "rounded-xl",
     stickyNavbar: settings.stickyNavbar !== false,
     showEditButton: settings.showEditButton !== false,
+    editModeSidebarPosition: settings.editModeSidebarPosition || "right",
+    editServiceSheetPosition: settings.editServiceSheetPosition || "right",
     settings,
   };
 }

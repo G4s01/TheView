@@ -1,17 +1,16 @@
 <script lang="ts">
 	import { appState } from '$lib/client/state.svelte';
-	import { ArrowUpCircle, Box, GripHorizontal, Pencil, Upload, Trash2 } from "@lucide/svelte";
-	import QBittorrentWidget from './widgets/QBittorrentWidget.svelte';
-	import AdGuardWidget from './widgets/AdGuardWidget.svelte';
-	import TextInput from './ui/TextInput.svelte';
-	import UrlInput from './ui/UrlInput.svelte';
-	import SelectInput from './ui/SelectInput.svelte';
-	import ToggleInput from './ui/ToggleInput.svelte';
-	import ServiceIcon from './ui/ServiceIcon.svelte';
-	import ServiceForm from './ServiceForm.svelte';
-	import { clickOutside } from '$lib/actions/clickOutside';
+	import { Pencil, Trash2 } from "@lucide/svelte";
 	import { Button } from "$lib/components/ui/button";
-	let { service = $bindable(), categories = [], isExpanded = false, showDescription = true, iconStyle = 'rounded-xl', onExpandToggle, onDeleteSpacer } = $props<{
+	import ServiceIcon from './ui/ServiceIcon.svelte';
+	import { usePing } from '$lib/queries/usePing';
+	import { onMount, untrack } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
+	
+	import CardLink from './card/CardLink.svelte';
+	import CardWidget from './card/CardWidget.svelte';
+
+	let { service, showDescription = true, iconStyle = 'rounded-xl' } = $props<{
 		service: {
 			id: number;
 			name: string;
@@ -25,150 +24,14 @@
 			iconDetails?: { type: 'custom' | 'brand' | 'lucide', value: string } | null;
 			size?: string;
 		};
-		categories?: { id: number; name: string }[];
-		isExpanded?: boolean;
 		showDescription?: boolean;
 		iconStyle?: string;
-		onExpandToggle?: (isExpanded: boolean) => void;
-		onDeleteSpacer?: () => void;
 	}>();
 	
-	import { usePing } from '$lib/queries/usePing';
 	const pingQuery = usePing(() => service.url, () => service.pingEnabled);
 	let liveStatus = $derived(pingQuery.data ? { isOnline: pingQuery.data.status === 'online', latencyMs: pingQuery.data.responseTimeMs } : null);
-	let editService = $state({
-		id: 0,
-		name: '',
-		url: '',
-		icon: '',
-		description: '',
-		categoryId: null as number | null,
-		pingEnabled: false,
-		widgetType: '',
-		dockerImage: '',
-		size: '1x1'
-	});
 	
-	let showDeleteConfirm = $state(false);
-	let isSaving = $state(false);
-
 	let dockerVersionInfo = $state<{ version: string; updateAvailable: boolean; updateUrl?: string } | null>(null);
-
-	let isAnimating = $state(false);
-	let animationTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
-
-	// --- Drag & Snap Resize Logic ---
-	let isResizing = $state(false);
-	let resizeStartX = 0;
-	let resizeStartY = 0;
-	let initialDragSize = '1x1';
-	let resizeDirection = 'both';
-
-	function startResize(e: PointerEvent, dir: string = 'both') {
-		if (!appState.isEditMode || isExpanded) return;
-		e.preventDefault();
-		e.stopPropagation(); // Previene il DnD di svelte-dnd-action
-		resizeStartX = e.clientX;
-		resizeStartY = e.clientY;
-		initialDragSize = service.size || '1x1';
-		resizeDirection = dir;
-		isResizing = true;
-		
-		// Rimuove temporaneamente le transizioni per il resizing fluido
-		document.body.style.cursor = dir === 'x' ? 'ew-resize' : dir === 'y' ? 'ns-resize' : 'se-resize';
-		
-		window.addEventListener('pointermove', onResizeMove);
-		window.addEventListener('pointerup', onResizeUp);
-	}
-
-	function onResizeMove(e: PointerEvent) {
-		if (!isResizing) return;
-		const dx = e.clientX - resizeStartX;
-		const dy = e.clientY - resizeStartY;
-
-		const THRESHOLD_X = 140; // Approx cell width
-		const THRESHOLD_Y = 140; // Approx cell height
-
-		const [wStr, hStr] = initialDragSize.split('x');
-		let newW = parseInt(wStr) || 1;
-		let newH = parseInt(hStr) || 1;
-
-		if (resizeDirection === 'x' || resizeDirection === 'both') {
-			newW += Math.round(dx / THRESHOLD_X);
-		}
-
-		if (resizeDirection === 'y' || resizeDirection === 'both') {
-			newH += Math.round(dy / THRESHOLD_Y);
-		}
-
-		// Constraint: Spacer up to 4x2, Widgets 2x1/1x2, Normal up to 2x1/1x2
-		const maxW = service.widgetType === 'spacer' ? 4 : 2;
-		newW = Math.max(1, Math.min(newW, maxW));
-		newH = Math.max(1, Math.min(newH, 2));
-
-		let newSize = `${newW}x${newH}` as string;
-		
-		if (service.widgetType && service.widgetType !== 'spacer') {
-			// Per i widget reali, forza sempre almeno 2x1 o 1x2, mai 1x1 o 2x2
-			if (newSize === '1x1' || newSize === '2x2') {
-				if (newW === 1) newSize = '1x2';
-				else newSize = '2x1';
-			}
-		} else if (service.widgetType !== 'spacer') {
-			// Per servizi normali (NON spacer), 2x2, 3x2, etc. non ammessi (solo 1x1, 1x2, 2x1)
-			if (newW > 1 && newH > 1) {
-				if (Math.abs(dx) > Math.abs(dy)) newSize = '2x1';
-				else newSize = '1x2';
-			}
-		}
-
-		if (service.size !== newSize) {
-			service.size = newSize; // Optimistic UI update
-		}
-	}
-
-	async function onResizeUp(e: PointerEvent) {
-		isResizing = false;
-		document.body.style.cursor = '';
-		window.removeEventListener('pointermove', onResizeMove);
-		window.removeEventListener('pointerup', onResizeUp);
-
-		// Salva nel db
-		if (service.size !== initialDragSize) {
-			try {
-				await fetch('/api/services/quick-edit', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(service)
-				});
-				await invalidateAll();
-			} catch (err) {
-				console.error(err);
-				service.size = initialDragSize; // rollback
-			}
-		}
-	}
-	// ---------------------------------
-
-	import { onMount, untrack } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
-
-	$effect(() => {
-		// Track isExpanded properly
-		const currentExpanded = isExpanded;
-		
-		untrack(() => {
-			isAnimating = true;
-			if (animationTimeout) clearTimeout(animationTimeout);
-			animationTimeout = setTimeout(() => {
-				isAnimating = false;
-			}, 500);
-		});
-
-		return () => {
-			if (animationTimeout) clearTimeout(animationTimeout);
-		};
-	});
 	
 	onMount(() => {
 		if (service.dockerImage) {
@@ -184,7 +47,8 @@
 	});
 
 	function startEdit() {
-		editService = {
+		appState.editingServiceId = service.id;
+		appState.editingService = {
 			id: service.id,
 			name: service.name,
 			url: service.url,
@@ -196,330 +60,105 @@
 			dockerImage: service.dockerImage || '',
 			size: service.size || '1x1'
 		};
-		if (onExpandToggle) onExpandToggle(true);
 	}
 
 	async function deleteService() {
-		isSaving = true;
 		const formData = new FormData();
 		formData.append('id', service.id.toString());
 		try {
 			await fetch('/admin?/deleteService', { method: 'POST', body: formData });
-			window.location.reload();
+			await invalidateAll();
 		} catch (err) {
 			console.error(err);
-		} finally {
-			isSaving = false;
 		}
 	}
 
-	async function saveEdit(e: Event) {
-		e.preventDefault();
-		const form = e.currentTarget as HTMLFormElement;
-		form.classList.remove('show-errors');
-		if (!form.checkValidity()) {
-			void form.offsetWidth;
-			form.classList.add('show-errors');
-			return;
-		}
-		isSaving = true;
-		try {
-			const res = await fetch('/api/services/quick-edit', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(editService)
-			});
-			if (res.ok) {
-				Object.assign(service, editService);
-				if (onExpandToggle) onExpandToggle(false);
-				await invalidateAll();
-			}
-		} catch (err) {
-			console.error(err);
-		} finally {
-			isSaving = false;
-		}
-	}
-
-	async function deleteSpacer() {
-		if (onDeleteSpacer) {
-			onDeleteSpacer();
-		} else {
-			try {
-				const res = await fetch('/api/services/spacer', {
-					method: 'DELETE',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ id: service.id })
-				});
-				if (res.ok) window.location.reload();
-			} catch (err) {
-				console.error(err);
-			}
-		}
-	}
-
-	// Calculate current visual status
-	let status = $derived(
+	let status = $derived<'online' | 'disabled' | 'checking' | 'offline'>(
 		!service.pingEnabled ? 'disabled' 
 		: liveStatus === null ? 'checking' 
 		: liveStatus.isOnline ? 'online' 
 		: 'offline'
 	);
 	
-	let tooltipText = $derived(
-		status === 'online' ? `Online (${liveStatus?.latencyMs}ms)` 
-		: status === 'offline' ? 'Offline'
-		: 'Checking...'
-	);
+	let latencyMs = $derived(liveStatus?.latencyMs ?? null);
 
 	let bgColor = $derived('');
 	let borderColor = $derived('');
 	let iconBgColor = $derived('');
-	let currentSize = $derived(service.size || '1x1');
+	let nodeW = $derived(service.w ?? 2);
+	let nodeH = $derived(service.h ?? 2);
+	let currentSize = $derived(`gs-${nodeW}x${nodeH}`);
+	let isWide = $derived(nodeW > nodeH);
+	let isTall = $derived(nodeH > nodeW);
+	let isSquare = $derived(nodeW === nodeH);
+	// True when width != height, meaning we need separate grid cells
+
+	let isWidgetLayout = $derived(nodeW !== nodeH || (nodeW >= 4 && nodeH >= 4));
 
 	let requireAuth = $derived(
 		service.widgetType === 'qbittorrent' ? (appState.settings?.qbit_require_auth === 'true' || appState.settings?.qbit_require_auth === true)
 		: service.widgetType === 'adguard' ? (appState.settings?.adguard_require_auth === 'true' || appState.settings?.adguard_require_auth === true)
-		: false
+		: false // Wg-easy handles its own cookies/session
 	);
 
 	let showWidget = $derived(
-		(service.widgetType === 'qbittorrent' || service.widgetType === 'adguard') &&
+		(service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand') &&
 		(!requireAuth || appState.isAdmin)
 	);
 
 	let separateCells = $derived(
-		showWidget ? (
-			service.widgetType === 'qbittorrent' ? (appState.settings?.qbit_separate_cells === 'true' || appState.settings?.qbit_separate_cells === true)
-			: service.widgetType === 'adguard' ? (appState.settings?.adguard_separate_cells === 'true' || appState.settings?.adguard_separate_cells === true)
-			: false
-		) : false
+		service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand'
 	);
 </script>
 
-{#if service.widgetType === 'spacer'}
-	<div class="relative h-full w-full group {isResizing ? 'ring-2 ring-primary rounded-xl' : ''}">
-		<div class="bg-card rounded-xl border border-border shadow-sm w-full h-full relative">
+<div class="relative h-full w-full group">
+	{#if service.widgetType === 'spacer'}
+		<div class="w-full h-full {appState.isEditMode ? 'border-2 border-dashed border-border/50 bg-muted/10 rounded-xl flex items-center justify-center relative' : 'bg-card border border-border rounded-xl shadow-sm'}">
 			{#if appState.isEditMode}
-				<button class="absolute top-2 right-2 p-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity z-50 cursor-pointer" onclick={deleteSpacer} title="Elimina spacer">
-					<Trash2 size={16} />
+				<span class="text-xs text-muted-foreground/50 font-bold uppercase tracking-wider select-none">BlankCard</span>
+				<button 
+					type="button" 
+					class="absolute top-2 right-2 text-destructive/70 hover:text-destructive transition-colors p-1 bg-card/80 rounded-md shadow-sm" 
+					onclick={(e) => { e.preventDefault(); e.stopPropagation(); deleteService(); }} 
+					title="Elimina BlankCard"
+				>
+					<Trash2 class="size-4" />
 				</button>
-				<!-- Resize Handles (4 borders + corner) -->
-				<div class="absolute top-2 bottom-2 right-0 w-3 cursor-ew-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'x')}></div>
-				<div class="absolute top-2 bottom-2 left-0 w-3 cursor-ew-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'x')}></div>
-				<div class="absolute bottom-0 left-2 right-2 h-3 cursor-ns-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'y')}></div>
-				<div class="absolute top-0 left-2 right-2 h-3 cursor-ns-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'y')}></div>
-				
-				<div 
-					class="absolute bottom-0 right-0 w-8 h-8 cursor-se-resize z-40 flex items-end justify-end p-1 hover:bg-muted/30 rounded-tl-xl transition-colors"
-					onpointerdown={(e) => startResize(e, 'both')}
-				>
-					<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-muted-foreground">
-						<path d="M12 0L12 12L0 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-					</svg>
-				</div>
 			{/if}
 		</div>
-	</div>
-{:else}
-<div class="relative h-full w-full group" use:clickOutside={{ enabled: isExpanded, handler: () => { if (isExpanded && onExpandToggle) onExpandToggle(false); } }}>
-	{#if appState.isEditMode && !isExpanded && (!separateCells || (currentSize !== '2x1' && currentSize !== '1x2'))}
-		<div class="absolute top-2 right-2 flex space-x-1.5 z-20">
-			<Button variant="outline" size="icon" onclick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(); }} class="bg-card/90 text-muted-foreground" title="Impostazioni Servizio">
-				<Pencil strokeWidth={1.5} />
-			</Button>
-			<div class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-card/90 hover:bg-muted shadow-sm h-8 w-8 cursor-move text-muted-foreground" title="Trascina per spostare">
-				<GripHorizontal class="pointer-events-none" strokeWidth={1.5} />
-			</div>
-		</div>
-	{/if}
-
-<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
-<svelte:element
-	this={appState.isEditMode ? 'div' : 'a'}
-	href={appState.isEditMode ? undefined : service.url} 
-	target={appState.isEditMode ? undefined : '_blank'} 
-	rel={appState.isEditMode ? undefined : "noopener noreferrer"}
-	class="relative {
-		separateCells && !isExpanded && (currentSize === '2x1' || currentSize === '1x2')
-		? 'bg-transparent border-none shadow-none grid gap-1.5 ' + (currentSize === '2x1' ? 'grid-cols-2' : 'grid-rows-2')
-		: 'bg-card text-card-foreground rounded-xl border border-border p-4 shadow-sm hover:shadow-md'
-	} transition-all duration-500 ease-in-out w-full h-full {isExpanded && !isAnimating ? 'overflow-visible' : 'overflow-hidden'} {
-		!isExpanded 
-		? (separateCells && (currentSize === '2x1' || currentSize === '1x2') ? '' 
-			: (currentSize === '2x1' ? `flex flex-row items-center ${showWidget ? 'gap-4' : 'justify-center gap-6'}` 
-			: (currentSize === '1x2' ? `flex flex-col items-center text-center ${showWidget ? 'justify-between' : 'justify-center gap-4'}` 
-			: 'flex flex-col justify-between'))) 
-		: 'flex flex-col'
-	}"
-	style="background-color: {bgColor}; border-color: {borderColor};"
-	onclick={(e: Event) => { if (appState.isEditMode) e.preventDefault(); }}
->
-	{#if !isExpanded}
-		{#if separateCells && (currentSize === '2x1' || currentSize === '1x2')}
-				<div class="bg-card text-card-foreground rounded-xl {currentSize === '2x1' ? 'rounded-r-none border-r-0' : 'rounded-b-none border-b-0'} border border-border p-4 shadow-sm hover:shadow-md transition-all duration-500 relative flex flex-col justify-center items-center text-center col-span-1 row-span-1">
-					{#if appState.isEditMode}
-						<div class="absolute top-2 right-2 flex gap-1 z-20">
-							<Button variant="outline" size="icon" class="h-8 w-8 bg-card/90 hover:bg-muted shadow-sm" onclick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(); }}>
-								<Pencil strokeWidth={1.5} />
-							</Button>
-							<div class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-card/90 hover:bg-muted shadow-sm h-8 w-8 cursor-move text-muted-foreground" title="Trascina per spostare">
-								<GripHorizontal class="pointer-events-none" strokeWidth={1.5} />
-							</div>
-						</div>
-					{/if}
-					{#if service.pingEnabled && !appState.isEditMode}
-						<div class="absolute top-4 right-4 flex items-center space-x-1.5 z-10" title={tooltipText}>
-							<span class="relative flex h-2.5 w-2.5">
-								{#if status === 'checking'}
-									<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75"></span>
-									<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-warning"></span>
-								{:else if status === 'online'}
-									<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-success shadow-[0_0_8px_hsl(var(--success,142_71%_45%))]"></span>
-								{:else}
-									<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive shadow-[0_0_8px_hsl(var(--destructive))]"></span>
-								{/if}
-							</span>
-						</div>
-					{/if}
-					<div class="relative flex items-center justify-center w-full flex-1 min-h-0">
-						<div 
-							class="h-full w-full aspect-square max-h-20 max-w-20 min-h-10 min-w-10 {iconStyle} flex items-center justify-center shadow-sm"
-							style="background-color: {iconBgColor || 'hsl(var(--muted-foreground))'}"
-						>
-							<ServiceIcon {iconStyle} name={service.name} icon={service.icon} size="md" class="w-3/5! h-3/5!" />
-						</div>
-					</div>
-					<div class="min-w-0 flex flex-col text-center mt-2 w-full items-center justify-center">
-						<h3 class="text-base font-semibold text-foreground truncate group-hover:text-primary transition-colors w-full">{service.name}</h3>
-						{#if showDescription && service.description}
-							<p class="mt-1 text-sm text-muted-foreground line-clamp-2">{service.description}</p>
-						{/if}
-					</div>
-				</div>
-			
-			{#if showWidget}
-				<div class="bg-card border border-border p-4 rounded-xl {currentSize === '2x1' ? 'rounded-l-none' : 'rounded-t-none'} shadow-sm hover:shadow-md transition-all duration-500 flex flex-col h-full w-full overflow-hidden col-span-1 row-span-1">
-					{#if service.widgetType === 'qbittorrent'}
-						<div class="w-full h-full flex flex-col min-h-0" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-							<QBittorrentWidget size={currentSize} />
-						</div>
-					{:else if service.widgetType === 'adguard'}
-						<div class="w-full h-full flex flex-col min-h-0" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-							<AdGuardWidget size={currentSize} />
-						</div>
-					{/if}
-				</div>
-			{/if}
-		{:else}
-		<!-- Status Indicator (top right) now absolute to free up flow layout -->
-		{#if service.pingEnabled && !appState.isEditMode}
-			<div class="absolute top-4 right-4 flex items-center space-x-1.5 z-10" title={tooltipText}>
-				<span class="relative flex h-2.5 w-2.5">
-					{#if status === 'checking'}
-						<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75"></span>
-						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-warning"></span>
-					{:else if status === 'online'}
-						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-success shadow-[0_0_8px_hsl(var(--success,142_71%_45%))]"></span>
-					{:else}
-						<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive shadow-[0_0_8px_hsl(var(--destructive))]"></span>
-					{/if}
-				</span>
-			</div>
-		{/if}
-
-			<!-- Icon -->
-			<div class="relative flex items-center justify-center {currentSize === '1x1' || (!showWidget && currentSize === '1x2') ? 'w-full flex-1 min-h-0' : 'shrink-0'}">
-				<div 
-					class="relative {(currentSize === '1x1' || (!showWidget && currentSize === '1x2')) ? 'h-full w-full aspect-square max-h-24 max-w-24 min-h-12 min-w-12' : (!showWidget && currentSize === '2x1' ? 'h-20 w-20' : 'h-14 w-14')} {iconStyle} flex items-center justify-center shadow-sm"
-					style="background-color: {iconBgColor || 'hsl(var(--muted-foreground))'}"
-				>
-					<ServiceIcon {iconStyle} name={service.name} icon={service.icon} size={(currentSize === '1x1' || (!showWidget && currentSize === '1x2')) ? 'md' : 'lg'} class={(currentSize === '1x1' || (!showWidget && currentSize === '1x2')) ? 'w-3/5! h-3/5!' : ''} />
-					{#if dockerVersionInfo && dockerVersionInfo.updateAvailable && !appState.isEditMode}
-						<!-- svelte-ignore a11y_click_events_have_key_events -->
-						<!-- svelte-ignore a11y_no_static_element_interactions -->
-						<div 
-							class="absolute -top-1.5 -right-1.5 flex items-center justify-center z-20 cursor-pointer text-destructive hover:text-destructive/80 transition-colors bg-card rounded-full shadow-sm" 
-							title="Aggiornamento disponibile online! Clicca per vedere la release."
-							onclick={(e) => {
-								e.preventDefault();
-								e.stopPropagation();
-								if (dockerVersionInfo?.updateUrl) {
-									window.open(dockerVersionInfo.updateUrl, '_blank');
-								}
-							}}
-						>
-							<span class="absolute inline-flex h-full w-full rounded-full bg-destructive opacity-40 animate-ping"></span>
-							<ArrowUpCircle class="w-4 h-4 animate-pulse relative" />
-						</div>
-					{/if}
-				</div>
-			</div>
-	
-			<div class="min-w-0 flex flex-col {(!showWidget && currentSize === '2x1') ? '' : 'flex-1'} min-h-0 w-full {currentSize === '1x1' || (!showWidget && currentSize === '1x2') ? 'items-center text-center justify-center mt-2' : (currentSize === '2x1' ? 'text-left' : 'mt-2 sm:mt-4 items-center text-center')}">
-				<h3 class="{(currentSize !== '1x1') ? 'text-xl font-bold' : 'text-base font-semibold'} text-foreground truncate group-hover:text-primary transition-colors w-full">
-				{service.name}
-			</h3>
-			
-			<div class="w-full flex flex-col flex-1 min-h-0">
-				{#if showDescription && service.description}
-				<p class="mt-1 {(currentSize !== '1x1') ? 'text-base' : 'text-sm'} text-muted-foreground line-clamp-2">
-					{service.description}
-				</p>
-				{/if}
-				
-				{#if showWidget && service.widgetType === 'qbittorrent'}
-					<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-						<QBittorrentWidget size={currentSize} />
-					</div>
-				{:else if showWidget && service.widgetType === 'adguard'}
-					<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-						<AdGuardWidget size={currentSize} />
-					</div>
-				{/if}
-			</div>
-		</div>
-		{/if}
 	{:else}
-		{#snippet iconSlot()}
-			<div 
-				class="h-10 w-10 {iconStyle} flex items-center justify-center shadow-sm"
-				style="background-color: {iconBgColor || 'hsl(var(--muted-foreground))'}"
-			>
-				<ServiceIcon {iconStyle} name={service.name} icon={service.icon} />
+		{#if appState.isEditMode && (!separateCells || !isWidgetLayout)}
+			<div class="absolute top-2 right-2 flex gap-1.5 z-20">
+				<Button variant="outline" size="icon" onclick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(); }} class="bg-card/90 text-muted-foreground" title="Impostazioni Servizio">
+					<Pencil strokeWidth={1.5} />
+				</Button>
 			</div>
-		{/snippet}
+		{/if}
 
-		<div class="w-full h-full flex flex-col" role="presentation" onclick={(e) => e.stopPropagation()}>
-			<ServiceForm 
-				mode="edit" 
-				bind:service={editService} 
-				{categories} 
-				{isSaving}
-				{iconSlot}
-				onSubmit={saveEdit} 
-				onCancel={() => { if (onExpandToggle) onExpandToggle(false); showDeleteConfirm = false; }} 
-				onDelete={deleteService} 
-			/>
-		</div>
+	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
+	<svelte:element
+		this={appState.isEditMode || showWidget ? 'div' : 'a'}
+		href={appState.isEditMode || showWidget ? undefined : service.url} 
+		target={appState.isEditMode || showWidget ? undefined : '_blank'} 
+		rel={appState.isEditMode || showWidget ? undefined : "noopener noreferrer"}
+		class="relative {
+			separateCells && isWidgetLayout
+			? 'bg-transparent border-none shadow-none grid gap-1.5'
+			: 'bg-card text-card-foreground rounded-xl border border-border p-4 shadow-sm hover:shadow-md'
+		} transition-all duration-500 ease-in-out w-full h-full overflow-hidden {
+			(separateCells && isWidgetLayout ? '' 
+				: (isWide ? `flex flex-row items-center ${showWidget ? 'gap-4' : 'justify-center gap-6'}` 
+				: (isTall ? `flex flex-col items-center text-center ${showWidget ? 'justify-between' : 'justify-center gap-4'}` 
+				: 'flex flex-col justify-between'))) 
+		}"
+		style="background-color: {bgColor}; border-color: {borderColor}; {separateCells && isWidgetLayout ? (isWide ? `grid-template-columns: calc(${(2/nodeW)*100}% - 0.375rem) 1fr;` : `grid-template-rows: calc(${(2/nodeH)*100}% - 0.375rem) 1fr;`) : ''}"
+		onclick={(e: Event) => { if (appState.isEditMode) e.preventDefault(); }}
+	>
+		{#if showWidget}
+			<CardWidget {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescription} {dockerVersionInfo} {iconBgColor} {separateCells} {startEdit} />
+		{:else}
+			<CardLink {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescription} {dockerVersionInfo} {iconBgColor} />
+		{/if}
+	</svelte:element>
 	{/if}
-
-	<!-- Resize Handles (4 borders + corner) -->
-	{#if appState.isEditMode && !isExpanded}
-		<div class="absolute top-2 bottom-2 right-0 w-3 cursor-ew-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'x')}></div>
-		<div class="absolute top-2 bottom-2 left-0 w-3 cursor-ew-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'x')}></div>
-		<div class="absolute bottom-0 left-2 right-2 h-3 cursor-ns-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'y')}></div>
-		<div class="absolute top-0 left-2 right-2 h-3 cursor-ns-resize z-30 hover:bg-muted/30 transition-colors" onpointerdown={(e) => startResize(e, 'y')}></div>
-		
-		<div 
-			class="absolute bottom-0 right-0 w-8 h-8 cursor-se-resize z-40 flex items-end justify-end p-1 hover:bg-muted/30 rounded-tl-xl transition-colors"
-			onpointerdown={(e) => startResize(e, 'both')}
-		>
-			<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-muted-foreground">
-				<path d="M12 0L12 12L0 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-			</svg>
-		</div>
-	{/if}
-</svelte:element>
 </div>
-{/if}

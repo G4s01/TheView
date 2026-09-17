@@ -11,10 +11,7 @@
 	import { clickOutside } from '$lib/actions/clickOutside';
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
 	import { page } from '$app/stores';
-
-	let { showAlert } = $props<{
-		showAlert: (title: string, message: string) => void;
-	}>();
+	import { toast } from 'svelte-sonner';
 
 	let showConfirmDialog = $state(false);
 
@@ -39,8 +36,8 @@
 	let isSaving2FA = $state(false);
 
 	function preSavePassword() {
-		if (!adminPassword) return showAlert("ATTENZIONE", "INSERIRE PASSWORD!");
-		if (adminPassword !== adminPasswordConfirm) return showAlert("ATTENZIONE", "PASSWORD DIVERSE!");
+		if (!adminPassword) { toast.warning("INSERIRE PASSWORD!"); return; }
+		if (adminPassword !== adminPasswordConfirm) { toast.warning("PASSWORD DIVERSE!"); return; }
 		
 		if (totpEnabled && isChangingAdminPasswordStep === 1) {
 			isChangingAdminPasswordStep = 2;
@@ -59,7 +56,7 @@
 			const res = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
 			if (!res.ok) {
 				const data = await res.json();
-				showAlert("ERRORE", data.error || "Impossibile cambiare password");
+				toast.error(data.error || "Impossibile cambiare password");
 				return;
 			}
 			adminPassword = '';
@@ -68,9 +65,9 @@
 			isChangingAdminPassword = false;
 			isChangingAdminPasswordStep = 1;
 			showConfirmDialog = false;
-			showAlert("SUCCESSO", "PASSWORD MODIFICATA!");
+			toast.success("PASSWORD MODIFICATA!");
 		} catch(e) { 
-			showAlert("ERRORE", "IMPEDIMENTO DURANTE IL CAMBIO PASSWORD"); 
+			toast.error("IMPEDIMENTO DURANTE IL CAMBIO PASSWORD"); 
 		}
 	}
 
@@ -84,7 +81,7 @@
 			setupQrCode = data.qrcode;
 			totpEnabled = true; 
 		} else {
-			showAlert("ERRORE", "Impossibile avviare setup 2FA");
+			toast.error("Impossibile avviare setup 2FA");
 		}
 		isSaving2FA = false;
 	}
@@ -100,10 +97,10 @@
 			totpEnabled = false;
 			isDisabling2FA = false;
 			disable2FAOtpCode = '';
-			showAlert("SUCCESSO", "2FA DISABILITATA");
+			toast.success("2FA DISABILITATA");
 		} else {
 			const data = await res.json();
-			showAlert("ERRORE", data.error || "Impossibile disabilitare 2FA");
+			toast.error(data.error || "Impossibile disabilitare 2FA");
 		}
 		isSaving2FA = false;
 	}
@@ -118,16 +115,16 @@
 			});
 			const data = await res.json();
 			if (res.ok && data.success) {
-				showAlert("SUCCESSO", "2FA ABILITATA CON SUCCESSO");
+				toast.success("2FA ABILITATA CON SUCCESSO");
 				setupSecret = '';
 				setupQrCode = '';
 				setupOtpCode = '';
 				import('$app/navigation').then(m => m.invalidateAll());
 			} else {
-				showAlert("ERRORE", data.error || "Codice non valido");
+				toast.error(data.error || "Codice non valido");
 			}
 		} catch(e) {
-			showAlert("ERRORE", "Errore di connessione");
+			toast.error("Errore di connessione");
 		}
 		isSaving2FA = false;
 	}

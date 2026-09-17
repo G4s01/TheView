@@ -257,7 +257,7 @@
 						<div class="p-2 flex flex-col gap-1">
 							{#each Array(5) as _}
 								<div class="flex items-center gap-3 px-2 py-1.5">
-									<Skeleton class="w-6 h-6 shrink-0 rounded" />
+									<Skeleton class="size-6 shrink-0 rounded" />
 									<Skeleton class="h-4 w-32" />
 								</div>
 							{/each}
@@ -283,7 +283,7 @@
 									onSelect={() => handleSelect(value)}
 									class="flex items-center gap-3 cursor-pointer border-b"
 								>
-									<Check class={cn("mr-2 h-4 w-4 shrink-0", "opacity-100")} />
+									<Check class={cn("mr-2 size-4 shrink-0", "opacity-100")} />
 									<span class="font-bold">Usa URL:</span> <span class="truncate">{value}</span>
 								</Command.Item>
 							{/if}
@@ -293,8 +293,8 @@
 									onSelect={() => handleSelect(icon)}
 									class="flex items-center gap-3 cursor-pointer"
 								>
-									<Check class={cn("mr-2 h-4 w-4 shrink-0", value === icon ? "opacity-100" : "opacity-0")} />
-									<img src={`https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/${icon}.png`} class="w-6 h-6 object-contain shrink-0 rounded" alt={icon} loading="lazy" />
+									<Check class={cn("mr-2 size-4 shrink-0", value === icon ? "opacity-100" : "opacity-0")} />
+									<img src={`https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/${icon}.png`} class="size-6 object-contain shrink-0 rounded" alt={icon} loading="lazy" />
 									<span class="truncate">{icon}</span>
 								</Command.Item>
 							{/each}
@@ -315,8 +315,8 @@
 											onSelect={() => handleSelect(icon.url)}
 											class="flex items-center gap-3 cursor-pointer"
 										>
-											<Check class={cn("mr-2 h-4 w-4 shrink-0", value === icon.url ? "opacity-100" : "opacity-0")} />
-											<img src={icon.url} class="w-6 h-6 object-contain shrink-0 rounded" alt={icon.id} loading="lazy" />
+											<Check class={cn("mr-2 size-4 shrink-0", value === icon.url ? "opacity-100" : "opacity-0")} />
+											<img src={icon.url} class="size-6 object-contain shrink-0 rounded" alt={icon.id} loading="lazy" />
 											<span class="truncate">{icon.id}</span>
 										</Command.Item>
 									{/each}
@@ -327,8 +327,8 @@
 								<Command.Group>
 									{#each Array(5) as _}
 										<Command.Item disabled class="flex items-center gap-3">
-											<Check class="mr-2 h-4 w-4 shrink-0 opacity-0" />
-											<Skeleton class="w-6 h-6 shrink-0 rounded" />
+											<Check class="mr-2 size-4 shrink-0 opacity-0" />
+											<Skeleton class="size-6 shrink-0 rounded" />
 											<Skeleton class="h-4 w-24" />
 										</Command.Item>
 									{/each}
@@ -339,8 +339,8 @@
 								<Command.Group>
 									{#each Array(3) as _}
 										<Command.Item disabled class="flex items-center gap-3">
-											<Check class="mr-2 h-4 w-4 shrink-0 opacity-0" />
-											<Skeleton class="w-6 h-6 shrink-0 rounded" />
+											<Check class="mr-2 size-4 shrink-0 opacity-0" />
+											<Skeleton class="size-6 shrink-0 rounded" />
 											<Skeleton class="h-4 w-24" />
 										</Command.Item>
 									{/each}

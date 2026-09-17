@@ -13,7 +13,7 @@
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
 	import { clickOutside } from '$lib/actions/clickOutside';
 	
-	let { localCategories = $bindable() } = $props();
+	let { mode = 'admin', onServiceAdded } = $props<{ mode?: string, onServiceAdded?: () => void }>();
 
 	let discoveredServices = $state<any[]>([]);
 	let npmError = $state<string | null>(null);
@@ -77,8 +77,9 @@
 	}
 </script>
 
-<div class="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-	<SettingsNPMWidget
+<div class="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+	{#if mode === 'admin'}
+<SettingsNPMWidget
 		bind:npmUrlCombined
 		bind:npmEmail
 		bind:npmPassword
@@ -87,14 +88,16 @@
 		onDisconnect={confirmNpmDisconnect}
 		onSave={fetchDiscovery}
 	/>
+{/if}
 
 	<!-- Results Block -->
 	<div class="bg-card text-card-foreground rounded-2xl shadow-lg border border-border">
 		<!-- HEADER: RISULTATI + DISCOVERY BUTTON -->
+		{#if mode === 'admin'}
 		<div class="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
 			<div class="flex items-center space-x-3">
 				<div class="p-2 bg-primary/20 text-primary rounded-lg">
-					<Search class="w-6 h-6" strokeWidth={1.5} />
+					<Search class="size-6" strokeWidth={1.5} />
 				</div>
 				<h3 class="text-xl font-bold uppercase tracking-wider text-foreground">RISULTATI</h3>
 			</div>
@@ -105,15 +108,33 @@
 					class="inline-flex items-center justify-center w-full md:w-auto px-5 py-2.5 bg-primary text-primary-foreground hover:opacity-90 text-sm font-bold uppercase tracking-wider rounded-xl transition-all shadow-md disabled:opacity-50"
 				>
 					{#if isDiscovering}
-						<LoaderCircle class="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground" strokeWidth={2} />
+						<LoaderCircle class="animate-spin -ml-1 mr-2 size-4 text-primary-foreground" strokeWidth={2} />
 						STO CERCANDO...
 					{:else}
-						<Search class="-ml-1 mr-2 h-4 w-4" strokeWidth={1.5} />
+						<Search class="-ml-1 mr-2 size-4" strokeWidth={1.5} />
 						DISCOVERY
 					{/if}
 				</button>
 			</div>
 		</div>
+		{:else}
+		<div class="p-4 border-b border-border flex justify-between items-center bg-muted/30">
+            <span class="text-xs text-muted-foreground uppercase font-bold tracking-wider">Container Trovati</span>
+			<button 
+					onclick={fetchDiscovery} 
+					disabled={isDiscovering}
+					class="inline-flex items-center justify-center px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold uppercase tracking-wider rounded-lg transition-all disabled:opacity-50"
+				>
+					{#if isDiscovering}
+						<LoaderCircle class="animate-spin -ml-1 mr-2 size-4 text-primary" strokeWidth={2} />
+						STO CERCANDO...
+					{:else}
+						<Search class="-ml-1 mr-2 size-4" strokeWidth={1.5} />
+						AVVIA SCANSIONE
+					{/if}
+				</button>
+		</div>
+		{/if}
 
 	<div class="p-0">
 		{#if npmError}
@@ -129,8 +150,8 @@
 				{#each Array(5) as _, i}
 					<li class="px-6 py-8 {i > 0 ? 'border-t border-border' : ''}">
 						<div class="flex items-center space-x-4 animate-pulse">
-							<div class="w-12 h-12 rounded-xl bg-muted"></div>
-							<div class="flex-1 space-y-3">
+							<div class="size-12 rounded-xl bg-muted"></div>
+							<div class="flex-1 flex flex-col gap-3">
 								<div class="h-4 bg-muted rounded {i % 2 === 0 ? 'w-1/4' : 'w-1/3'}"></div>
 								<div class="h-3 bg-muted rounded {i % 2 === 0 ? 'w-1/2' : 'w-2/5'}"></div>
 							</div>
@@ -139,7 +160,7 @@
 				{/each}
 			{:else if discoveredServices.length === 0}
 				<li class="px-6 py-12 text-center text-sm text-muted-foreground">
-					<Search class="mx-auto h-12 w-12 text-muted-foreground mb-3" strokeWidth={1.5} />
+					<Search class="mx-auto size-12 text-muted-foreground mb-3" strokeWidth={1.5} />
 					NESSUN NUOVO SERVIZIO TROVATO.
 				</li>
 			{/if}
@@ -158,13 +179,13 @@
 									<p class="text-sm font-semibold text-foreground truncate">{ds.name}</p>
 									<div class="flex items-center gap-1">
 										{#if ds.source === 'npm' || ds.source === 'npm+docker'}
-											<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-accent text-accent-foreground" title="Trovato via Nginx Proxy Manager">
-												<Box class="w-3.5 h-3.5" strokeWidth={1.5} />
+											<span class="inline-flex items-center justify-center size-5 rounded-full bg-accent text-accent-foreground" title="Trovato via Nginx Proxy Manager">
+												<Box class="size-3.5" strokeWidth={1.5} />
 											</span>
 										{/if}
 										{#if ds.source === 'docker' || ds.source === 'npm+docker'}
-											<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary" title="Trovato via Docker">
-												<Box class="w-3.5 h-3.5" strokeWidth={1.5} />
+											<span class="inline-flex items-center justify-center size-5 rounded-full bg-primary/20 text-primary" title="Trovato via Docker">
+												<Box class="size-3.5" strokeWidth={1.5} />
 											</span>
 										{/if}
 									</div>
@@ -176,17 +197,17 @@
 						<div>
 							{#if ds.added}
 								<span class="inline-flex items-center px-3 py-1.5 rounded-xl text-sm font-medium bg-accent text-accent-foreground">
-									<Check class="mr-1.5 h-4 w-4" strokeWidth={2} />
+									<Check class="mr-1.5 size-4" strokeWidth={2} />
 									AGGIUNTO
 								</span>
 							{:else}
-								<button type="button" onclick={(e: Event) => { e.stopPropagation(); expandedId = expandedId === ds.id ? null : ds.id; }} class="inline-flex items-center justify-center w-10 h-10 border border-transparent rounded-full shadow-sm transition-all duration-300 {expandedId === ds.id ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground hover:opacity-90'} focus:outline-none hover:scale-110 edit-discovery-btn">
-									<div class="relative w-5 h-5">
-										<Pencil class="absolute top-0 left-0 w-4 h-4 transition-all duration-300 {expandedId === ds.id ? 'opacity-60' : ''}" strokeWidth={2.5} />
+								<button type="button" onclick={(e: Event) => { e.stopPropagation(); expandedId = expandedId === ds.id ? null : ds.id; }} class="inline-flex items-center justify-center size-10 border border-transparent rounded-full shadow-sm transition-all duration-300 {expandedId === ds.id ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground hover:opacity-90'} focus:outline-none hover:scale-110 edit-discovery-btn">
+									<div class="relative size-5">
+										<Pencil class="absolute top-0 left-0 size-4 transition-all duration-300 {expandedId === ds.id ? 'opacity-60' : ''}" strokeWidth={2.5} />
 										{#if expandedId === ds.id}
-											<X class="absolute -bottom-1 -right-1 w-3.5 h-3.5 shadow-sm" strokeWidth={3} />
+											<X class="absolute -bottom-1 -right-1 size-3.5 shadow-sm" strokeWidth={3} />
 										{:else}
-											<Plus class="absolute -bottom-1 -right-1 w-3.5 h-3.5 shadow-sm" strokeWidth={3} />
+											<Plus class="absolute -bottom-1 -right-1 size-3.5 shadow-sm" strokeWidth={3} />
 										{/if}
 									</div>
 								</button>
@@ -202,16 +223,15 @@
 								<ServiceForm 
 									mode="discovery" 
 									bind:service={discoveredServices[i]} 
-									bind:categories={localCategories} 
-									action="?/createService" 
-									useEnhance={true} 
+									action="/admin?/createService" 
+									useEnhance={true}
 									enhanceFn={() => {
-										return async ({ result, update }: any) => {
-											if (result.type === 'success') {
+										return async ({ result }: any) => {
+											if (result.type === 'success' || result.type === 'redirect') {
 												ds.added = true;
 												expandedId = null;
+												if (onServiceAdded) onServiceAdded();
 											}
-											await update();
 										};
 									}}
 									onCancel={() => expandedId = null}

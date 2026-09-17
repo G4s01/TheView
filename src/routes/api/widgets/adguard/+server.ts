@@ -7,95 +7,108 @@ import { Agent, fetch as undiciFetch } from "undici";
 // Inietta l'Agent per chiamate con certificati self-signed
 const agent = new Agent({ connect: { rejectUnauthorized: false } });
 
+interface AdGuardActionBody {
+	action: 'enable' | 'disable';
+	duration?: number;
+}
+
 async function getAdGuardConfig() {
-  const settings = await getSettings();
-  if (
-    !settings.adguard_url ||
-    !settings.adguard_username ||
-    !settings.adguard_password
-  ) {
-    return null;
-  }
-  return {
-    url: settings.adguard_url.replace(/\/$/, ""),
-    username: settings.adguard_username,
-    password: decryptString(settings.adguard_password),
-  };
+	const settings = await getSettings();
+	if (
+		!settings.adguard_url ||
+		!settings.adguard_username ||
+		!settings.adguard_password
+	) {
+		return null;
+	}
+	return {
+		url: settings.adguard_url.replace(/\/$/, ""),
+		username: settings.adguard_username,
+		password: decryptString(settings.adguard_password),
+	};
 }
 
 export const GET: RequestHandler = async () => {
-  const config = await getAdGuardConfig();
-  if (!config)
-    return json({ error: "AdGuard not configured" }, { status: 400 });
+	const config = await getAdGuardConfig();
+	if (!config)
+		return json({ error: "AdGuard non configurato" }, { status: 400 });
 
-  const authHeader = `Basic ${Buffer.from(`${config.username}:${config.password}`).toString("base64")}`;
+	const authHeader = `Basic ${Buffer.from(`${config.username}:${config.password}`).toString("base64")}`;
 
-  try {
-    const [statsRes, statusRes] = await Promise.all([
-      undiciFetch(`${config.url}/control/stats`, {
-        headers: { Authorization: authHeader },
-        dispatcher: agent,
-      } as any),
-      undiciFetch(`${config.url}/control/status`, {
-        headers: { Authorization: authHeader },
-        dispatcher: agent,
-      } as any),
-    ]);
+	try {
+		const [statsRes, statusRes] = await Promise.all([
+			undiciFetch(`${config.url}/control/stats`, {
+				headers: { Authorization: authHeader },
+				dispatcher: agent,
+			}),
+			undiciFetch(`${config.url}/control/status`, {
+				headers: { Authorization: authHeader },
+				dispatcher: agent,
+			}),
+		]);
 
-    if (!statsRes.ok || !statusRes.ok) {
-      if (!statsRes.ok) console.log(await statsRes.text());
-      if (!statusRes.ok) console.log(await statusRes.text());
-      return json({ error: "Failed to fetch from AdGuard" }, { status: 502 });
-    }
+		if (!statsRes.ok || !statusRes.ok) {
+			const statsError = statsRes.ok ? '' : await statsRes.text().catch(() => 'stats error');
+			const statusError = statusRes.ok ? '' : await statusRes.text().catch(() => 'status error');
+			return json({ error: "Recupero dati da AdGuard fallito", details: { statsError, statusError } }, { status: 502 });
+		}
 
-    const stats = await statsRes.json();
-    const status = await statusRes.json();
+		const stats = await statsRes.json();
+		const status = await statusRes.json();
 
-    return json({ stats, status });
-  } catch (err) {
-    console.error("AdGuard proxy error:", err);
-    return json({ error: "AdGuard connection failed" }, { status: 500 });
-  }
+		return json({ stats, status });
+	} catch (e: unknown) {
+		const errorMessage = e instanceof Error ? e.message : 'Errore sconosciuto';
+		console.error("AdGuard proxy error:", errorMessage);
+		return json({ error: "Connessione ad AdGuard fallita", details: errorMessage }, { status: 500 });
+	}
 };
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-  if (!locals.isAdmin) {
-    return json({ error: "Unauthorized" }, { status: 401 });
-  }
+	if (!locals.isAdmin) {
+		return json({ error: "Non autorizzato" }, { status: 401 });
+	}
 
-  const config = await getAdGuardConfig();
-  if (!config)
-    return json({ error: "AdGuard not configured" }, { status: 400 });
+	const config = await getAdGuardConfig();
+	if (!config)
+		return json({ error: "AdGuard non configurato" }, { status: 400 });
 
-  const body = await request.json();
-  const action = body.action;
-  const duration = body.duration;
+	const body = await request.json().catch(() => null);
+	if (!body) {
+		return json({ error: "Payload JSON mancante o non valido" }, { status: 400 });
+	}
 
-  const authHeader = `Basic ${Buffer.from(`${config.username}:${config.password}`).toString("base64")}`;
+	const { action, duration } = body as AdGuardActionBody;
+	if (action !== 'enable' && action !== 'disable') {
+		return json({ error: "Azione non valida" }, { status: 400 });
+	}
 
-  try {
-    const res = await undiciFetch(`${config.url}/control/protection`, {
-      method: "POST",
-      headers: {
-        Authorization: authHeader,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(
-        action === "enable"
-          ? { enabled: true }
-          : { enabled: false, ...(duration ? { duration } : {}) },
-      ),
-      dispatcher: agent,
-    } as any);
+	const authHeader = `Basic ${Buffer.from(`${config.username}:${config.password}`).toString("base64")}`;
 
-    if (!res.ok) {
-      console.log(await res.text());
-      return json({ error: "Failed to toggle protection" }, { status: 502 });
-    }
+	try {
+		const payload = action === "enable" 
+			? { enabled: true } 
+			: { enabled: false, ...(duration ? { duration } : {}) };
 
-    return json({ success: true });
-  } catch (err) {
-    console.error("AdGuard toggle error:", err);
-    return json({ error: "AdGuard connection failed" }, { status: 500 });
-  }
+		const res = await undiciFetch(`${config.url}/control/protection`, {
+			method: "POST",
+			headers: {
+				Authorization: authHeader,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(payload),
+			dispatcher: agent,
+		});
+
+		if (!res.ok) {
+			const errorText = await res.text().catch(() => 'unknown error');
+			return json({ error: "Aggiornamento protezione fallito", details: errorText }, { status: 502 });
+		}
+
+		return json({ success: true });
+	} catch (e: unknown) {
+		const errorMessage = e instanceof Error ? e.message : 'Errore sconosciuto';
+		console.error("AdGuard toggle error:", errorMessage);
+		return json({ error: "Connessione ad AdGuard fallita", details: errorMessage }, { status: 500 });
+	}
 };

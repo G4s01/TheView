@@ -1,7 +1,7 @@
 {
   "name": "theview",
   "private": true,
-  "version": "1.9.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
@@ -24,15 +24,17 @@
     "@types/uuid": "^10.0.0",
     "bits-ui": "^2.19.0",
     "drizzle-kit": "^0.31.10",
+    "mode-watcher": "^1.1.0",
     "svelte": "^5.56.1",
     "svelte-check": "^4.6.0",
+    "svelte-sonner": "^1.2.1",
     "tailwind-variants": "^3.3.1",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3",
     "vite": "^8.0.16"
   },
   "dependencies": {
-    "@lucide/svelte": "^1.42.0",
+    "@lucide/svelte": "^1.47.0",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
     "@oslojs/otp": "^1.1.0",
@@ -40,11 +42,11 @@
     "better-sqlite3": "^13.0.3",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
+    "gridstack": "^13.3.0",
     "isomorphic-dompurify": "^4.1.0",
     "marked": "^18.0.11",
     "puppeteer": "^25.10.0",
     "qrcode": "^1.5.4",
-    "svelte-dnd-action": "^0.9.79",
     "tailwind-merge": "^3.6.0",
     "uuid": "^14.0.2"
   },

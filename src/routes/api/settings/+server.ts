@@ -20,6 +20,22 @@ export const GET: RequestHandler = async ({ locals }) => {
     safeSettings.adguard_password = decryptString(
       safeSettings.adguard_password,
     );
+  if (safeSettings.beszel_password)
+    safeSettings.beszel_password = decryptString(
+      safeSettings.beszel_password,
+    );
+  if (safeSettings.wgeasy_password)
+    safeSettings.wgeasy_password = decryptString(
+      safeSettings.wgeasy_password,
+    );
+  if (safeSettings.duplicati_password)
+    safeSettings.duplicati_password = decryptString(
+      safeSettings.duplicati_password,
+    );
+  if (safeSettings.dockhand_password)
+    safeSettings.dockhand_password = decryptString(
+      safeSettings.dockhand_password,
+    );
 
   return json(safeSettings);
 };
@@ -86,6 +102,14 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       delete newSettings.qbit_password;
     if (newSettings.adguard_password === "********")
       delete newSettings.adguard_password;
+    if (newSettings.beszel_password === "********")
+      delete newSettings.beszel_password;
+    if (newSettings.wgeasy_password === "********")
+      delete newSettings.wgeasy_password;
+    if (newSettings.duplicati_password === "********")
+      delete newSettings.duplicati_password;
+    if (newSettings.dockhand_password === "********")
+      delete newSettings.dockhand_password;
 
     // Crittografia/Hash dinamico
     const { hashPassword, encryptString } = await import("$lib/server/crypto");
@@ -101,6 +125,26 @@ export const POST: RequestHandler = async ({ locals, request }) => {
     if (newSettings.adguard_password) {
       newSettings.adguard_password = encryptString(
         newSettings.adguard_password,
+      );
+    }
+    if (newSettings.beszel_password) {
+      newSettings.beszel_password = encryptString(
+        newSettings.beszel_password,
+      );
+    }
+    if (newSettings.wgeasy_password) {
+      newSettings.wgeasy_password = encryptString(
+        newSettings.wgeasy_password,
+      );
+    }
+    if (newSettings.duplicati_password) {
+      newSettings.duplicati_password = encryptString(
+        newSettings.duplicati_password,
+      );
+    }
+    if (newSettings.dockhand_password) {
+      newSettings.dockhand_password = encryptString(
+        newSettings.dockhand_password,
       );
     }
 

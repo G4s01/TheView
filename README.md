@@ -1,7 +1,7 @@
 <div align="center">
   <img src="static/favicon.svg" width="150" alt="TheView Logo" />
 
-  <h1>TheView</h1>
+  <h1>TheView 2.0</h1>
 
   <p>
     <strong>A modern, dynamic, and blazing-fast homelab dashboard.</strong>
@@ -15,6 +15,7 @@
     <a href="https://orm.drizzle.team/"><img src="https://img.shields.io/badge/SQLite-Drizzle_ORM-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" /></a>
     <a href="https://ui.shadcn.com/"><img src="https://img.shields.io/badge/shadcn--svelte-latest-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="shadcn-svelte" /></a>
     <a href="https://tanstack.com/query"><img src="https://img.shields.io/badge/TanStack_Query-latest-FF4154?style=for-the-badge&logo=reactquery&logoColor=white" alt="TanStack Query" /></a>
+    <a href="https://gridstackjs.com/"><img src="https://img.shields.io/badge/Gridstack.js-latest-00b4ff?style=for-the-badge&logo=javascript&logoColor=white" alt="Gridstack.js" /></a>
   </p>
 </div>
 
@@ -24,23 +25,21 @@
 
 **TheView** is a lightweight, highly customizable, and aesthetically pleasing alternative to dashboard projects like Homer, Heimdall, or Dashy. It is built natively for users who want a rich UI without the burden of manual configuration files.
 
-Built with **Svelte 5 Runes**, `shadcn-svelte`, **Tailwind CSS v4**, and **TanStack Query**, TheView delivers a pristine, highly-polished interface that feels like a native desktop app.
+Built with **Svelte 5 Runes**, `shadcn-svelte`, **Tailwind CSS v4**, **TanStack Query**, and powered by **Gridstack.js**, TheView delivers a pristine, highly-polished interface that feels like a native desktop app.
 
-- 🖥️ **100% Web UI Driven**: Forget editing YAML files. Add, edit, remove, and reorder categories and services using an intuitive drag-and-drop web interface.
-- 🍱 **Bento Grid Design**: A beautiful, modern Bento Box layout with responsive Flexbox wrapping. Cards can flexibly span 1x1, 1x2, 2x1, or 2x2 blocks that perfectly adapt to your screen size. Cells dynamically resize to fit widget content — no scrollbars, no clipping.
-- 📐 **Interactive Drag & Resize**: In Edit Mode, you can effortlessly resize any service card by dragging its borders (top, bottom, left, right) or the bottom-right corner to snap it into different dimensions!
-- 🧱 **Blank Spacer Cards**: Structure your dashboard exactly how you want it. In Edit Mode, you can inject functional "Spacer" cards in empty slots. Spacers can be dynamically resized in all directions up to an ultra-wide **4x2 format** (unlike regular widgets restricted to 2x2).
-- 🔀 **Drag & Drop Reordering**: Full drag-and-drop reordering powered by `svelte-dnd-action`. In edit mode, spacer items allow free vertical placement — stack services across multiple rows even when there aren't enough items to fill a row.
+- 🖥️ **100% Web UI Driven**: Forget editing YAML files. Add, edit, remove, and configure categories and services using an intuitive web interface.
+- 🍱 **Multi-Grid Bento Layout**: Create distinct grid areas per category, each with its own Title and Widget arrangement. The elegant 12-column Gridstack engine allows components to perfectly adapt to your screen size.
+- 📐 **Interactive 2D Drag & Resize**: In Edit Mode, effortlessly resize any service card in true 2D space. Drag items, change their dimensions, and lock them in place. The grid natively handles empty spaces—no "Spacer Cards" needed anymore!
 - 🔐 **Two-Factor Authentication (2FA)**: Secure your admin panel with TOTP-based 2FA. Fully integrated with your favorite authenticator apps (Google Authenticator, Authy, etc.) for maximum security.
 - 🔍 **Hybrid Icon Search Engine**: The built-in icon picker works like a search engine. Start typing to get instant autocomplete suggestions with visual previews directly from the `homarr-labs/dashboard-icons` repository, **or fetch millions of icons directly from the Iconify API**. You can also paste a custom direct URL.
-- 📡 **Live Health Checks (Ping)**: Built-in pinging system powered by TanStack Query with 30-second polling. Shows live online/offline status and latency (ms) for all your tracked services with smooth pulsing indicators.
-- 📦 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click. The smart icon parser automatically matches services like AdGuard Home, Filebrowser, and Beszel.
+- 📡 **Live Health Checks (Ping)**: Built-in pinging system powered by TanStack Query. Shows live online/offline status with an elegant pulsating glow, and tracks latency (ms) for all your tracked services.
+- 📦 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click. The smart icon parser automatically matches services.
 - 🔄 **Docker Update Notifications**: Automatically checks if your Docker containers have new versions available on Docker Hub or GHCR by comparing image SHA256 digests. A notification badge will alert you directly on the dashboard!
-- ⚡ **Seamless In-Place Edit**: Click the edit icon on any service card, and it elegantly scales into a fully functional form directly on the grid, gracefully expanding its layout without annoying popups.
+- ⚡ **Zero Layout-Shift Edit Mode**: Click the edit icon on any service card to summon the elegant **Edit Service Sheet** — a non-intrusive, sliding side panel that lets you configure services and widgets without disrupting or squishing your beautifully crafted dashboard.
 - 🔌 **Interactive Widgets**:
-  - **qBittorrent**: Live download/upload speeds, active torrent list with pause/resume controls, and torrent addition via magnet link or `.torrent` file upload — all directly on the dashboard.
+  - **qBittorrent**: Live download/upload speeds, active torrent list with pause/resume controls, and torrent addition via magnet link or `.torrent` file upload.
   - **AdGuard Home**: Real-time DNS query stats, protection toggle with timed pause via a scrollable time wheel picker, and automatic countdown to re-activation.
-  - _Both widgets support a "Separate Cells" layout mode that looks stunning in both horizontal (2x1) and vertical (1x2) sizes._
+  - _Both widgets are highly responsive, magically adapting their internal layouts based on the Gridstack dimensions you assign them!_
 - 🎨 **Advanced Theming**: Pick your vibe. Full support for Dark/Light modes powered by semantic `shadcn-svelte` HSL variables for pixel-perfect contrast. The entire UI is built on a clean, scalable Tailwind v4 design system, with no hardcoded colors.
 - 🦴 **Beautiful Loading States**: Skeletons that match actual component layouts instead of basic spinners, providing a native application feel while TanStack Query fetches data in the background.
 - 📱 **Fully Responsive**: Carefully designed to look stunning and function perfectly on desktops, tablets, and smartphones.
@@ -109,7 +108,7 @@ services:
 
 ## ⚙️ Configuration & Security
 
-TheView stores all state (Categories, Services, uploaded Icons, and UI Settings) in a robust local SQLite database inside the `/app/data` volume. This means your dashboard is entirely portable just by backing up the `data/sqlite.db` file!
+TheView stores all state (Categories, Services, uploaded Icons, Grid Layouts, and UI Settings) in a robust local SQLite database inside the `/app/data` volume. This means your dashboard is entirely portable just by backing up the `data/sqlite.db` file!
 
 ### 🔐 Security & Encryption
 
@@ -121,8 +120,8 @@ You can easily backup or migrate your dashboard directly from the web interface:
 
 1. Go to **Settings** in the Admin panel.
 2. Scroll down to the **Backup e Ripristino** section.
-3. Click **Download Backup** to instantly download your entire SQLite database.
-4. You can restore an old backup by uploading it. The dashboard will automatically restart to apply the new database.
+3. Click **ESPORTA** to instantly download your entire SQLite database, fully named and timestamped.
+4. You can restore an old backup by uploading it via **IMPORTA**. The dashboard will automatically restart to apply the new database.
 
 ### Nginx Proxy Manager Discovery
 
@@ -152,8 +151,7 @@ Live torrent monitoring and management directly from your dashboard card.
 - Real-time download/upload speeds with 3-second TanStack Query polling.
 - Active torrent list with individual pause/resume buttons.
 - Add new torrents via magnet link or `.torrent` file upload directly from the widget.
-- Configurable Bento Grid size constraints.
-- Optional "Separate Cells" mode for a split-view layout.
+- Fluid Gridstack integration natively responds to sizing changes.
 
 ### AdGuard Home
 
@@ -208,7 +206,7 @@ npx drizzle-kit push
 | **Styling**       | Tailwind CSS v4 + shadcn-svelte                      |
 | **Database**      | SQLite via Drizzle ORM                               |
 | **Data Fetching** | TanStack Query (Svelte)                              |
-| **Drag & Drop**   | svelte-dnd-action                                    |
+| **Drag & Drop**   | Gridstack.js                                         |
 | **Icons**         | lucide-svelte + Homarr Dashboard Icons + Iconify API |
 | **Encryption**    | AES-256-GCM / SHA-256                                |
 | **Deployment**    | Docker / Docker Compose                              |

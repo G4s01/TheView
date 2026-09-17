@@ -8,7 +8,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import TimeWheelPicker from '$lib/components/ui/TimeWheelPicker.svelte';
 	
-	let { size = '1x1' } = $props<{ size?: string }>();
+	let { size = 'gs-2x2' } = $props<{ size?: string }>();
 	
 	const query = useAdGuardStats();
 	const toggle = useAdGuardToggle();

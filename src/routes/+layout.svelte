@@ -8,6 +8,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+	import { Toaster } from '$lib/components/ui/sonner';
 	
 	let { children, data } = $props();
 
@@ -60,8 +61,8 @@
 	});
 
 	// We'll pass categories down to the sidebar
-	// data.categories will be populated by +layout.server.ts later
-	let categories = $derived(data.categories || []);
+	// data.grids will be populated by +layout.server.ts later
+	let grids = $derived(data.grids || []);
 	let versionInfo = $state<{currentVersion?: string, latestVersion?: string, url?: string}>({});
 	
 	let isNavbarHidden = $state(false);
@@ -97,6 +98,7 @@
 <svelte:window onscroll={handleScroll} />
 
 <QueryClientProvider client={queryClient}>
+<Toaster />
 <div class="flex flex-col min-h-screen bg-background text-foreground">
 	{#if $page.url.pathname !== '/setup'}
 	<!-- Topbar Header -->
@@ -118,14 +120,14 @@
 			
 			<!-- Left Column (Logo & Back) -->
 			<div class="flex-1 flex items-center justify-start min-w-50">
-				<div class="flex items-center space-x-3">
+				<div class="flex items-center gap-3">
 					{#if $page.url.pathname.startsWith('/admin')}
 						<a href="/" class="flex items-center justify-center p-2 bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-xl transition-colors shadow-sm" title="Torna alla Dashboard">
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+							<svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
 						</a>
 					{/if}
-					<a href="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-						<img src="/favicon.svg" alt="TheView Logo" class="w-8 h-8" />
+					<a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+						<img src="/favicon.svg" alt="TheView Logo" class="size-8" />
 						<span class="hidden sm:inline text-xl font-bold text-foreground tracking-tight">TheView</span>
 					</a>
 				</div>
@@ -134,7 +136,7 @@
 			<!-- Center Column (Nav Tabs) -->
 			<div class="hidden md:flex w-full max-w-7xl shrink px-4">
 				{#if $page.url.pathname.startsWith('/admin')}
-					<nav class="flex items-center w-full space-x-3">
+					<nav class="flex items-center w-full gap-3">
 						<a href="/admin?tab=services" data-sveltekit-replacestate data-sveltekit-noscroll class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all border {($page.url.searchParams.get('tab') || 'services') === 'services' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 							Servizi
 						</a>
@@ -150,12 +152,12 @@
 					</nav>
 				{:else}
 					<div class="relative w-full overflow-hidden flex items-center" style="-webkit-mask-image: linear-gradient(to right, transparent, black 32px, black calc(100% - 64px), transparent); mask-image: linear-gradient(to right, transparent, black 32px, black calc(100% - 64px), transparent);">
-						<nav class="flex items-center space-x-2 w-full justify-start md:justify-center overflow-x-auto no-scrollbar relative z-0 px-2">
+						<nav class="flex items-center gap-2 w-full justify-start md:justify-center overflow-x-auto no-scrollbar relative z-0 px-2">
 						{#if data.showCategoriesDesktop}
-							{#each categories as category}
-								{#if category.count > 0 || appState.isEditMode}
-									<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-border text-muted-foreground hover:bg-muted hover:text-foreground">
-										{category.name}
+							{#each grids as grid}
+								{#if grid.count > 0 || appState.isEditMode}
+									<a href="/#{grid.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-border text-muted-foreground hover:bg-muted hover:text-foreground">
+										{grid.name}
 									</a>
 								{/if}
 							{/each}
@@ -170,14 +172,14 @@
 			</div>
 
 			<!-- Right Column (Actions) -->
-			<div class="flex-1 flex items-center justify-end min-w-37.5 space-x-2 sm:space-x-4">
+			<div class="flex-1 flex items-center justify-end min-w-37.5 gap-2 sm:gap-4">
 				<div class="flex items-center bg-muted rounded-lg p-1 border border-border transition-colors {data.isAdmin && appState.isEditMode ? 'ring-2 ring-primary border-primary' : ''}">
 					{#if data.isAdmin}
 						<a href="/admin?tab={appState.adminTab || 'services'}" class="relative p-1.5 text-muted-foreground hover:text-foreground transition-colors" title="ADMIN PANEL">
-							<Settings class="h-5 w-5" strokeWidth={1.5} />
+							<Settings class="size-5" strokeWidth={1.5} />
 							{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
 								<div class="absolute -top-1 -right-1 bg-destructive rounded-full text-destructive-foreground p-0.5 animate-bounce shadow-sm ring-1 ring-background" title="Nuova versione disponibile!">
-									<ArrowUp class="w-2.5 h-2.5" strokeWidth={1.5} />
+									<ArrowUp class="size-2.5" strokeWidth={1.5} />
 								</div>
 							{/if}
 						</a>
@@ -185,25 +187,25 @@
 						<div class="w-px h-4 bg-border mx-1"></div>
 						<button class="p-1.5 transition-colors {appState.isEditMode ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" onclick={() => appState.isEditMode = !appState.isEditMode} title={appState.isEditMode ? "DISATTIVA" : "MODIFICA"}>
 							{#if appState.isEditMode}
-								<Pencil class="h-5 w-5" strokeWidth={1.5} />
+								<Pencil class="size-5" strokeWidth={1.5} />
 							{:else}
-								<PencilOff class="h-5 w-5" strokeWidth={1.5} />
+								<PencilOff class="size-5" strokeWidth={1.5} />
 							{/if}
 						</button>
 						{/if}
 						<div class="w-px h-4 bg-border mx-1"></div>
 						<button class="p-1.5 text-destructive hover:opacity-80 transition-colors" onclick={async () => { await fetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); window.location.reload(); }} title="Esci dalla sessione">
-							<LogOut class="h-5 w-5" strokeWidth={1.5} />
+							<LogOut class="size-5" strokeWidth={1.5} />
 						</button>
 					{:else}
 						<button class="p-1.5 text-primary hover:text-primary/80 transition-colors" onclick={() => data.needsSetup ? goto('/setup') : appState.showLoginModal = true} title="Accedi">
-							<LogIn class="h-5 w-5" strokeWidth={1.5} />
+							<LogIn class="size-5" strokeWidth={1.5} />
 						</button>
 					{/if}
 				</div>
-				<div class="flex items-center space-x-1">
+				<div class="flex items-center gap-1">
 										<button class="theme-mode-toggle p-2 text-muted-foreground hover:text-foreground transition-colors" onclick={() => { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('theview-color-scheme', isDark ? 'dark' : 'light'); }} title="CHIARO/SCURO">
-						<Moon class="h-5 w-5" strokeWidth={1.5} />
+						<Moon class="size-5" strokeWidth={1.5} />
 					</button>
 				</div>
 			</div>
@@ -212,7 +214,7 @@
 		<!-- Mobile Header Tabs (if admin) -->
 		{#if $page.url.pathname.startsWith('/admin')}
 		<div class="md:hidden relative border-t border-border bg-card/90 w-full" style="-webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent);">
-			<nav class="flex items-center space-x-2 px-4 py-3 overflow-x-auto no-scrollbar relative z-0">
+			<nav class="flex items-center gap-2 px-4 py-3 overflow-x-auto no-scrollbar relative z-0">
 			<a href="/admin?tab=services" data-sveltekit-replacestate data-sveltekit-noscroll class="px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border {($page.url.searchParams.get('tab') || 'services') === 'services' ? 'border-primary/20 bg-primary/10 text-primary shadow-sm' : 'border-transparent text-muted-foreground hover:bg-muted'}">
 				Servizi
 			</a>
@@ -231,12 +233,12 @@
 		</div>
 		{:else}
 		<div class="md:hidden relative border-t border-border bg-card/90 w-full" style="-webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent);">
-			<nav class="flex items-center space-x-2 px-4 py-3 overflow-x-auto no-scrollbar relative z-0">
+			<nav class="flex items-center gap-2 px-4 py-3 overflow-x-auto no-scrollbar relative z-0">
 			{#if data.showCategoriesMobile}
-				{#each categories as category}
-					{#if category.count > 0 || appState.isEditMode}
-					<a href="/#{category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-border text-muted-foreground hover:bg-muted hover:text-foreground">
-						{category.name}
+				{#each grids as grid}
+					{#if grid.count > 0 || appState.isEditMode}
+					<a href="/#{grid.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-border text-muted-foreground hover:bg-muted hover:text-foreground">
+						{grid.name}
 					</a>
 					{/if}
 				{/each}
@@ -260,11 +262,11 @@
 		</div>
 		<footer class="w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-end items-center mt-auto">
 			{#if versionInfo.currentVersion}
-			<div class="flex items-center space-x-1 text-xs font-medium text-muted-foreground">
+			<div class="flex items-center gap-1 text-xs font-medium text-muted-foreground">
 				<span>v{versionInfo.currentVersion}</span>
 				{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
 				<a href={versionInfo.url || 'https://github.com/g4s01/TheView/releases'} target="_blank" rel="noopener noreferrer" class="text-destructive hover:text-destructive/80 transition-colors animate-pulse flex items-center" title="Nuova versione {versionInfo.latestVersion} disponibile su GitHub!">
-					<ArrowUp class="w-4 h-4" strokeWidth={1.5} />
+					<ArrowUp class="size-4" strokeWidth={1.5} />
 				</a>
 				{/if}
 			</div>
@@ -280,8 +282,8 @@
 		appState.showLoginModal = false;
 		
 		let hasServices = false;
-		if (data.categories) {
-			hasServices = data.categories.some((c: any) => c.count > 0);
+		if (data.grids) {
+			hasServices = data.grids.some((c: any) => c.count > 0);
 		}
 
 		if (appState.loginRedirectUrl) {

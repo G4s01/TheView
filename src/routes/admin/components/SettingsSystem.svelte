@@ -34,12 +34,12 @@
 		description="INFORMAZIONI DI VERSIONE"
 	>
 		{#snippet icon()}
-			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+			<svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
 		{/snippet}
 	</SettingsHeader>
 	<Card.Content class="p-6">
 		<div class="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between py-3">
-			<div class="space-y-1 w-full flex-1">
+			<div class="flex flex-col gap-1 w-full flex-1">
 				{#if isCheckingVersion}
 					<div class="flex flex-col gap-2 animate-pulse w-full max-w-75">
 						<div class="flex items-center gap-2">
@@ -55,12 +55,12 @@
 					</div>
 					{#if versionInfo.latestVersion && versionInfo.latestVersion !== versionInfo.currentVersion}
 						<div class="flex items-center space-x-2 text-destructive">
-							<ArrowUp class="w-4 h-4 animate-bounce" strokeWidth={1.5} />
+							<ArrowUp class="size-4 animate-bounce" strokeWidth={1.5} />
 							<span class="text-sm font-bold uppercase tracking-wider">Nuova versione disponibile: v{versionInfo.latestVersion}</span>
 						</div>
 					{:else if versionInfo.latestVersion === versionInfo.currentVersion}
 						<div class="flex items-center space-x-2 text-primary">
-							<Check class="w-4 h-4" strokeWidth={2} />
+							<Check class="size-4" strokeWidth={2} />
 							<span class="text-xs font-bold uppercase tracking-wider">Il sistema è aggiornato</span>
 						</div>
 					{/if}
@@ -76,8 +76,8 @@
 						title={showChangelog ? 'Nascondi Changelog' : 'Vedi Changelog'}
 					>
 						<div class="relative flex items-center justify-center w-full h-full">
-							<ScrollText class="w-6 h-6" />
-							<ChevronDown class="w-3 h-3 absolute -bottom-1 -right-1 transition-transform duration-300 {showChangelog ? 'rotate-180' : ''}" strokeWidth={3} />
+							<ScrollText class="size-6" />
+							<ChevronDown class="size-3 absolute -bottom-1 -right-1 transition-transform duration-300 {showChangelog ? 'rotate-180' : ''}" strokeWidth={3} />
 						</div>
 					</Button>
 				{/if}
@@ -89,9 +89,9 @@
 					title="Controlla Aggiornamenti"
 				>
 					{#if isCheckingVersion}
-						<Loader2 class="animate-spin h-6 w-6" strokeWidth={2} />
+						<Loader2 class="animate-spin size-6" strokeWidth={2} />
 					{:else}
-						<RefreshCw class="h-6 w-6" strokeWidth={1.5} />
+						<RefreshCw class="size-6" strokeWidth={1.5} />
 					{/if}
 				</Button>
 			</div>
@@ -103,11 +103,11 @@
 					<div class="flex items-center justify-between mb-4">
 						<div class="h-4 bg-muted rounded w-48"></div>
 						<div class="flex gap-2">
-							<div class="h-9 w-9 bg-muted rounded-md"></div>
-							<div class="h-9 w-9 bg-muted rounded-md"></div>
+							<div class="size-9 bg-muted rounded-md"></div>
+							<div class="size-9 bg-muted rounded-md"></div>
 						</div>
 					</div>
-					<div class="space-y-3">
+					<div class="flex flex-col gap-3">
 						<div class="h-4 bg-muted rounded w-full"></div>
 						<div class="h-4 bg-muted rounded w-5/6"></div>
 						<div class="h-4 bg-muted rounded w-4/6"></div>
@@ -122,9 +122,9 @@
 						<div class="flex items-center gap-2">
 							<Button variant="outline" size="icon" onclick={() => copyChangelog()} title="Copia Changelog">
 								{#if copiedChangelog}
-									<Check class="w-4 h-4 text-primary" strokeWidth={2} />
+									<Check class="size-4 text-primary" strokeWidth={2} />
 								{:else}
-									<Copy class="w-4 h-4" strokeWidth={1.5} />
+									<Copy class="size-4" strokeWidth={1.5} />
 								{/if}
 							</Button>
 							<Button variant="outline" size="icon" href={versionInfo.url} target="_blank" rel="noopener noreferrer" title="Apri su GitHub">

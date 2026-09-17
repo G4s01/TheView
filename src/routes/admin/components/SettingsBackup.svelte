@@ -3,8 +3,9 @@
 	import SettingsHeader from '$lib/components/ui/SettingsHeader.svelte';
 	import { DatabaseBackup, Download, Upload, Loader2 } from "@lucide/svelte";
 
-	let { showAlert, showConfirm } = $props<{
-		showAlert: (title: string, message: string) => void;
+	import { toast } from "svelte-sonner";
+
+	let { showConfirm } = $props<{
 		showConfirm: (title: string, message: string, onConfirm: () => void) => void;
 	}>();
 
@@ -26,14 +27,14 @@
 					body: formData
 				});
 				if (res.ok) {
-					showAlert("RIPRISTINO COMPLETATO", "L'APP SI RIAVVIA PER APPLICARE LE MODIFICHE. ATTENDERE QUALCHE SECONDO...");
+					toast.success("L'APP SI RIAVVIA PER APPLICARE LE MODIFICHE. ATTENDERE QUALCHE SECONDO...");
 					setTimeout(() => window.location.reload(), 3000);
 				} else {
 					const err = await res.json();
-					showAlert("Errore", "Errore durante il ripristino: " + err.error);
+					toast.error("Errore durante il ripristino: " + err.error);
 				}
 			} catch (e) {
-				showAlert("ERRORE", "ERRORE DI RETE");
+				toast.error("ERRORE DI RETE");
 			} finally {
 				isUploadingBackup = false;
 				target.value = '';
@@ -51,26 +52,26 @@
 		description="CONSERVA E RIPRISTINA I DATI DEL SISTEMA"
 	>
 		{#snippet icon()}
-			<DatabaseBackup class="w-6 h-6" />
+			<DatabaseBackup class="size-6" />
 		{/snippet}
 	</SettingsHeader>
 	<Card.Content class="p-6">
 		<div class="flex flex-col sm:flex-row gap-4">
 			<a 
 				href="/api/backup/download" 
-				download
+				data-sveltekit-reload
 				class="inline-flex items-center justify-center px-4 py-2.5 bg-muted hover:bg-muted/80 text-foreground text-sm font-bold uppercase tracking-wider rounded-xl transition-colors border border-border"
 			>
-				<Download class="w-4 h-4 mr-2" />
+				<Download class="size-4 mr-2" />
 				ESPORTA
 			</a>
 			
 			<label class="relative inline-flex items-center justify-center px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer disabled:opacity-50 {isUploadingBackup ? 'opacity-50 pointer-events-none' : ''}">
 				{#if isUploadingBackup}
-					<Loader2 class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" strokeWidth={2} />
+					<Loader2 class="animate-spin -ml-1 mr-2 size-4 text-current" strokeWidth={2} />
 					Ripristino...
 				{:else}
-					<Upload class="w-4 h-4 mr-2" />
+					<Upload class="size-4 mr-2" />
 					IMPORTA
 				{/if}
 				<input 

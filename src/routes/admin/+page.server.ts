@@ -98,7 +98,14 @@ export const actions: Actions = {
 
     const parsedCatId = parseInt(categoryIdStr || "");
     const categoryId = isNaN(parsedCatId) ? -1 : parsedCatId;
-    console.log("updateService received categoryIdStr:", categoryIdStr, "parsed:", parsedCatId, "final:", categoryId);
+    console.log(
+      "updateService received categoryIdStr:",
+      categoryIdStr,
+      "parsed:",
+      parsedCatId,
+      "final:",
+      categoryId,
+    );
     const icon = data.get("icon")?.toString() || null;
     let iconToSave = icon;
     if (iconToSave && iconToSave.startsWith("/http")) {
@@ -147,86 +154,6 @@ export const actions: Actions = {
       return { success: true };
     } catch (error) {
       return fail(500, { error: "Database error while deleting service" });
-    }
-  },
-
-  createCategory: async ({ request }) => {
-    const data = await request.formData();
-    const name = data.get("name")?.toString();
-    const icon = data.get("icon")?.toString() || null;
-    let iconToSave = icon;
-    if (iconToSave && iconToSave.startsWith("/http")) {
-      iconToSave = iconToSave.substring(1);
-    }
-
-    if (!name) return fail(400, { error: "Nome categoria mancante" });
-
-    try {
-      const allCats = await db.select().from(categories);
-      if (allCats.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
-        return fail(400, { error: "Esiste già una categoria con questo nome" });
-      }
-
-      const [newCat] = await db.insert(categories).values({ name, icon: iconToSave }).returning();
-      return { success: true, category: newCat };
-    } catch (error) {
-      return fail(500, {
-        error: "Errore durante la creazione della categoria",
-      });
-    }
-  },
-
-  updateCategory: async ({ request }) => {
-    const data = await request.formData();
-    const id = data.get("id")?.toString();
-    const name = data.get("name")?.toString();
-    const icon = data.get("icon")?.toString() || null;
-    let iconToSave = icon;
-    if (iconToSave && iconToSave.startsWith("/http")) {
-      iconToSave = iconToSave.substring(1);
-    }
-
-    if (!id || !name) return fail(400, { error: "Dati mancanti" });
-
-    try {
-      const allCats = await db.select().from(categories);
-      if (
-        allCats.some(
-          (c) =>
-            c.name.toLowerCase() === name.toLowerCase() &&
-            c.id !== parseInt(id),
-        )
-      ) {
-        return fail(400, { error: "Esiste già una categoria con questo nome" });
-      }
-
-      await db
-        .update(categories)
-        .set({ name, icon: iconToSave })
-        .where(eq(categories.id, parseInt(id)));
-      return { success: true };
-    } catch (error) {
-      return fail(500, {
-        error: "Errore durante l'aggiornamento della categoria",
-      });
-    }
-  },
-
-  deleteCategory: async ({ request }) => {
-    const data = await request.formData();
-    const id = data.get("id")?.toString();
-
-    if (!id) return fail(400, { error: "ID mancante" });
-
-    try {
-      // Imposta i servizi collegati alla categoria fantasma (-1) anziché eliminarli
-      await db.update(services).set({ categoryId: -1 }).where(eq(services.categoryId, parseInt(id)));
-      await db.delete(categories).where(eq(categories.id, parseInt(id)));
-      return { success: true };
-    } catch (error) {
-      return fail(500, {
-        error: "Errore durante l'eliminazione della categoria",
-      });
     }
   },
 };
