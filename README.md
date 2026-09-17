@@ -110,6 +110,20 @@ services:
 
 TheView stores all state (Categories, Services, uploaded Icons, Grid Layouts, and UI Settings) in a robust local SQLite database inside the `/app/data` volume. This means your dashboard is entirely portable just by backing up the `data/sqlite.db` file!
 
+### 👤 Volume Permissions (PUID/PGID & UMASK)
+
+To avoid permission issues with the mounted `/app/data` volume (such as `EACCES` or `readonly database` errors with SQLite), TheView supports standard **`PUID`**, **`PGID`**, and **`UMASK`** environment variables.
+These variables ensure that the container's internal process runs with the same User ID and Group ID as the host system user that owns the directory, and that any files created have the correct permissions.
+
+If you don't provide them, the container defaults to `1000:1000` and `UMASK=022`. Set them in your `docker-compose.yml` to match your host user:
+
+```yaml
+environment:
+  - PUID=1000
+  - PGID=1000
+  - UMASK=022
+```
+
 ### 🔐 Security & Encryption
 
 All sensitive data (Admin Password, NPM credentials, Widget passwords, and 2FA secrets) are **strongly encrypted or hashed** (AES-256-GCM / SHA-256) inside the database. The system automatically generates a unique `APP_SECRET` on first boot. This secret is safely stored inside the persistent `/app/data/secret.key` file to survive Docker updates flawlessly. TheView does not store plaintext passwords anywhere.

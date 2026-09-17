@@ -11,6 +11,9 @@ services:
       # Utile per futuri widget che leggono lo stato dei container Docker
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=022
       - TZ=Europe/Rome
       - NODE_ENV=production
       - PORT=3001

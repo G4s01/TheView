@@ -23,6 +23,9 @@ FROM node:24-slim
 
 WORKDIR /app
 
+# Installa gosu per gestire i permessi ed effettuare il drop dei privilegi
+RUN apt-get update && apt-get install -y gosu && rm -rf /var/lib/apt/lists/*
+
 # sqlite.db sarà salvato nella directory /app/data tramite volume docker-compose
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/node_modules ./node_modules
@@ -37,5 +40,8 @@ COPY --from=builder /app/src/lib/server/db/migrations ./src/lib/server/db/migrat
 
 EXPOSE 3001
 
-CMD ["node", "build"]
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["node", "build"]
