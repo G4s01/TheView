@@ -40,12 +40,15 @@ export async function getNpmServices(
     const agent = new Agent({ connect: { rejectUnauthorized: false } });
 
     // 1. Get Token
-    const tokenRes = await undiciFetch(new URL("/api/tokens", npmUrl).toString(), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ identity: email, secret: plainPassword }),
-      dispatcher: agent,
-    } as any);
+    const tokenRes = await undiciFetch(
+      new URL("/api/tokens", npmUrl).toString(),
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identity: email, secret: plainPassword }),
+        dispatcher: agent,
+      } as any,
+    );
 
     if (!tokenRes.ok) {
       console.error("Failed to authenticate with NPM API");
@@ -105,9 +108,13 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
       socketPath: "/var/run/docker.sock",
       path: "/containers/json",
       method: "GET",
+      headers: {
+        Host: "localhost",
+      },
     };
 
     const req = http.request(options, (res) => {
+      res.setEncoding("utf8");
       let data = "";
       res.on("data", (chunk) => (data += chunk));
       res.on("end", () => {

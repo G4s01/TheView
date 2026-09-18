@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useDockhand, useDockhandActions } from '$lib/queries/useDockhand';
-	import { Waves, CheckCircle2, XCircle, Box, AlertTriangle, Play, Square, RotateCw, RefreshCw, DownloadCloud } from '@lucide/svelte';
+	import { Waves, CheckCircle2, XCircle, Box, AlertTriangle, Play, Square, RotateCw, RefreshCw, DownloadCloud, Search, CloudUpload } from '@lucide/svelte';
     import { Button } from "$lib/components/ui/button";
     import { appState } from '$lib/client/state.svelte';
 
@@ -8,7 +8,14 @@
 
 	let query = useDockhand();
     let actions = useDockhandActions();
-	let containers = $derived(Array.isArray(query.data) ? query.data : []);
+	let containers = $derived.by(() => {
+        const data = Array.isArray(query.data) ? query.data : [];
+        return [...data].sort((a: any, b: any) => {
+            if (a.updateAvailable && !b.updateAvailable) return -1;
+            if (!a.updateAvailable && b.updateAvailable) return 1;
+            return a.name.localeCompare(b.name);
+        });
+    });
     let isAdmin = $derived(appState.isAdmin);
 
     let runningContainers = $derived(containers.filter((c: any) => c.state === 'running'));
@@ -29,9 +36,16 @@
 		<div class="flex items-center gap-2">
 			<Waves class="size-4 text-primary" />
 			<span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Dockhand</span>
+        </div>
+        <div class="flex items-center gap-2">
             {#if isAdmin && query.isSuccess}
-                <Button variant="ghost" size="icon" class="size-5 rounded-md hover:bg-primary/20 text-muted-foreground hover:text-primary ml-1" onclick={checkUpdates} disabled={actions.isPending} title="Cerca aggiornamenti immagini">
-                    <DownloadCloud class="size-3.5 {actions.isPending ? 'animate-pulse text-primary' : ''}" />
+                <Button variant="ghost" size="icon" class="size-6 rounded-md bg-primary/10 hover:bg-primary/20 text-primary transition-colors" onclick={checkUpdates} disabled={actions.isPending} title="Cerca aggiornamenti">
+                    <div class="relative flex items-center justify-center {actions.isPending ? 'animate-pulse' : ''}">
+                        <CloudUpload class="size-3.5" />
+                        <div class="absolute -bottom-1 -right-1 bg-card rounded-full p-[1px]">
+                            <Search class="size-2 stroke-[3px]" />
+                        </div>
+                    </div>
                 </Button>
             {/if}
 		</div>
@@ -70,7 +84,7 @@
 
                 <div class="flex flex-col gap-2 mt-1 pb-1">
 					{#each containers as container}
-                        <div class="flex flex-col p-2.5 rounded-lg bg-card border border-border shadow-sm text-xs transition-opacity {container.state === 'running' ? '' : 'opacity-60'}">
+                        <div class="flex flex-col p-2.5 rounded-lg bg-card border shadow-sm text-xs transition-opacity {container.state === 'running' ? '' : 'opacity-60'} {container.updateAvailable ? 'border-primary shadow-[0_0_8px_var(--color-primary)]' : 'border-border'}">
 							<div class="flex items-center justify-between mb-2 border-b border-border/40 pb-1.5">
 								<div class="flex items-center gap-2 font-semibold">
 									<div class="size-2.5 rounded-full {container.state === 'running' ? 'bg-primary shadow-[0_0_6px_rgba(var(--primary),0.5)]' : 'bg-destructive'}"></div>

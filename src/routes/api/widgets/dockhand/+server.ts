@@ -141,11 +141,8 @@ export const POST: RequestHandler = async ({ request }) => {
     } else {
       if (!id) return json({ error: "ID container mancante" }, { status: 400 });
 
-      // Map the "update" action from frontend to Dockhand's "recreate" endpoint
+      // Map the "update" action from frontend to Dockhand's "update" endpoint
       let targetAction = action;
-      if (action === "update") {
-        targetAction = "recreate";
-      }
 
       endpoint = `${normalizedUrl}/api/containers/${id}/${targetAction}?env=${envId}`;
 
@@ -159,8 +156,7 @@ export const POST: RequestHandler = async ({ request }) => {
         body = JSON.stringify({
           image: payload.image,
           name: payload.name,
-          pullImage: true,
-          repullImage: true, // Just in case Dockhand expects this
+          repullImage: true,
           startAfterUpdate: true,
         });
         headers["Content-Type"] = "application/json";

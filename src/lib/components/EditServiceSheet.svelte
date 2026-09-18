@@ -4,6 +4,7 @@
     import ServiceForm from '$lib/components/ServiceForm.svelte';
     import { invalidateAll } from '$app/navigation';
     import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
+    import EditWidgetSettingsCard from '$lib/components/EditWidgetSettingsCard.svelte';
 
     import { page } from "$app/stores";
 
@@ -96,6 +97,8 @@
                     />
                 </div>
             </div>
+            
+            <EditWidgetSettingsCard widgetType={appState.editingService.widgetType} />
         {/if}
     </Sheet.Content>
 </Sheet.Root>
