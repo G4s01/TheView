@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useDockhand, useDockhandActions } from '$lib/queries/useDockhand';
-	import { WavesHorizontal, CircleCheck, CircleX, Box, TriangleAlert, Play, Square, RotateCw, RefreshCw, CloudDownload, Search, CloudUpload } from '@lucide/svelte';
+	import { WavesHorizontal, CircleCheck, CircleX, Box, TriangleAlert, Play, Square, RotateCw, RefreshCw, CloudDownload, Search, CloudUpload, LoaderCircle } from '@lucide/svelte';
     import { Button } from "$lib/components/ui/button";
     import { appState } from '$lib/client/state.svelte';
 
@@ -84,7 +84,13 @@
 
                 <div class="flex flex-col gap-2 mt-1 pb-1">
 					{#each containers as container}
-                        <div class="flex flex-col p-2.5 rounded-lg bg-card border shadow-sm text-xs transition-opacity {container.state === 'running' ? '' : 'opacity-60'} {container.updateAvailable ? 'border-primary shadow-[0_0_8px_var(--color-primary)]' : 'border-border'}">
+                        {@const isActionPending = actions.isPending && actions.variables?.id === container.id}
+                        <div class="flex flex-col p-2.5 rounded-lg bg-card border shadow-sm text-xs transition-opacity relative overflow-hidden {container.state === 'running' ? '' : 'opacity-60'} {container.updateAvailable ? 'border-primary shadow-[0_0_8px_var(--color-primary)]' : 'border-border'} {isActionPending ? 'pointer-events-none' : ''}">
+                            {#if isActionPending}
+                                <div class="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                                    <LoaderCircle class="size-5 text-primary animate-spin" />
+                                </div>
+                            {/if}
 							<div class="flex items-center justify-between mb-2 border-b border-border/40 pb-1.5">
 								<div class="flex items-center gap-2 font-semibold">
 									<div class="size-2.5 rounded-full {container.state === 'running' ? 'bg-primary shadow-[0_0_6px_rgba(var(--primary),0.5)]' : 'bg-destructive'}"></div>
@@ -114,7 +120,7 @@
                                                 </span>
                                             {/if}
                                             <Button variant="ghost" size="icon" class="size-6 rounded-md {container.updateAvailable ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'hover:bg-primary/20 text-primary'} ml-1" onclick={() => handleAction(container, 'update')} disabled={actions.isPending} title="Aggiorna / Redeploy">
-                                                <RefreshCw class="size-3.5 {actions.isPending && actions.variables?.id === container.id && actions.variables?.action === 'update' ? 'animate-spin' : ''}" />
+                                                <RefreshCw class="size-3.5" />
                                             </Button>
                                         </div>
                                     {/if}

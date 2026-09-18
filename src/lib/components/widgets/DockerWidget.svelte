@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useDocker, useDockerActions } from "$lib/queries/useDocker";
-	import { Box, Play, Square, RotateCw, AlertTriangle } from "@lucide/svelte";
+	import { Box, Play, Square, RotateCw, AlertTriangle, LoaderCircle } from "@lucide/svelte";
 	import { Button } from "$lib/components/ui/button";
 	import { appState } from "$lib/client/state.svelte";
 
@@ -76,7 +76,13 @@
 				<!-- Lista container -->
 				<div class="flex flex-col gap-2 mt-1 pb-1 flex-1 overflow-y-auto pr-1 custom-scrollbar">
 					{#each containers as container}
-						<div class="flex flex-col p-2.5 rounded-lg bg-card border border-border shadow-sm text-xs transition-opacity {container.state === 'running' ? '' : 'opacity-60'}">
+                        {@const isActionPending = actions.isPending && actions.variables?.id === container.id}
+						<div class="flex flex-col p-2.5 rounded-lg bg-card border border-border shadow-sm text-xs transition-opacity relative overflow-hidden {container.state === 'running' ? '' : 'opacity-60'} {isActionPending ? 'pointer-events-none' : ''}">
+                            {#if isActionPending}
+                                <div class="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                                    <LoaderCircle class="size-5 text-primary animate-spin" />
+                                </div>
+                            {/if}
 							<div class="flex items-center justify-between">
 								<div class="flex items-center gap-2 font-semibold">
 									<div class="size-2.5 rounded-full {container.state === 'running' ? 'bg-primary shadow-[0_0_6px_rgba(var(--primary),0.5)]' : (container.state === 'paused' ? 'bg-amber-500' : 'bg-destructive')}"></div>

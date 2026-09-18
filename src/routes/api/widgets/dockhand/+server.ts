@@ -180,6 +180,27 @@ export const POST: RequestHandler = async ({ request }) => {
       return json(await res.json());
     }
 
+    // Se era un update, forziamo uno start finale sul nome del container
+    // dato che a volte Dockhand lo ricrea ma lo lascia spento/pending.
+    // Usiamo payload.name perché l'ID hash potrebbe essere cambiato dopo la ricreazione.
+    if (action === "update" && payload && payload.name) {
+      try {
+        await undiciFetch(
+          `${normalizedUrl}/api/containers/${payload.name}/start?env=${envId}`,
+          {
+            method: "POST",
+            headers: { Cookie: cookie },
+            dispatcher: agent,
+          },
+        );
+      } catch (startErr) {
+        console.error(
+          "Errore durante lo start automatico post-update:",
+          startErr,
+        );
+      }
+    }
+
     return json({ success: true });
   } catch (e: any) {
     return json({ error: e.message || "Errore interno" }, { status: 500 });
