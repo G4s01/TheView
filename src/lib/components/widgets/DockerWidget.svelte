@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useDocker, useDockerActions } from "$lib/queries/useDocker";
-	import { Box, Play, Square, RotateCw, AlertTriangle, LoaderCircle } from "@lucide/svelte";
+	import { Box, Play, Square, RotateCw, AlertTriangle, LoaderCircle, CloudUpload, Search, CloudDownload } from "@lucide/svelte";
 	import { Button } from "$lib/components/ui/button";
 	import { appState } from "$lib/client/state.svelte";
 
@@ -16,10 +16,15 @@
 	let stats = $derived(query.data?.stats || { total: 0, running: 0, stopped: 0, paused: 0 });
 	let containers = $derived(Array.isArray(query.data?.containers) ? query.data.containers : []);
 	let isAdmin = $derived(appState.isAdmin);
+    let updatesAvailableCount = $derived(containers.filter((c: any) => c.updateAvailable).length);
 
 	function handleAction(container: any, action: string) {
 		actions.mutate({ id: container.id, action });
 	}
+    
+    function checkUpdates() {
+        actions.mutate({ id: 'all', action: 'checkUpdates' });
+    }
 </script>
 
 <div class="h-full w-full flex flex-col p-2 bg-card rounded-xl border border-border shadow-sm overflow-hidden text-card-foreground">
@@ -27,6 +32,18 @@
 		<div class="flex items-center gap-2">
 			<Box class="size-4 text-primary" />
 			<span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Docker</span>
+		</div>
+        <div class="flex items-center gap-2">
+            {#if isAdmin && query.isSuccess}
+                <Button variant="ghost" size="icon" class="size-6 rounded-md bg-primary/10 hover:bg-primary/20 text-primary transition-colors" onclick={checkUpdates} disabled={actions.isPending} title="Cerca aggiornamenti (Scarica layer in background)">
+                    <div class="relative flex items-center justify-center {actions.isPending && actions.variables?.action === 'checkUpdates' ? 'animate-pulse' : ''}">
+                        <CloudUpload class="size-3.5" />
+                        <div class="absolute -bottom-1 -right-1 bg-card rounded-full p-px">
+                            <Search class="size-2 stroke-[3px]" />
+                        </div>
+                    </div>
+                </Button>
+            {/if}
 		</div>
 	</div>
 
@@ -52,7 +69,12 @@
 			<div class="flex flex-col gap-2 h-full">
 				<!-- Sommari globali -->
 				{#if isWide && nodeW >= 3}
-					<div class="flex justify-between items-center w-full bg-muted/20 px-3 py-2 rounded-lg border border-border/40 shrink-0">
+					<div class="flex justify-between items-center w-full bg-muted/20 px-3 py-2 rounded-lg border border-border/40 shrink-0 relative">
+                        {#if updatesAvailableCount > 0}
+                            <div class="absolute -top-1.5 -right-1.5 flex items-center justify-center bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-[0_0_6px_rgba(var(--primary),0.6)] animate-pulse">
+                                {updatesAvailableCount} upd
+                            </div>
+                        {/if}
 						<div class="flex items-center gap-2">
 							<span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">In Esecuzione</span>
 							<span class="text-sm font-bold text-foreground">{stats.running} / {stats.total}</span>
@@ -64,7 +86,12 @@
 						{/if}
 					</div>
 				{:else}
-					<div class="bg-muted/20 p-2 rounded-lg flex flex-col items-center justify-center border border-border/40 shrink-0">
+					<div class="bg-muted/20 p-2 rounded-lg flex flex-col items-center justify-center border border-border/40 shrink-0 relative">
+                        {#if updatesAvailableCount > 0}
+                            <div class="absolute top-1.5 right-1.5 flex items-center justify-center bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-[0_0_6px_rgba(var(--primary),0.6)] animate-pulse">
+                                {updatesAvailableCount} upd
+                            </div>
+                        {/if}
 						<span class="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold mb-1">In Esec. / Totali</span>
 						<div class="flex items-baseline gap-0.5 font-bold">
 							<span class="text-xl leading-none {stats.running > 0 ? 'text-primary' : 'text-muted-foreground'}">{stats.running}</span>
@@ -77,7 +104,7 @@
 				<div class="flex flex-col gap-2 mt-1 pb-1 flex-1 overflow-y-auto pr-1 custom-scrollbar">
 					{#each containers as container}
                         {@const isActionPending = actions.isPending && actions.variables?.id === container.id}
-						<div class="flex flex-col p-2.5 rounded-lg bg-card border border-border shadow-sm text-xs transition-opacity relative overflow-hidden {container.state === 'running' ? '' : 'opacity-60'} {isActionPending ? 'pointer-events-none' : ''}">
+						<div class="flex flex-col p-2.5 rounded-lg bg-card border shadow-sm text-xs transition-opacity relative overflow-hidden {container.state === 'running' ? '' : 'opacity-60'} {container.updateAvailable ? 'border-primary shadow-[0_0_8px_var(--color-primary)]' : 'border-border'} {isActionPending ? 'pointer-events-none' : ''}">
                             {#if isActionPending}
                                 <div class="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
                                     <LoaderCircle class="size-5 text-primary animate-spin" />
@@ -105,8 +132,13 @@
 									{/if}
 								</div>
 							</div>
-							<div class="text-[9px] text-muted-foreground/60 mt-1 truncate">
-								{container.status}
+							<div class="text-[9px] text-muted-foreground/60 mt-1 truncate capitalize flex items-center justify-between">
+								<span>{container.status}</span>
+                                {#if container.updateAvailable}
+                                    <span class="text-primary font-semibold flex items-center gap-1">
+                                        <CloudDownload class="size-3" /> Aggiornamento Pronto (Locale)
+                                    </span>
+                                {/if}
 							</div>
 						</div>
 					{/each}
