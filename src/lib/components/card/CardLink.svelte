@@ -32,8 +32,8 @@
 
 	let nodeW = $derived(parseInt(currentSize.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(currentSize.split('x')[1]) || 2);
-	let isTall = $derived(nodeH >= nodeW);
-	let isWide = $derived(nodeW > nodeH);
+	let isTall = $derived(nodeH >= nodeW || centerText);
+	let isWide = $derived(nodeW > nodeH && !centerText);
 	let isBaseSize = $derived(nodeW === 2 && nodeH === 2);
 </script>
 
@@ -45,12 +45,12 @@
 />
 
 <!-- Icon -->
-<div class="relative flex items-center justify-center {isTall ? 'w-full flex-1 min-h-0' : 'shrink-0'}">
+<div class="relative flex items-center justify-center shrink-0">
 	<div 
-		class="relative {isTall ? 'h-full w-full aspect-square max-h-24 max-w-24 min-h-12 min-w-12' : (isWide ? 'size-20' : 'size-14')} {iconStyle} flex items-center justify-center shadow-sm"
+		class="relative {isTall ? 'size-16 sm:size-20' : (isWide ? 'size-16 sm:size-20' : 'size-14')} {iconStyle} flex items-center justify-center shadow-sm"
 		style="background-color: {iconBgColor}"
 	>
-		<ServiceIcon {iconStyle} name={service.name} icon={service.icon} size={isTall ? 'md' : 'lg'} class={isTall ? 'w-3/5! h-3/5!' : ''} />
+		<ServiceIcon {iconStyle} name={service.name} icon={service.icon} size="lg" class="w-3/5! h-3/5!" />
 		{#if dockerVersionInfo && dockerVersionInfo.updateAvailable && !appState.isEditMode}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -72,12 +72,12 @@
 	</div>
 </div>
 
-<div class="min-w-0 flex flex-col {isWide && !centerText ? '' : 'flex-1'} min-h-0 w-full {isTall ? 'items-center text-center justify-center mt-2' : (isWide && !centerText ? 'text-left' : 'mt-2 sm:mt-4 items-center text-center')}">
+<div class="min-w-0 flex flex-col shrink-0 w-full {isTall ? 'items-center text-center justify-center mt-3' : (isWide && !centerText ? 'text-left ml-4' : 'mt-3 items-center text-center')}">
 	<h3 class="{!isBaseSize ? 'text-xl font-bold' : 'text-base font-semibold'} text-foreground truncate group-hover:text-primary transition-colors w-full">
 		{service.name}
 	</h3>
 
-	<div class="w-full flex flex-col flex-1 min-h-0">
+	<div class="w-full flex flex-col shrink-0 min-h-0">
 		{#if showDescription && service.description}
 		<p class="mt-1 {!isBaseSize ? 'text-base' : 'text-sm'} text-muted-foreground line-clamp-2">
 			{service.description}

@@ -147,18 +147,32 @@ export const POST: RequestHandler = async ({ request }) => {
       endpoint = `${normalizedUrl}/api/containers/${id}/${targetAction}?env=${envId}`;
 
       if (action === "update") {
-        if (!payload || !payload.image || !payload.name) {
+        if (!payload || !payload.name) {
           return json(
             { error: "Dati payload mancanti per aggiornamento" },
             { status: 400 },
           );
         }
-        body = JSON.stringify({
-          image: payload.image,
+
+        let realImage = payload.image;
+        if (realImage?.startsWith("sha256:") && payload.labels) {
+          const composeImage = payload.labels["com.docker.compose.image"];
+          if (composeImage && !composeImage.startsWith("sha256:")) {
+            realImage = composeImage;
+          }
+        }
+
+        let updateBody: any = {
           name: payload.name,
-          repullImage: true,
           startAfterUpdate: true,
-        });
+        };
+
+        if (realImage && !realImage.startsWith("sha256:")) {
+          updateBody.image = realImage;
+          updateBody.repullImage = true;
+        }
+
+        body = JSON.stringify(updateBody);
         headers["Content-Type"] = "application/json";
       }
     }

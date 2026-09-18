@@ -330,7 +330,7 @@
 		w = Math.max(w, minW);
 		h = Math.max(h, minH);
 		
-		const autoPos = service.x === undefined || service.x === null;
+		const autoPos = service.x === undefined || service.x === null || service.categoryId === -1;
 		
 		const widgetEl = grid.addWidget({
 			id: service.id.toString(),
