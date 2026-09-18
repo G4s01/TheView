@@ -85,7 +85,7 @@
                 <div class="flex flex-col gap-2 mt-1 pb-1">
 					{#each containers as container}
                         {@const isActionPending = actions.isPending && actions.variables?.id === container.id}
-                        <div class="flex flex-col p-2.5 rounded-lg bg-card border shadow-sm text-xs transition-opacity relative overflow-hidden {container.state === 'running' ? '' : 'opacity-60'} {container.updateAvailable ? 'border-primary shadow-[0_0_8px_var(--color-primary)]' : 'border-border'} {isActionPending ? 'pointer-events-none' : ''}">
+                        <div class="flex flex-col shrink-0 p-2.5 rounded-lg bg-card border shadow-sm text-xs transition-opacity relative overflow-hidden {container.state === 'running' ? '' : 'opacity-60'} {container.updateAvailable ? 'border-primary shadow-[0_0_8px_var(--color-primary)]' : 'border-border'} {isActionPending ? 'pointer-events-none' : ''}">
                             {#if isActionPending}
                                 <div class="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
                                     <LoaderCircle class="size-5 text-primary animate-spin" />

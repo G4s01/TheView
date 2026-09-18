@@ -154,7 +154,7 @@
 				staticGrid: !appState.isEditMode,
 				resizable: { handles: 'e, se, s, sw, w' },
 				margin: '0.5rem',
-				float: true,
+				float: gridName !== 'Inbox', // L'inbox si auto-compatta verso l'alto
 				acceptWidgets: true
 			}, node);
 			
