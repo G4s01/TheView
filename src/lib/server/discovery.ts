@@ -101,8 +101,10 @@ export async function getNpmServices(
   }
 }
 
-// Interroga il socket Docker per i container attivi
-export function getDockerServices(): Promise<DiscoveredService[]> {
+export function getDockerServices(): Promise<{
+  services: DiscoveredService[];
+  error?: string;
+}> {
   return new Promise((resolve) => {
     const options = {
       socketPath: "/var/run/docker.sock",
@@ -120,7 +122,10 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
       res.on("end", () => {
         if (res.statusCode !== 200) {
           console.error("Docker API error:", res.statusCode, data);
-          return resolve([]);
+          return resolve({
+            services: [],
+            error: `Docker API HTTP ${res.statusCode}: ${data}`,
+          });
         }
 
         try {
@@ -183,17 +188,24 @@ export function getDockerServices(): Promise<DiscoveredService[]> {
             });
           }
 
-          resolve(services);
-        } catch (e) {
+          resolve({ services });
+        } catch (e: any) {
           console.error("Error parsing Docker JSON:", e);
-          resolve([]);
+          resolve({ services: [], error: `JSON Parse Error: ${e.message}` });
         }
       });
     });
 
     req.on("error", (e) => {
       console.error("Docker Socket error (is it mounted?):", e.message);
-      resolve([]);
+      let errorMsg = e.message;
+      if (e.message.includes("EACCES")) {
+        errorMsg +=
+          " (Permission denied. The container user might not have permissions to read /var/run/docker.sock. Check PUID/PGID or socket permissions.)";
+      } else if (e.message.includes("ENOENT")) {
+        errorMsg += " (Socket not found. Is /var/run/docker.sock mounted?)";
+      }
+      resolve({ services: [], error: errorMsg });
     });
 
     req.end();
@@ -206,7 +218,11 @@ export async function discoverAllServices(
   npmUrl?: string,
   npmEmail?: string,
   npmPassword?: string,
-): Promise<{ services: DiscoveredService[]; npmError?: string }> {
+): Promise<{
+  services: DiscoveredService[];
+  npmError?: string;
+  dockerError?: string;
+}> {
   let npmError: string | undefined = undefined;
 
   let npm: (DiscoveredService & {
@@ -274,7 +290,7 @@ export async function discoverAllServices(
     }
   }
 
-  const docker = await getDockerServices();
+  const { services: docker, error: dockerError } = await getDockerServices();
 
   // Fondere NPM e Docker
   const merged: DiscoveredService[] = [];
@@ -413,5 +429,5 @@ export async function discoverAllServices(
     return order[a.source] - order[b.source];
   });
 
-  return { services: enriched, npmError };
+  return { services: enriched, npmError, dockerError };
 }

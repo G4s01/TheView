@@ -17,6 +17,7 @@
 
 	let discoveredServices = $state<any[]>([]);
 	let npmError = $state<string | null>(null);
+	let dockerError = $state<string | null>(null);
 	let isDiscovering = $state(false);
 	let expandedId = $state<string | null>(null);
 	import { page } from '$app/stores';
@@ -68,6 +69,7 @@
 				const data = await res.json();
 				discoveredServices = data.services;
 				npmError = data.npmError;
+				dockerError = data.dockerError;
 			}
 		} catch (e) {
 			console.error(e);
@@ -138,11 +140,16 @@
 
 	<div class="p-0">
 		{#if npmError}
-		<div class="p-4 rounded-md bg-destructive/10 text-destructive border border-destructive/20">
+		<div class="p-4 mb-4 rounded-md bg-destructive/10 text-destructive border border-destructive/20">
 			<strong>ERRORE NPM:</strong> {npmError}
 			<p class="text-sm mt-1">ASSICURATI L'INDIRIZZO SIA RAGGIUNGIBILE!</p>
 		</div>
-	{/if}
+	    {/if}
+        {#if dockerError}
+		<div class="p-4 mb-4 rounded-md bg-destructive/10 text-destructive border border-destructive/20">
+			<strong>ERRORE DOCKER:</strong> {dockerError}
+		</div>
+	    {/if}
 
 	<div class="bg-card text-card-foreground shadow-sm border border-border rounded-2xl">
 		<ul class="divide-y divide-border">
@@ -163,9 +170,8 @@
 					<Search class="mx-auto size-12 text-muted-foreground mb-3" strokeWidth={1.5} />
 					NESSUN NUOVO SERVIZIO TROVATO.
 				</li>
-			{/if}
-
-			{#each discoveredServices as ds, i}
+			{:else}
+			    {#each discoveredServices as ds, i}
 				<!-- svelte-ignore a11y_click_events_have_key_events -->
 				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 				<li class="px-6 py-5 hover:bg-muted/50 transition-colors flex flex-col gap-4 cursor-pointer" onclick={() => { expandedId = expandedId === ds.id ? null : ds.id; }}>
@@ -240,7 +246,8 @@
 						</div>
 					{/if}
 				</li>
-			{/each}
+			    {/each}
+            {/if}
 		</ul>
 	</div>
 	</div>
