@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useDockhand, useDockhandActions } from '$lib/queries/useDockhand';
-	import { Waves, CheckCircle2, XCircle, Box, AlertTriangle, Play, Square, RotateCw, RefreshCw, DownloadCloud, Search, CloudUpload } from '@lucide/svelte';
+	import { WavesHorizontal, CircleCheck, CircleX, Box, TriangleAlert, Play, Square, RotateCw, RefreshCw, CloudDownload, Search, CloudUpload } from '@lucide/svelte';
     import { Button } from "$lib/components/ui/button";
     import { appState } from '$lib/client/state.svelte';
 
@@ -34,7 +34,7 @@
 <div class="h-full w-full flex flex-col p-2 bg-card rounded-xl border border-border shadow-sm overflow-hidden text-card-foreground">
 	<div class="flex items-center justify-between pb-2 mb-2 border-b border-border/50 shrink-0">
 		<div class="flex items-center gap-2">
-			<Waves class="size-4 text-primary" />
+			<WavesHorizontal class="size-4 text-primary" />
 			<span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Dockhand</span>
         </div>
         <div class="flex items-center gap-2">
@@ -42,7 +42,7 @@
                 <Button variant="ghost" size="icon" class="size-6 rounded-md bg-primary/10 hover:bg-primary/20 text-primary transition-colors" onclick={checkUpdates} disabled={actions.isPending} title="Cerca aggiornamenti">
                     <div class="relative flex items-center justify-center {actions.isPending ? 'animate-pulse' : ''}">
                         <CloudUpload class="size-3.5" />
-                        <div class="absolute -bottom-1 -right-1 bg-card rounded-full p-[1px]">
+                        <div class="absolute -bottom-1 -right-1 bg-card rounded-full p-px">
                             <Search class="size-2 stroke-[3px]" />
                         </div>
                     </div>
@@ -59,7 +59,7 @@
 			</div>
 		{:else if query.isError}
 			<div class="flex flex-col items-center justify-center h-full text-center text-destructive/80 gap-2 p-4">
-				<AlertTriangle class="size-8 opacity-50" />
+				<TriangleAlert class="size-8 opacity-50" />
 				<p class="text-xs font-medium truncate max-w-full">{query.error?.message || 'Errore Dockhand'}</p>
 			</div>
 		{:else if containers.length === 0}
@@ -127,7 +127,7 @@
                                 <span>Status: {container.status}</span>
                                 {#if container.updateAvailable}
                                     <span class="text-primary font-semibold flex items-center gap-1">
-                                        <DownloadCloud class="size-3" /> Aggiornamento!
+                                        <CloudDownload class="size-3" /> Aggiornamento!
                                     </span>
                                 {/if}
                             </div>
