@@ -258,12 +258,12 @@
                     <div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border flex flex-col gap-4">
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                             <div class="md:col-span-6 h-10">
-                                <label class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Fuso Orario</label>
-                                <input type="text" class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" placeholder="Es. Europe/Rome (vuoto = locale)" bind:value={clock_timezone} />
+                                <label for="clock_timezone" class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Fuso Orario</label>
+                                <input id="clock_timezone" type="text" class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" placeholder="Es. Europe/Rome (vuoto = locale)" bind:value={clock_timezone} />
                             </div>
                             <div class="md:col-span-6 h-10">
-                                <label class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Formato</label>
-                                <select class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" bind:value={clock_format}>
+                                <label for="clock_format" class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Formato</label>
+                                <select id="clock_format" class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" bind:value={clock_format}>
                                     <option value="digital">Digitale</option>
                                     <option value="analog">Analogico</option>
                                 </select>
@@ -283,8 +283,8 @@
                     <div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border flex flex-col gap-4">
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                             <div class="md:col-span-12 h-10">
-                                <label class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Località</label>
-                                <input type="text" class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" placeholder="Es. Milano, Roma, IT" bind:value={weather_location} />
+                                <label for="weather_location" class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Località</label>
+                                <input id="weather_location" type="text" class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" placeholder="Es. Milano, Roma, IT" bind:value={weather_location} />
                                 <p class="text-[10px] text-muted-foreground mt-1 ml-1">La località verrà geolocalizzata tramite Open-Meteo per ottenere le previsioni.</p>
                             </div>
                         </div>

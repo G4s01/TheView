@@ -11,7 +11,7 @@
     CloudLightning,
     Wind,
     Droplets
-  } from 'lucide-svelte';
+  } from '@lucide/svelte';
   
   let { nodeW = 1, nodeH = 1 } = $props<{ nodeW?: number, nodeH?: number }>();
   let isWide = $derived(nodeW >= 2 || (nodeW === 2 && nodeH === 2));

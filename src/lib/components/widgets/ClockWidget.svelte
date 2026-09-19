@@ -1,8 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getAppState } from '$lib/stores/appState.svelte';
+  import { appState } from '$lib/client/state.svelte';
 
-  let appState = getAppState();
   let time = $state(new Date());
 
   // Reactive options from global settings
