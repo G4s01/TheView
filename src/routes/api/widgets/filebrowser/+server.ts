@@ -13,15 +13,24 @@ async function getAuthToken(url: string, username?: string, password?: string) {
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry)
     return cachedToken;
 
-  const loginRes = await undiciFetch(`${url}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-    dispatcher: agent,
-  });
+  // FileBrowser Quantum expects username in query and password URL-encoded in X-Password header
+  const encodedUsername = encodeURIComponent(username || "");
+  const encodedPassword = encodeURIComponent(password || "");
+
+  const loginRes = await undiciFetch(
+    `${url}/api/auth/login?username=${encodedUsername}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Password": encodedPassword,
+      },
+      dispatcher: agent,
+    },
+  );
 
   if (!loginRes.ok) {
-    throw new Error("Autenticazione Filebrowser fallita");
+    throw new Error("Credenziali errate o autenticazione Filebrowser fallita");
   }
 
   const token = await loginRes.text();
@@ -55,7 +64,11 @@ export const GET: RequestHandler = async () => {
     }
 
     const headers: Record<string, string> = {};
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+      headers["X-JWT-Assertion"] = token;
+      headers["X-Auth"] = token; // Legacy fallback just in case
+    }
 
     const res = await undiciFetch(`${normalizedUrl}/api/settings/sources`, {
       headers,
@@ -64,7 +77,12 @@ export const GET: RequestHandler = async () => {
 
     if (!res.ok) {
       if (res.status === 401 || res.status === 403) cachedToken = null; // force relogin next time
-      throw new Error(`Errore fetch usage: ${res.status}`);
+      if (res.status === 401 && !requireAuth) {
+        throw new Error(
+          "Il servizio richiede l'autenticazione. Abilita 'Richiede autenticazione' e inserisci le credenziali.",
+        );
+      }
+      throw new Error(`Errore fetch usage (Status ${res.status})`);
     }
 
     const sources: any = await res.json();
