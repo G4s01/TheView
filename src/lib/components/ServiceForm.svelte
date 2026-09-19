@@ -254,6 +254,8 @@
 					{ value: "docker", label: "DOCKER" },
 					{ value: "dockhand", label: "DOCKHAND" },
 					{ value: "filebrowser", label: "FILEBROWSER" },
+					{ value: "clock", label: "OROLOGIO" },
+					{ value: "weather", label: "METEO" },
 				]}
 			/>
 		</div>

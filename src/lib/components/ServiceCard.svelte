@@ -103,12 +103,12 @@
 	);
 
 	let showWidget = $derived(
-		(service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand' || service.widgetType === 'filebrowser') &&
+		(service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand' || service.widgetType === 'filebrowser' || service.widgetType === 'clock' || service.widgetType === 'weather') &&
 		(!requireAuth || appState.isAdmin)
 	);
 
 	let separateCells = $derived(
-		service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand' || service.widgetType === 'filebrowser'
+		service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand' || service.widgetType === 'filebrowser' || service.widgetType === 'clock' || service.widgetType === 'weather'
 	);
 </script>
 

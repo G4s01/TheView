@@ -47,6 +47,13 @@
     let filebrowser_password = $state('');
     let filebrowser_require_auth = $state(false);
 
+    // Clock
+    let clock_timezone = $state('');
+    let clock_format = $state('digital');
+
+    // Weather
+    let weather_location = $state('');
+
     let isExpanded = $state(true); // Always expand in this card
 
     $effect(() => {
@@ -94,6 +101,11 @@
                     filebrowser_username = data.filebrowser_username || '';
                     filebrowser_password = data.filebrowser_password || '';
                     filebrowser_require_auth = data.filebrowser_require_auth === true || data.filebrowser_require_auth === 'true';
+                } else if (widgetType === 'clock') {
+                    clock_timezone = data.clock_timezone || '';
+                    clock_format = data.clock_format || 'digital';
+                } else if (widgetType === 'weather') {
+                    weather_location = data.weather_location || '';
                 }
             }
         } catch (e) {
@@ -237,6 +249,50 @@
                     onSave={() => saveSettings({ filebrowser_url, filebrowser_username, filebrowser_password, filebrowser_require_auth })}
                     {isSaving}
                 />
+            {:else if widgetType === 'clock'}
+                <li class="px-6 py-5 flex flex-col gap-4">
+                    <div class="flex items-center gap-4 mb-2">
+                        <ServiceIcon icon="clock" name="Clock" size="lg" class="shadow-sm border border-border bg-card" />
+                        <p class="text-sm font-semibold text-foreground uppercase tracking-wider truncate">Orologio</p>
+                    </div>
+                    <div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border flex flex-col gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div class="md:col-span-6 h-10">
+                                <label class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Fuso Orario</label>
+                                <input type="text" class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" placeholder="Es. Europe/Rome (vuoto = locale)" bind:value={clock_timezone} />
+                            </div>
+                            <div class="md:col-span-6 h-10">
+                                <label class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Formato</label>
+                                <select class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" bind:value={clock_format}>
+                                    <option value="digital">Digitale</option>
+                                    <option value="analog">Analogico</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex justify-end mt-2">
+                            <SaveButton class="w-32 h-10" onclick={() => saveSettings({ clock_timezone, clock_format })} isLoading={isSaving} />
+                        </div>
+                    </div>
+                </li>
+            {:else if widgetType === 'weather'}
+                <li class="px-6 py-5 flex flex-col gap-4">
+                    <div class="flex items-center gap-4 mb-2">
+                        <ServiceIcon icon="cloud-sun" name="Weather" size="lg" class="shadow-sm border border-border bg-card" />
+                        <p class="text-sm font-semibold text-foreground uppercase tracking-wider truncate">Meteo</p>
+                    </div>
+                    <div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border flex flex-col gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div class="md:col-span-12 h-10">
+                                <label class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Località</label>
+                                <input type="text" class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" placeholder="Es. Milano, Roma, IT" bind:value={weather_location} />
+                                <p class="text-[10px] text-muted-foreground mt-1 ml-1">La località verrà geolocalizzata tramite Open-Meteo per ottenere le previsioni.</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-end mt-6">
+                            <SaveButton class="w-32 h-10" onclick={() => saveSettings({ weather_location })} isLoading={isSaving} />
+                        </div>
+                    </div>
+                </li>
             {/if}
         </ul>
     </div>

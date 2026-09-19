@@ -8,6 +8,8 @@
 	import DockerWidget from '../widgets/DockerWidget.svelte';
 	import DockhandWidget from '../widgets/DockhandWidget.svelte';
 	import FilebrowserWidget from '../widgets/FilebrowserWidget.svelte';
+	import ClockWidget from '../widgets/ClockWidget.svelte';
+	import WeatherWidget from '../widgets/WeatherWidget.svelte';
 	import { appState } from '$lib/client/state.svelte';
 	import { Pencil, GripHorizontal } from "@lucide/svelte";
 	import { Button } from "$lib/components/ui/button";
@@ -92,6 +94,14 @@
 			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
 				<FilebrowserWidget size={currentSize} />
 			</div>
+		{:else if service.widgetType === 'clock'}
+			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
+				<ClockWidget />
+			</div>
+		{:else if service.widgetType === 'weather'}
+			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
+				<WeatherWidget nodeW={nodeW} nodeH={nodeH} />
+			</div>
 		{/if}
 	</div>
 {:else}
@@ -127,6 +137,14 @@
 		{:else if service.widgetType === 'filebrowser'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
 				<FilebrowserWidget size={currentSize} />
+			</div>
+		{:else if service.widgetType === 'clock'}
+			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
+				<ClockWidget />
+			</div>
+		{:else if service.widgetType === 'weather'}
+			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
+				<WeatherWidget nodeW={nodeW} nodeH={nodeH} />
 			</div>
 		{/if}
 	</CardLink>
