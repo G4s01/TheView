@@ -97,7 +97,7 @@
 				
 				<div class="flex justify-between items-center mt-2">
 					<div class="flex gap-4 items-center">
-					{#each widget.fields.filter(f => f.type === 'checkbox') as field}
+					{#each widget.fields.filter((f: any) => f.type === 'checkbox') as field}
 						<ToggleInput label={field.label} bind:checked={values[field.id]} />
 					{/each}
 					</div>
@@ -137,7 +137,7 @@
 		
 		<div class="flex justify-between items-center mt-2 w-full">
 			<div class="flex flex-col gap-2 items-start">
-			{#each widget.fields.filter(f => f.type === 'checkbox') as field}
+			{#each widget.fields.filter((f: any) => f.type === 'checkbox') as field}
 				<ToggleInput label={field.label} bind:checked={values[field.id]} />
 			{/each}
 			</div>

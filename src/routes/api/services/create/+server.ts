@@ -12,14 +12,23 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   try {
     const data = await request.json();
     const finalGridId = data.gridId; // null for Inbox
-    
-    let w = 2, h = 2;
-    if (data.widgetType === 'qbittorrent' || data.widgetType === 'adguard' || data.widgetType === 'beszel' || data.widgetType === 'wgeasy') {
-      w = 3; h = 2;
-    } else if (data.widgetType === 'clock') {
-      w = 2; h = 2;
-    } else if (data.widgetType === 'weather') {
-      w = 2; h = 2;
+
+    let w = 2,
+      h = 2;
+    if (
+      data.widgetType === "qbittorrent" ||
+      data.widgetType === "adguard" ||
+      data.widgetType === "beszel" ||
+      data.widgetType === "wgeasy"
+    ) {
+      w = 3;
+      h = 2;
+    } else if (data.widgetType === "clock") {
+      w = 2;
+      h = 2;
+    } else if (data.widgetType === "weather") {
+      w = 2;
+      h = 2;
     }
 
     const [newService] = await db
@@ -32,12 +41,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         icon: data.icon || null,
         description: data.description || "",
         widgetType: data.widgetType || "none",
+        isWidget: true,
         pingEnabled: data.pingEnabled === true,
         dockerImage: data.dockerImage || null,
         size: `gs-${w}x${h}`,
         position: 999,
         w: w,
         h: h,
+        x: data.x !== undefined ? data.x : 0,
+        y: data.y !== undefined ? data.y : 0,
       })
       .returning();
 

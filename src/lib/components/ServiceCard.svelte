@@ -127,6 +127,8 @@
 				</button>
 			{/if}
 		</div>
+	{:else if service.isWidget}
+		<CardWidget {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescription} {dockerVersionInfo} {iconBgColor} {separateCells} {startEdit} />
 	{:else}
 		{#if appState.isEditMode && (!separateCells || !isWidgetLayout)}
 			<div class="absolute top-2 right-2 flex gap-1.5 z-20">

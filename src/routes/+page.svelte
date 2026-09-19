@@ -237,11 +237,13 @@
 										name: widgetName,
 										widgetType: widgetType,
 										icon: widgetIcon,
-										pingEnabled: false
+										pingEnabled: false,
+										x: item.x,
+										y: item.y
 									})
 								});
 							} else {
-								await fetch('/api/services/spacer', { method: 'POST', body: JSON.stringify({ gridId: gridId }) });
+								await fetch('/api/services/spacer', { method: 'POST', body: JSON.stringify({ gridId: gridId, x: item.x, y: item.y }) }); 
 							}
 							await invalidateAll();
 						} catch (err) {}

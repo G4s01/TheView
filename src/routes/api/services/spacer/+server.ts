@@ -10,38 +10,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   }
 
   try {
-    const { categoryId, gridId } = await request.json();
-    const finalGridId = gridId !== undefined ? gridId : categoryId;
-
-    // We can allow finalGridId to be null for the Inbox
-    const condition =
-      finalGridId === null
-        ? eq(services.grid_id, -1) // or however null is handled, but let's just insert
-        : eq(services.grid_id, finalGridId);
-
-    const existing =
-      finalGridId === null
-        ? await db
-            .select({ position: services.position })
-            .from(services)
-            .where(eq(services.categoryId, -1))
-        : await db
-            .select({ position: services.position })
-            .from(services)
-            .where(condition);
-
-    const maxPos =
-      existing.length > 0
-        ? Math.max(...existing.map((s) => s.position || 0))
-        : -1;
-    const nextPos = maxPos + 1;
+    const data = await request.json();
+    const finalGridId =
+      data.gridId !== undefined ? data.gridId : data.categoryId;
 
     const [newService] = await db
       .insert(services)
       .values({
         name: "__SPACER__",
         url: "#",
-        categoryId: -1, // Use -1 to satisfy constraints safely
+        categoryId: -1,
         grid_id: finalGridId,
         icon: null,
         description: "Spacer fittizio",
@@ -49,9 +27,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         pingEnabled: false,
         dockerImage: null,
         size: "gs-2x2",
-        position: nextPos,
+        position: 999,
         w: 1,
         h: 1,
+        x: data.x !== undefined ? data.x : 0,
+        y: data.y !== undefined ? data.y : 0,
       })
       .returning();
 
