@@ -253,6 +253,7 @@
 					{ value: "duplicati", label: "DUPLICATI" },
 					{ value: "docker", label: "DOCKER" },
 					{ value: "dockhand", label: "DOCKHAND" },
+					{ value: "filebrowser", label: "FILEBROWSER" },
 				]}
 			/>
 		</div>

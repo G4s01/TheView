@@ -21,13 +21,9 @@ export const GET: RequestHandler = async ({ locals }) => {
       safeSettings.adguard_password,
     );
   if (safeSettings.beszel_password)
-    safeSettings.beszel_password = decryptString(
-      safeSettings.beszel_password,
-    );
+    safeSettings.beszel_password = decryptString(safeSettings.beszel_password);
   if (safeSettings.wgeasy_password)
-    safeSettings.wgeasy_password = decryptString(
-      safeSettings.wgeasy_password,
-    );
+    safeSettings.wgeasy_password = decryptString(safeSettings.wgeasy_password);
   if (safeSettings.duplicati_password)
     safeSettings.duplicati_password = decryptString(
       safeSettings.duplicati_password,
@@ -35,6 +31,10 @@ export const GET: RequestHandler = async ({ locals }) => {
   if (safeSettings.dockhand_password)
     safeSettings.dockhand_password = decryptString(
       safeSettings.dockhand_password,
+    );
+  if (safeSettings.filebrowser_password)
+    safeSettings.filebrowser_password = decryptString(
+      safeSettings.filebrowser_password,
     );
 
   return json(safeSettings);
@@ -110,6 +110,8 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       delete newSettings.duplicati_password;
     if (newSettings.dockhand_password === "********")
       delete newSettings.dockhand_password;
+    if (newSettings.filebrowser_password === "********")
+      delete newSettings.filebrowser_password;
 
     // Crittografia/Hash dinamico
     const { hashPassword, encryptString } = await import("$lib/server/crypto");
@@ -128,14 +130,10 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       );
     }
     if (newSettings.beszel_password) {
-      newSettings.beszel_password = encryptString(
-        newSettings.beszel_password,
-      );
+      newSettings.beszel_password = encryptString(newSettings.beszel_password);
     }
     if (newSettings.wgeasy_password) {
-      newSettings.wgeasy_password = encryptString(
-        newSettings.wgeasy_password,
-      );
+      newSettings.wgeasy_password = encryptString(newSettings.wgeasy_password);
     }
     if (newSettings.duplicati_password) {
       newSettings.duplicati_password = encryptString(
@@ -147,28 +145,36 @@ export const POST: RequestHandler = async ({ locals, request }) => {
         newSettings.dockhand_password,
       );
     }
+    if (newSettings.filebrowser_password) {
+      newSettings.filebrowser_password = encryptString(
+        newSettings.filebrowser_password,
+      );
+    }
 
     if (newSettings.enableCategories !== undefined) {
       const currentEnable = currentSettings.enableCategories !== false;
       const newEnable = newSettings.enableCategories !== false;
-      
+
       if (currentEnable !== newEnable) {
         const { db } = await import("$lib/server/db");
         const { services, categories } = await import("$lib/server/db/schema");
         const { eq } = await import("drizzle-orm");
-        
+
         const allServices = await db.select().from(services);
         const allCats = await db.select().from(categories);
-        const catIds = [...allCats.map(c => c.id), -1];
+        const catIds = [...allCats.map((c) => c.id), -1];
 
         for (const catId of catIds) {
-           const catServices = allServices.filter(s => s.categoryId === catId);
-           catServices.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-           for (let i = 0; i < catServices.length; i++) {
-             await db.update(services)
-               .set({ size: '1x1', position: i })
-               .where(eq(services.id, catServices[i].id));
-           }
+          const catServices = allServices.filter((s) => s.categoryId === catId);
+          catServices.sort((a, b) =>
+            (a.name || "").localeCompare(b.name || ""),
+          );
+          for (let i = 0; i < catServices.length; i++) {
+            await db
+              .update(services)
+              .set({ size: "1x1", position: i })
+              .where(eq(services.id, catServices[i].id));
+          }
         }
       }
     }

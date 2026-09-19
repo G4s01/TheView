@@ -5,7 +5,7 @@
 	import WidgetSettingsForm from './WidgetSettingsForm.svelte';
 	import { toast } from 'svelte-sonner';
 
-	let expandedStates = $state({ qbit: false, adguard: false, beszel: false, wgeasy: false, duplicati: false, docker: false });
+	let expandedStates = $state({ qbit: false, adguard: false, beszel: false, wgeasy: false, duplicati: false, filebrowser: false, docker: false });
 
 	let qbit_url = $state('');
 	let qbit_username = $state('');
@@ -117,6 +117,29 @@
 		}
 	}
 
+	let filebrowser_url = $state('');
+	let filebrowser_username = $state('');
+	let filebrowser_password = $state('');
+	let filebrowser_require_auth = $state(false);
+	let isSavingFilebrowser = $state(false);
+
+	async function saveFilebrowserSettings() {
+		isSavingFilebrowser = true;
+		try {
+			const res = await fetch('/api/settings', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ filebrowser_url, filebrowser_username, filebrowser_password, filebrowser_require_auth })
+			});
+			if (res.ok) toast.success('Impostazioni Filebrowser salvate con successo!');
+			else toast.error('Errore durante il salvataggio.');
+		} catch (e) {
+			toast.error('Errore di rete.');
+		} finally {
+			isSavingFilebrowser = false;
+		}
+	}
+
 	let docker_socket_path = $state('');
 	let isSavingDocker = $state(false);
 
@@ -188,6 +211,10 @@
 				wgeasy_password = data.wgeasy_password || '';
 				duplicati_url = data.duplicati_url || '';
 				duplicati_password = data.duplicati_password || '';
+				filebrowser_url = data.filebrowser_url || '';
+				filebrowser_username = data.filebrowser_username || '';
+				filebrowser_password = data.filebrowser_password || '';
+				filebrowser_require_auth = data.filebrowser_require_auth === true || data.filebrowser_require_auth === 'true';
 				docker_socket_path = data.docker_socket_path || '/var/run/docker.sock';
 				dockhandUrl = data.dockhand_url || '';
 				dockhandUsername = data.dockhand_username || '';
@@ -281,6 +308,20 @@
 					onSave={saveDuplicatiSettings}
 					isSaving={isSavingDuplicati}
 					requireAuth={false}
+				/>
+				<WidgetSettingsForm
+					title="Filebrowser"
+					icon="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/filebrowser.svg"
+					usernameLabel="Username"
+					passwordLabel="Password"
+					urlLabel="URL (es. http://192.168.1.10:8080)"
+					bind:username={filebrowser_username}
+					bind:password={filebrowser_password}
+					bind:url={filebrowser_url}
+					bind:requireAuth={filebrowser_require_auth}
+					bind:isExpanded={expandedStates.filebrowser}
+					onSave={saveFilebrowserSettings}
+					isSaving={isSavingFilebrowser}
 				/>
 				<WidgetSettingsForm
 					title="Docker"

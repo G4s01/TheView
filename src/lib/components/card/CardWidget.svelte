@@ -7,6 +7,7 @@
 	import DuplicatiWidget from '../widgets/DuplicatiWidget.svelte';
 	import DockerWidget from '../widgets/DockerWidget.svelte';
 	import DockhandWidget from '../widgets/DockhandWidget.svelte';
+	import FilebrowserWidget from '../widgets/FilebrowserWidget.svelte';
 	import { appState } from '$lib/client/state.svelte';
 	import { Pencil, GripHorizontal } from "@lucide/svelte";
 	import { Button } from "$lib/components/ui/button";
@@ -87,6 +88,10 @@
 			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
 				<DockhandWidget size={currentSize} />
 			</div>
+		{:else if service.widgetType === 'filebrowser'}
+			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
+				<FilebrowserWidget size={currentSize} />
+			</div>
 		{/if}
 	</div>
 {:else}
@@ -118,6 +123,10 @@
 		{:else if service.widgetType === 'dockhand'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
 				<DockhandWidget size={currentSize} />
+			</div>
+		{:else if service.widgetType === 'filebrowser'}
+			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
+				<FilebrowserWidget size={currentSize} />
 			</div>
 		{/if}
 	</CardLink>
