@@ -13,7 +13,7 @@ async function getAuthToken(url: string, username?: string, password?: string) {
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry)
     return cachedToken;
 
-  const loginRes = await undiciFetch(`${url}/api/login`, {
+  const loginRes = await undiciFetch(`${url}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -55,9 +55,9 @@ export const GET: RequestHandler = async () => {
     }
 
     const headers: Record<string, string> = {};
-    if (token) headers["X-Auth"] = token;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const res = await undiciFetch(`${normalizedUrl}/api/usage/`, {
+    const res = await undiciFetch(`${normalizedUrl}/api/settings/sources`, {
       headers,
       dispatcher: agent,
     });
@@ -67,8 +67,23 @@ export const GET: RequestHandler = async () => {
       throw new Error(`Errore fetch usage: ${res.status}`);
     }
 
-    const usage: any = await res.json();
-    return json(usage);
+    const sources: any = await res.json();
+
+    // Aggregate usage from all sources
+    let total = 0;
+    let used = 0;
+
+    if (sources && typeof sources === "object") {
+      for (const key of Object.keys(sources)) {
+        const source = sources[key];
+        if (source && typeof source === "object") {
+          total += source.total || 0;
+          used += source.used || 0;
+        }
+      }
+    }
+
+    return json({ total, used });
   } catch (e: any) {
     return json({ error: e.message || "Errore interno" }, { status: 500 });
   }
