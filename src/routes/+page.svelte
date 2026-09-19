@@ -376,7 +376,7 @@
 		uniqueServices.forEach((service) => {
 			addWidgetToGrid(grid, service);
 		});
-		(grid as any).commit();
+		grid.batchUpdate(false);
 	}
 </script>
 

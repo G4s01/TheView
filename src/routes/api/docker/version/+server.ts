@@ -139,11 +139,6 @@ export const GET: RequestHandler = async ({ url }) => {
     const containers = await dockerRequest("/containers/json");
     if (containers && Array.isArray(containers)) {
       for (const c of containers) {
-        // If container explicitly uses this image but digest differs from the pulled one
-        if (c.Image === image && c.ImageID !== localDigest) {
-          updateAvailable = true;
-          break;
-        }
         // If container is untagged (sha256:) and its compose image label matches OR its name resembles the image name
         if (c.Image.startsWith("sha256:")) {
           const composeImage = c.Labels?.["com.docker.compose.image"];
