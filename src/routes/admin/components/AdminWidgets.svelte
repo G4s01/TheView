@@ -4,8 +4,11 @@
 	import SettingsHeader from '$lib/components/ui/SettingsHeader.svelte';
 	import WidgetSettingsForm from './WidgetSettingsForm.svelte';
 	import { toast } from 'svelte-sonner';
+	import SaveButton from "$lib/components/ui/SaveButton.svelte";
+	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
+	import { Pencil, Plus, X } from "@lucide/svelte";
 
-	let expandedStates = $state({ qbit: false, adguard: false, beszel: false, wgeasy: false, duplicati: false, filebrowser: false, docker: false });
+	let expandedStates = $state({ qbit: false, adguard: false, beszel: false, wgeasy: false, duplicati: false, filebrowser: false, docker: false, clock: false, weather: false });
 
 	let qbit_url = $state('');
 	let qbit_username = $state('');
@@ -160,6 +163,47 @@
 		}
 	}
 
+	let clock_timezone = $state('');
+	let clock_format = $state('digital');
+	let isSavingClock = $state(false);
+
+	async function saveClockSettings() {
+		isSavingClock = true;
+		try {
+			const res = await fetch('/api/settings', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ clock_timezone, clock_format })
+			});
+			if (res.ok) toast.success('Impostazioni Orologio salvate con successo!');
+			else toast.error('Errore durante il salvataggio.');
+		} catch (e) {
+			toast.error('Errore di rete.');
+		} finally {
+			isSavingClock = false;
+		}
+	}
+
+	let weather_location = $state('');
+	let isSavingWeather = $state(false);
+
+	async function saveWeatherSettings() {
+		isSavingWeather = true;
+		try {
+			const res = await fetch('/api/settings', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ weather_location })
+			});
+			if (res.ok) toast.success('Impostazioni Meteo salvate con successo!');
+			else toast.error('Errore durante il salvataggio.');
+		} catch (e) {
+			toast.error('Errore di rete.');
+		} finally {
+			isSavingWeather = false;
+		}
+	}
+
 	let dockhandUrl = $state('');
 	let dockhandUsername = $state('');
 	let dockhandPassword = $state('');
@@ -220,6 +264,9 @@
 				dockhandUsername = data.dockhand_username || '';
 				dockhandPassword = data.dockhand_password || '';
 				isDockhandEditing = !dockhandUrl;
+				clock_timezone = data.clock_timezone || '';
+				clock_format = data.clock_format || 'digital';
+				weather_location = data.weather_location || '';
 			}
 		} catch (e) {
 			console.error(e);
@@ -346,6 +393,103 @@
 					onSave={saveDockhandSettings}
 					isSaving={false}
 				/>
+				<!-- Clock -->
+				<li id="widget-clock-row" class="px-6 py-5 hover:bg-muted/50 transition-colors flex flex-col gap-4 cursor-pointer" onclick={() => expandedStates.clock = !expandedStates.clock}>
+					<div class="flex items-center justify-between w-full">
+						<div class="flex items-center gap-4 flex-1 min-w-0 mr-4">
+							<div class="shrink-0">
+								<ServiceIcon icon="clock" name="Orologio" size="lg" class="shadow-sm border border-border bg-card" />
+							</div>
+							<div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 flex-1 min-w-0">
+								<p class="text-sm font-semibold text-foreground uppercase tracking-wider truncate">Orologio</p>
+							</div>
+						</div>
+						
+						<div>
+							<button type="button" onclick={(e: Event) => { e.stopPropagation(); expandedStates.clock = !expandedStates.clock; }} class="inline-flex items-center justify-center size-10 border border-transparent rounded-full shadow-sm transition-all duration-300 {expandedStates.clock ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground hover:opacity-90'} focus:outline-none hover:scale-110">
+								<div class="relative size-5">
+									<Pencil class="absolute top-0 left-0 size-4 transition-all duration-300 {expandedStates.clock ? 'opacity-60' : ''}" strokeWidth={2.5} />
+									{#if expandedStates.clock}
+										<X class="absolute -bottom-1 -right-1 size-3.5 shadow-sm" strokeWidth={3} />
+									{:else}
+										<Plus class="absolute -bottom-1 -right-1 size-3.5 shadow-sm" strokeWidth={3} />
+									{/if}
+								</div>
+							</button>
+						</div>
+					</div>
+					
+					{#if expandedStates.clock}
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<div class="w-full mt-2 relative">
+							<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-accent rounded-t-xl z-10"></div>
+							<div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border relative flex flex-col gap-4" onclick={(e) => e.stopPropagation()} role="presentation">
+								<div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+									<div class="md:col-span-6 h-10">
+										<label for="admin_clock_timezone" class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Fuso Orario</label>
+										<input id="admin_clock_timezone" type="text" class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" placeholder="Es. Europe/Rome (vuoto = locale)" bind:value={clock_timezone} />
+									</div>
+									<div class="md:col-span-6 h-10">
+										<label for="admin_clock_format" class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Formato</label>
+										<select id="admin_clock_format" class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" bind:value={clock_format}>
+											<option value="digital">Digitale</option>
+											<option value="analog">Analogico</option>
+										</select>
+									</div>
+								</div>
+								<div class="flex justify-end mt-2">
+									<SaveButton class="w-32 h-10" onclick={saveClockSettings} isLoading={isSavingClock} />
+								</div>
+							</div>
+						</div>
+					{/if}
+				</li>
+
+				<!-- Weather -->
+				<li id="widget-weather-row" class="px-6 py-5 hover:bg-muted/50 transition-colors flex flex-col gap-4 cursor-pointer" onclick={() => expandedStates.weather = !expandedStates.weather}>
+					<div class="flex items-center justify-between w-full">
+						<div class="flex items-center gap-4 flex-1 min-w-0 mr-4">
+							<div class="shrink-0">
+								<ServiceIcon icon="cloud-sun" name="Meteo" size="lg" class="shadow-sm border border-border bg-card" />
+							</div>
+							<div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 flex-1 min-w-0">
+								<p class="text-sm font-semibold text-foreground uppercase tracking-wider truncate">Meteo</p>
+							</div>
+						</div>
+						
+						<div>
+							<button type="button" onclick={(e: Event) => { e.stopPropagation(); expandedStates.weather = !expandedStates.weather; }} class="inline-flex items-center justify-center size-10 border border-transparent rounded-full shadow-sm transition-all duration-300 {expandedStates.weather ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground hover:opacity-90'} focus:outline-none hover:scale-110">
+								<div class="relative size-5">
+									<Pencil class="absolute top-0 left-0 size-4 transition-all duration-300 {expandedStates.weather ? 'opacity-60' : ''}" strokeWidth={2.5} />
+									{#if expandedStates.weather}
+										<X class="absolute -bottom-1 -right-1 size-3.5 shadow-sm" strokeWidth={3} />
+									{:else}
+										<Plus class="absolute -bottom-1 -right-1 size-3.5 shadow-sm" strokeWidth={3} />
+									{/if}
+								</div>
+							</button>
+						</div>
+					</div>
+					
+					{#if expandedStates.weather}
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<div class="w-full mt-2 relative">
+							<div class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-accent rounded-t-xl z-10"></div>
+							<div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border relative flex flex-col gap-4" onclick={(e) => e.stopPropagation()} role="presentation">
+								<div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+									<div class="md:col-span-12 h-10">
+										<label for="admin_weather_location" class="block text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5 ml-1">Località</label>
+										<input id="admin_weather_location" type="text" class="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow" placeholder="Es. Milano, Roma, IT" bind:value={weather_location} />
+										<p class="text-[10px] text-muted-foreground mt-1 ml-1">La località verrà geolocalizzata tramite Open-Meteo per ottenere le previsioni.</p>
+									</div>
+								</div>
+								<div class="flex justify-end mt-6">
+									<SaveButton class="w-32 h-10" onclick={saveWeatherSettings} isLoading={isSavingWeather} />
+								</div>
+							</div>
+						</div>
+					{/if}
+				</li>
 			</ul>
 		</Card.Content>
 	</Card.Root>

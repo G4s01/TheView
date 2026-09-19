@@ -62,6 +62,13 @@ export const GET: RequestHandler = async ({ url }) => {
   let repo = image;
   let tag = "latest";
 
+  // Parse tag if present
+  if (repo.includes(":")) {
+    const parts = repo.split(":");
+    tag = parts.pop() || "latest";
+    repo = parts.join(":");
+  }
+
   let registry = "registry-1.docker.io";
   let registryPath = repo;
 
