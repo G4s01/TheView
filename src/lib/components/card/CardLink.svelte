@@ -44,6 +44,25 @@
 	visible={service.pingEnabled && !appState.isEditMode && !hidePing}
 />
 
+{#if dockerVersionInfo && dockerVersionInfo.updateAvailable && !appState.isEditMode}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div 
+		class="absolute top-2 left-2 flex items-center justify-center z-20 cursor-pointer text-destructive hover:text-destructive/80 transition-colors bg-card rounded-full shadow-sm" 
+		title="Aggiornamento disponibile online! Clicca per vedere la release."
+		onclick={(e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			if (dockerVersionInfo?.updateUrl) {
+				window.open(dockerVersionInfo.updateUrl, '_blank');
+			}
+		}}
+	>
+		<span class="absolute inline-flex h-full w-full rounded-full bg-destructive opacity-40 animate-ping"></span>
+		<ArrowUpCircle class="size-4 animate-pulse relative" />
+	</div>
+{/if}
+
 <!-- Icon -->
 <div class="relative flex items-center justify-center shrink-0">
 	<div 
@@ -51,28 +70,10 @@
 		style="background-color: {iconBgColor}"
 	>
 		<ServiceIcon {iconStyle} name={service.name} icon={service.icon} size="lg" class="w-3/5! h-3/5!" />
-		{#if dockerVersionInfo && dockerVersionInfo.updateAvailable && !appState.isEditMode}
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div 
-				class="absolute -top-1.5 -right-1.5 flex items-center justify-center z-20 cursor-pointer text-destructive hover:text-destructive/80 transition-colors bg-card rounded-full shadow-sm" 
-				title="Aggiornamento disponibile online! Clicca per vedere la release."
-				onclick={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					if (dockerVersionInfo?.updateUrl) {
-						window.open(dockerVersionInfo.updateUrl, '_blank');
-					}
-				}}
-			>
-				<span class="absolute inline-flex h-full w-full rounded-full bg-destructive opacity-40 animate-ping"></span>
-				<ArrowUpCircle class="size-4 animate-pulse relative" />
-			</div>
-		{/if}
 	</div>
 </div>
 
-<div class="min-w-0 flex flex-col shrink-0 w-full {isTall ? 'items-center text-center justify-center mt-3' : (isWide && !centerText ? 'text-left ml-4' : 'mt-3 items-center text-center')}">
+<div class="flex-1 min-w-0 flex flex-col {isTall ? 'items-center text-center justify-center mt-3' : (isWide && !centerText ? 'text-left ml-4' : 'mt-3 items-center text-center')}">
 	<h3 class="{!isBaseSize ? 'text-xl font-bold' : 'text-base font-semibold'} text-foreground truncate group-hover:text-primary transition-colors w-full">
 		{service.name}
 	</h3>

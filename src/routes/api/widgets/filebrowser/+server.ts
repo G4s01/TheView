@@ -45,10 +45,20 @@ export const GET: RequestHandler = async () => {
     if (password) password = decryptString(password);
 
     const normalizedUrl = url.replace(/\/$/, "");
-    const token = await getAuthToken(normalizedUrl, username, password);
+    const requireAuth =
+      settings.filebrowser_require_auth === true ||
+      settings.filebrowser_require_auth === "true";
+
+    let token = "";
+    if (requireAuth) {
+      token = await getAuthToken(normalizedUrl, username, password);
+    }
+
+    const headers: Record<string, string> = {};
+    if (token) headers["X-Auth"] = token;
 
     const res = await undiciFetch(`${normalizedUrl}/api/usage/`, {
-      headers: { "X-Auth": token },
+      headers,
       dispatcher: agent,
     });
 
