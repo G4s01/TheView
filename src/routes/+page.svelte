@@ -330,7 +330,7 @@
 		w = Math.max(w, minW);
 		h = Math.max(h, minH);
 		
-		const autoPos = service.x === undefined || service.x === null || service.categoryId === -1;
+		const autoPos = service.x === undefined || service.x === null || service.category === 'Inbox';
 		
 		const widgetEl = grid.addWidget({
 			id: service.id.toString(),
@@ -364,9 +364,19 @@
 
 	function renderWidgets(grid: GridStack, services: any[]) {
 		const uniqueServices = Array.from(new Map(services.map(s => [s.id, s])).values());
+		
+		// Sort items by Y then X to prevent insertion collisions pushing items around
+		uniqueServices.sort((a, b) => {
+			const ay = a.y || 0, by = b.y || 0;
+			if (ay !== by) return ay - by;
+			return (a.x || 0) - (b.x || 0);
+		});
+		
+		grid.batchUpdate();
 		uniqueServices.forEach((service) => {
 			addWidgetToGrid(grid, service);
 		});
+		(grid as any).commit();
 	}
 </script>
 

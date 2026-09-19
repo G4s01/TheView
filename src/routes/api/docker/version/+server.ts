@@ -85,6 +85,7 @@ export const GET: RequestHandler = async ({ url }) => {
               Authorization: `Bearer ${tokenData.token}`,
               Accept:
                 "application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.index.v1+json",
+              "Cache-Control": "no-cache",
             },
           },
         );
@@ -116,6 +117,7 @@ export const GET: RequestHandler = async ({ url }) => {
               Authorization: `Bearer ${tokenData.token}`,
               Accept:
                 "application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.index.v1+json",
+              "Cache-Control": "no-cache",
             },
           },
         );
@@ -132,11 +134,46 @@ export const GET: RequestHandler = async ({ url }) => {
     updateAvailable = true;
   }
 
-  return json({
-    image,
-    updateAvailable,
-    updateUrl,
-    localDigest,
-    remoteDigest,
-  });
+  // Check if any container is running an untagged version of this image or old digest
+  if (!updateAvailable) {
+    const containers = await dockerRequest("/containers/json");
+    if (containers && Array.isArray(containers)) {
+      for (const c of containers) {
+        // If container explicitly uses this image but digest differs from the pulled one
+        if (c.Image === image && c.ImageID !== localDigest) {
+          updateAvailable = true;
+          break;
+        }
+        // If container is untagged (sha256:) and its compose image label matches OR its name resembles the image name
+        if (c.Image.startsWith("sha256:")) {
+          const composeImage = c.Labels?.["com.docker.compose.image"];
+          if (composeImage === image) {
+            updateAvailable = true;
+            break;
+          }
+          // Fallback heuristic: if container name shares the repo name
+          const repoName = image.split("/").pop()?.split(":")[0];
+          if (repoName && c.Names?.some((n: string) => n.includes(repoName))) {
+            updateAvailable = true;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return json(
+    {
+      image,
+      updateAvailable,
+      updateUrl,
+      localDigest,
+      remoteDigest,
+    },
+    {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+      },
+    },
+  );
 };
