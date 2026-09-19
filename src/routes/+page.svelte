@@ -7,7 +7,7 @@
 	import { navigating } from '$app/stores';
 	import { slide } from 'svelte/transition';
 	import { invalidateAll } from '$app/navigation';
-	import { Plus, X, Trash, EyeOff, Eye, Pencil, Layers, PlusSquare, Undo2, SquareDashed, LayoutGrid, Search, ChevronUp, ChevronDown, LayoutDashboard } from '@lucide/svelte';
+	import { Plus, X, Trash, EyeOff, Eye, Pencil, Layers, PlusSquare, Undo2, SquareDashed, LayoutGrid, Search, ChevronUp, ChevronDown, LayoutDashboard, Blocks } from '@lucide/svelte';
 	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
 	import { enhance } from '$app/forms';
@@ -162,6 +162,7 @@
 			}, node);
 			
 			GridStackClass.setupDragIn('.drag-in-spacer', { scroll: false, appendTo: 'body', helper: 'clone' });
+			GridStackClass.setupDragIn('.drag-in-widget', { scroll: false, appendTo: 'body', helper: 'clone' });
 
 			grids.set(gridName, grid as GridStack);
 
@@ -198,15 +199,31 @@
 
 			grid!.on('added', async (event: Event, items: any[]) => {
 				for (const item of items) {
-					if (item.el && item.el.dataset.type === 'spacer') {
+					if (item.el && (item.el.dataset.type === 'spacer' || item.el.dataset.type === 'widget')) {
+						const isWidget = item.el.dataset.type === 'widget';
 						const gridIdStr = gridName;
 						const gridId = gridIdStr === 'Inbox' ? null : parseInt(gridIdStr);
 						try {
-							
 							grid!.removeWidget(item.el, true, false);
-							await fetch('/api/services/spacer', { method: 'POST', body: JSON.stringify({ gridId: gridId }) });
+							if (isWidget) {
+								const widgetType = item.el.dataset.widgetType;
+								const widgetName = item.el.dataset.widgetName;
+								const widgetIcon = item.el.dataset.widgetIcon;
+								
+								await fetch('/api/services/create', { 
+									method: 'POST', 
+									body: JSON.stringify({ 
+										gridId,
+										name: widgetName,
+										widgetType: widgetType,
+										icon: widgetIcon,
+										pingEnabled: false
+									})
+								});
+							} else {
+								await fetch('/api/services/spacer', { method: 'POST', body: JSON.stringify({ gridId: gridId }) });
+							}
 							await invalidateAll();
-
 						} catch (err) {}
 					} else if (item.id) {
 						if (appState.isEditMode) {
@@ -487,11 +504,11 @@
 		<div class="flex items-center justify-between border-b border-border/50 pb-4">
 			<div class="flex items-center gap-3">
 				<div class="p-2 bg-primary/20 text-primary rounded-xl">
-					<LayoutDashboard class="size-6" />
+					<Blocks class="size-6" />
 				</div>
 				<div>
-					<h2 class="text-xl font-bold uppercase tracking-wider text-foreground">Aggiunta Widget</h2>
-					<p class="text-xs text-muted-foreground mt-0.5">Seleziona un widget da aggiungere alla dashboard.</p>
+					<h2 class="text-xl font-bold uppercase tracking-wider text-foreground">Aggiunta Rapida Widget</h2>
+					<p class="text-xs text-muted-foreground mt-0.5">Trascina un widget nella griglia per aggiungerlo immediatamente.</p>
 				</div>
 			</div>
 			<button onclick={() => isWidgetModalOpen = false} class="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-xl transition-colors ring-1 ring-border shadow-sm">
@@ -501,39 +518,23 @@
 		
 		<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 z-10">
 			{#each [
-				{ name: 'Orologio', type: 'clock', icon: 'lucide:clock' },
-				{ name: 'Meteo', type: 'weather', icon: 'lucide:cloud-sun' },
-				{ name: 'qBittorrent', type: 'qbittorrent', icon: 'qbittorrent' },
-				{ name: 'AdGuard Home', type: 'adguard', icon: 'adguard-home' },
-				{ name: 'Beszel', type: 'beszel', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/beszel.svg' },
-				{ name: 'Wg-easy', type: 'wgeasy', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/wireguard.svg' },
-				{ name: 'Duplicati', type: 'duplicati', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/duplicati.svg' },
-				{ name: 'Filebrowser', type: 'filebrowser', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/filebrowser.svg' },
-				{ name: 'Docker', type: 'docker', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/docker.svg' },
-				{ name: 'Dockhand', type: 'dockhand', icon: 'dockhand' },
+				{ name: 'Orologio', type: 'clock', icon: 'lucide:clock', w: 2, h: 2 },
+				{ name: 'Meteo', type: 'weather', icon: 'lucide:cloud-sun', w: 2, h: 2 },
+				{ name: 'qBittorrent', type: 'qbittorrent', icon: 'qbittorrent', w: 3, h: 2 },
+				{ name: 'AdGuard Home', type: 'adguard', icon: 'adguard-home', w: 3, h: 2 },
+				{ name: 'Beszel', type: 'beszel', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/beszel.svg', w: 3, h: 2 },
+				{ name: 'Wg-easy', type: 'wgeasy', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/wireguard.svg', w: 3, h: 2 },
+				{ name: 'Duplicati', type: 'duplicati', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/duplicati.svg', w: 2, h: 2 },
+				{ name: 'Filebrowser', type: 'filebrowser', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/filebrowser.svg', w: 2, h: 2 },
+				{ name: 'Docker', type: 'docker', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/docker.svg', w: 2, h: 2 },
+				{ name: 'Dockhand', type: 'dockhand', icon: 'dockhand', w: 2, h: 2 },
 			] as widget}
-				<form action="/admin?/createService" method="POST" use:enhance={() => {
-					return async ({ result }: any) => {
-						if (result.type === 'success' || result.type === 'redirect') {
-							hasAddedServices = true;
-							isWidgetModalOpen = false;
-							window.location.reload();
-						}
-					};
-				}}>
-					<input type="hidden" name="name" value={widget.name} />
-					<input type="hidden" name="widgetType" value={widget.type} />
-					<input type="hidden" name="icon" value={widget.icon} />
-					<!-- pingEnabled is required by ServiceForm logic to be on/off? Actually let's just leave defaults -->
-					<input type="hidden" name="pingEnabled" value="off" />
-					<input type="hidden" name="url" value="" />
-					<input type="hidden" name="description" value="" />
-					
-					<button type="submit" class="w-full h-full flex flex-col items-center justify-center gap-3 p-4 bg-background rounded-xl border border-border shadow-sm hover:bg-muted/50 hover:border-primary/50 hover:scale-105 transition-all cursor-pointer group">
+				<div class="drag-in-widget grid-stack-item cursor-grab active:cursor-grabbing flex flex-col items-center justify-center gap-3 p-4 bg-background rounded-xl border border-border shadow-sm hover:bg-primary/10 hover:border-primary/50 transition-colors group text-primary" data-type="widget" data-widget-type={widget.type} data-widget-name={widget.name} data-widget-icon={widget.icon} {...{'gs-w': widget.w.toString(), 'gs-h': widget.h.toString(), 'gs-min-w': widget.w.toString(), 'gs-min-h': widget.h.toString()}} title="Trascina nella griglia per aggiungerlo">
+					<div class="grid-stack-item-content pointer-events-none flex flex-col items-center justify-center static! bg-transparent border-none shadow-none inset-0 w-full h-full gap-2">
 						<ServiceIcon icon={widget.icon} name={widget.name} size="lg" class="shadow-sm border border-border bg-card group-hover:scale-110 transition-transform" />
 						<span class="text-xs font-semibold text-foreground uppercase tracking-wider text-center">{widget.name}</span>
-					</button>
-				</form>
+					</div>
+				</div>
 			{/each}
 		</div>
 	</div>
@@ -639,13 +640,8 @@
 				
 				<button onclick={() => isWidgetModalOpen = !isWidgetModalOpen} class="w-12 h-12 flex items-center justify-center rounded-xl {isWidgetModalOpen ? 'bg-primary/20 ring-2 ring-primary/50' : 'hover:bg-primary/10'} text-primary transition-colors relative group" title={isWidgetModalOpen ? "Chiudi Aggiunta Widget" : "Aggiungi Widget"}>
 					<div class="relative flex items-center justify-center">
-						<LayoutDashboard class="size-6 group-hover:scale-110 transition-transform" />
+						<Blocks class="size-6 group-hover:scale-110 transition-transform" />
 						<div class="absolute -bottom-2 -right-2 bg-primary text-primary-foreground rounded-full shadow-sm ring-2 ring-card p-0.5">
-							{#if isWidgetModalOpen}
-								<X class="size-2.5" strokeWidth={4} />
-							{:else}
-								<Plus class="size-2.5" strokeWidth={4} />
-							{/if}
 						</div>
 					</div>
 				</button>
