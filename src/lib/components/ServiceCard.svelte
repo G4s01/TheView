@@ -98,16 +98,17 @@
 	let requireAuth = $derived(
 		service.widgetType === 'qbittorrent' ? (appState.settings?.qbit_require_auth === 'true' || appState.settings?.qbit_require_auth === true)
 		: service.widgetType === 'adguard' ? (appState.settings?.adguard_require_auth === 'true' || appState.settings?.adguard_require_auth === true)
+		: service.widgetType === 'filebrowser' ? (appState.settings?.filebrowser_require_auth === 'true' || appState.settings?.filebrowser_require_auth === true)
 		: false // Wg-easy handles its own cookies/session
 	);
 
 	let showWidget = $derived(
-		(service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand') &&
+		(service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand' || service.widgetType === 'filebrowser') &&
 		(!requireAuth || appState.isAdmin)
 	);
 
 	let separateCells = $derived(
-		service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand'
+		service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand' || service.widgetType === 'filebrowser'
 	);
 </script>
 
