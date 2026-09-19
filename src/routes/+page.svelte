@@ -7,8 +7,10 @@
 	import { navigating } from '$app/stores';
 	import { slide } from 'svelte/transition';
 	import { invalidateAll } from '$app/navigation';
-	import { Plus, X, Trash, EyeOff, Eye, Pencil, Layers, PlusSquare, Undo2, SquareDashed, LayoutGrid, Search, ChevronUp, ChevronDown } from '@lucide/svelte';
+	import { Plus, X, Trash, EyeOff, Eye, Pencil, Layers, PlusSquare, Undo2, SquareDashed, LayoutGrid, Search, ChevronUp, ChevronDown, LayoutDashboard } from '@lucide/svelte';
 	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
+	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
+	import { enhance } from '$app/forms';
 
 	import * as Dialog from '$lib/components/ui/dialog/index';
 	import AdminDiscovery from './admin/components/AdminDiscovery.svelte';
@@ -67,6 +69,7 @@
 	let mountedWidgets = new Map<number, any>();
 	let mountedServices = new Map<number, any>();
 	let isDiscoveryModalOpen = $state(false);
+	let isWidgetModalOpen = $state(false);
 	let hasAddedServices = $state(false);
 	let isAddManualExpanded = $state(false);
 
@@ -476,6 +479,65 @@
 	</div>
 {/if}
 
+{#if isWidgetModalOpen}
+	<div transition:slide class="w-full bg-card rounded-2xl border-2 border-primary/20 p-6 shadow-lg mb-6 flex flex-col gap-6 relative overflow-hidden">
+		<!-- Decorazione sfondo -->
+		<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 -translate-y-1/2 translate-x-1/3"></div>
+
+		<div class="flex items-center justify-between border-b border-border/50 pb-4">
+			<div class="flex items-center gap-3">
+				<div class="p-2 bg-primary/20 text-primary rounded-xl">
+					<LayoutDashboard class="size-6" />
+				</div>
+				<div>
+					<h2 class="text-xl font-bold uppercase tracking-wider text-foreground">Aggiunta Widget</h2>
+					<p class="text-xs text-muted-foreground mt-0.5">Seleziona un widget da aggiungere alla dashboard.</p>
+				</div>
+			</div>
+			<button onclick={() => isWidgetModalOpen = false} class="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-xl transition-colors ring-1 ring-border shadow-sm">
+				<X class="size-5" />
+			</button>
+		</div>
+		
+		<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 z-10">
+			{#each [
+				{ name: 'Orologio', type: 'clock', icon: 'lucide:clock' },
+				{ name: 'Meteo', type: 'weather', icon: 'lucide:cloud-sun' },
+				{ name: 'qBittorrent', type: 'qbittorrent', icon: 'qbittorrent' },
+				{ name: 'AdGuard Home', type: 'adguard', icon: 'adguard-home' },
+				{ name: 'Beszel', type: 'beszel', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/beszel.svg' },
+				{ name: 'Wg-easy', type: 'wgeasy', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/wireguard.svg' },
+				{ name: 'Duplicati', type: 'duplicati', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/duplicati.svg' },
+				{ name: 'Filebrowser', type: 'filebrowser', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/filebrowser.svg' },
+				{ name: 'Docker', type: 'docker', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/docker.svg' },
+				{ name: 'Dockhand', type: 'dockhand', icon: 'dockhand' },
+			] as widget}
+				<form action="/admin?/createService" method="POST" use:enhance={() => {
+					return async ({ result }: any) => {
+						if (result.type === 'success' || result.type === 'redirect') {
+							hasAddedServices = true;
+							isWidgetModalOpen = false;
+							window.location.reload();
+						}
+					};
+				}}>
+					<input type="hidden" name="name" value={widget.name} />
+					<input type="hidden" name="widgetType" value={widget.type} />
+					<input type="hidden" name="icon" value={widget.icon} />
+					<!-- pingEnabled is required by ServiceForm logic to be on/off? Actually let's just leave defaults -->
+					<input type="hidden" name="pingEnabled" value="off" />
+					<input type="hidden" name="url" value="" />
+					<input type="hidden" name="description" value="" />
+					
+					<button type="submit" class="w-full h-full flex flex-col items-center justify-center gap-3 p-4 bg-background rounded-xl border border-border shadow-sm hover:bg-muted/50 hover:border-primary/50 hover:scale-105 transition-all cursor-pointer group">
+						<ServiceIcon icon={widget.icon} name={widget.name} size="lg" class="shadow-sm border border-border bg-card group-hover:scale-110 transition-transform" />
+						<span class="text-xs font-semibold text-foreground uppercase tracking-wider text-center">{widget.name}</span>
+					</button>
+				</form>
+			{/each}
+		</div>
+	</div>
+{/if}
 
 
 	{#each Object.entries(localGroups) as [gridId, services] (gridId)}
@@ -575,6 +637,19 @@
 					</div>
 				</button>
 				
+				<button onclick={() => isWidgetModalOpen = !isWidgetModalOpen} class="w-12 h-12 flex items-center justify-center rounded-xl {isWidgetModalOpen ? 'bg-primary/20 ring-2 ring-primary/50' : 'hover:bg-primary/10'} text-primary transition-colors relative group" title={isWidgetModalOpen ? "Chiudi Aggiunta Widget" : "Aggiungi Widget"}>
+					<div class="relative flex items-center justify-center">
+						<LayoutDashboard class="size-6 group-hover:scale-110 transition-transform" />
+						<div class="absolute -bottom-2 -right-2 bg-primary text-primary-foreground rounded-full shadow-sm ring-2 ring-card p-0.5">
+							{#if isWidgetModalOpen}
+								<X class="size-2.5" strokeWidth={4} />
+							{:else}
+								<Plus class="size-2.5" strokeWidth={4} />
+							{/if}
+						</div>
+					</div>
+				</button>
+
 				<button onclick={createGrid} class="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-primary/10 text-primary transition-colors relative group" title="Nuova Griglia">
 					<div class="relative flex items-center justify-center">
 						<LayoutGrid class="size-6 group-hover:scale-110 transition-transform" />

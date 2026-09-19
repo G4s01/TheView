@@ -398,7 +398,7 @@
 					<div class="flex items-center justify-between w-full">
 						<div class="flex items-center gap-4 flex-1 min-w-0 mr-4">
 							<div class="shrink-0">
-								<ServiceIcon icon="clock" name="Orologio" size="lg" class="shadow-sm border border-border bg-card" />
+								<ServiceIcon icon="lucide:clock" name="Orologio" size="lg" class="shadow-sm border border-border bg-card" />
 							</div>
 							<div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 flex-1 min-w-0">
 								<p class="text-sm font-semibold text-foreground uppercase tracking-wider truncate">Orologio</p>
@@ -450,7 +450,7 @@
 					<div class="flex items-center justify-between w-full">
 						<div class="flex items-center gap-4 flex-1 min-w-0 mr-4">
 							<div class="shrink-0">
-								<ServiceIcon icon="cloud-sun" name="Meteo" size="lg" class="shadow-sm border border-border bg-card" />
+								<ServiceIcon icon="lucide:cloud-sun" name="Meteo" size="lg" class="shadow-sm border border-border bg-card" />
 							</div>
 							<div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 flex-1 min-w-0">
 								<p class="text-sm font-semibold text-foreground uppercase tracking-wider truncate">Meteo</p>

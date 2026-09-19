@@ -252,7 +252,7 @@
             {:else if widgetType === 'clock'}
                 <li class="px-6 py-5 flex flex-col gap-4">
                     <div class="flex items-center gap-4 mb-2">
-                        <ServiceIcon icon="clock" name="Clock" size="lg" class="shadow-sm border border-border bg-card" />
+                        <ServiceIcon icon="lucide:clock" name="Clock" size="lg" class="shadow-sm border border-border bg-card" />
                         <p class="text-sm font-semibold text-foreground uppercase tracking-wider truncate">Orologio</p>
                     </div>
                     <div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border flex flex-col gap-4">
@@ -277,7 +277,7 @@
             {:else if widgetType === 'weather'}
                 <li class="px-6 py-5 flex flex-col gap-4">
                     <div class="flex items-center gap-4 mb-2">
-                        <ServiceIcon icon="cloud-sun" name="Weather" size="lg" class="shadow-sm border border-border bg-card" />
+                        <ServiceIcon icon="lucide:cloud-sun" name="Weather" size="lg" class="shadow-sm border border-border bg-card" />
                         <p class="text-sm font-semibold text-foreground uppercase tracking-wider truncate">Meteo</p>
                     </div>
                     <div class="p-5 bg-card text-card-foreground rounded-xl shadow-lg border border-border flex flex-col gap-4">
