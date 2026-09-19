@@ -141,39 +141,26 @@ export const POST: RequestHandler = async ({ request }) => {
     } else {
       if (!id) return json({ error: "ID container mancante" }, { status: 400 });
 
-      // Map the "update" action from frontend to Dockhand's "update" endpoint
-      let targetAction = action;
-
-      endpoint = `${normalizedUrl}/api/containers/${id}/${targetAction}?env=${envId}`;
-
-      if (action === "update") {
-        if (!payload || !payload.name) {
+      if (["start", "stop", "restart", "update"].includes(action)) {
+        if (!payload || !payload.id) {
           return json(
-            { error: "Dati payload mancanti per aggiornamento" },
+            { error: "Dati payload mancanti (id richiesto)" },
             { status: 400 },
           );
         }
 
-        let realImage = payload.image;
-        if (realImage?.startsWith("sha256:") && payload.labels) {
-          const composeImage = payload.labels["com.docker.compose.image"];
-          if (composeImage && !composeImage.startsWith("sha256:")) {
-            realImage = composeImage;
-          }
+        let targetAction = action;
+        endpoint = `${normalizedUrl}/api/containers/${id}/${targetAction}?env=${envId}`;
+
+        if (action === "update") {
+          // Usa l'endpoint batch-update perché quello singolo ha un bug noto
+          // in Dockhand col default bridge (network-scoped aliases).
+          endpoint = `${normalizedUrl}/api/containers/batch-update?env=${envId}`;
+          body = JSON.stringify({
+            containerIds: [payload.id],
+          });
+          headers["Content-Type"] = "application/json";
         }
-
-        let updateBody: any = {
-          name: payload.name,
-          startAfterUpdate: true,
-        };
-
-        if (realImage && !realImage.startsWith("sha256:")) {
-          updateBody.image = realImage;
-          updateBody.repullImage = true;
-        }
-
-        body = JSON.stringify(updateBody);
-        headers["Content-Type"] = "application/json";
       }
     }
 

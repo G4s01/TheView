@@ -113,9 +113,13 @@ export const GET: RequestHandler = async () => {
       // Docker api ImageID sometimes has sha256: prefix, sometimes not. Id from images/json always does.
 
       let updateAvailable = false;
-      const latestImageId = imageTagMap[imageTag];
-      if (latestImageId && latestImageId !== c.ImageID) {
+      if (imageTag.startsWith("sha256:")) {
         updateAvailable = true;
+      } else {
+        const latestImageId = imageTagMap[imageTag];
+        if (latestImageId && latestImageId !== c.ImageID) {
+          updateAvailable = true;
+        }
       }
 
       return {

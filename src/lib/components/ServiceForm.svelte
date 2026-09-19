@@ -246,13 +246,13 @@
 				bind:value={service.widgetType}
 				options={[
 					{ value: "none", label: "NESSUNO" },
-					{ value: "qbittorrent", label: "qBittorrent" },
-					{ value: "adguard", label: "AdGuard Home" },
-					{ value: "beszel", label: "Beszel" },
-					{ value: "wgeasy", label: "Wg-easy" },
-					{ value: "duplicati", label: "Duplicati" },
-					{ value: "docker", label: "Docker" },
-					{ value: "dockhand", label: "Dockhand" },
+					{ value: "qbittorrent", label: "QBITTORRENT" },
+					{ value: "adguard", label: "ADGUARD HOME" },
+					{ value: "beszel", label: "BESZEL" },
+					{ value: "wgeasy", label: "WG-EASY" },
+					{ value: "duplicati", label: "DUPLICATI" },
+					{ value: "docker", label: "DOCKER" },
+					{ value: "dockhand", label: "DOCKHAND" },
 				]}
 			/>
 		</div>
