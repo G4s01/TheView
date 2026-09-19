@@ -7,7 +7,7 @@
 	import { navigating } from '$app/stores';
 	import { slide } from 'svelte/transition';
 	import { invalidateAll } from '$app/navigation';
-	import { Plus, X, Trash, EyeOff, Eye, Pencil, Layers, PlusSquare, Undo2, SquareDashed, LayoutGrid, Search, ChevronUp, ChevronDown, LayoutDashboard, Blocks } from '@lucide/svelte';
+	import { Plus, X, Trash, EyeOff, Eye, Pencil, Layers, PlusSquare, Undo2, SquareDashed, LayoutGrid, Search, ChevronUp, ChevronDown, LayoutDashboard, CloudSun } from '@lucide/svelte';
 	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
 	import { enhance } from '$app/forms';
@@ -75,10 +75,30 @@
 
 	let _wasModalOpen = false;
 	$effect(() => {
+		if (isWidgetModalOpen) {
+			setTimeout(() => {
+				import('gridstack').then((module) => {
+					const GridStackClass = module.GridStack || module.default?.GridStack || module.default;
+					GridStackClass.setupDragIn('.drag-in-widget', { scroll: false, appendTo: 'body', helper: 'clone' });
+				});
+			}, 100);
+		}
+	});
+	$effect(() => {
 		if (isDiscoveryModalOpen) {
 			_wasModalOpen = true;
 		} else if (_wasModalOpen) {
 			_wasModalOpen = false;
+	$effect(() => {
+		if (isWidgetModalOpen) {
+			setTimeout(() => {
+				import('gridstack').then((module) => {
+					const GridStackClass = module.GridStack || module.default?.GridStack || module.default;
+					GridStackClass.setupDragIn('.drag-in-widget', { scroll: false, appendTo: 'body', helper: 'clone' });
+				});
+			}, 100);
+		}
+	});
 			if (hasAddedServices) {
 				window.location.reload();
 			}
@@ -504,7 +524,7 @@
 		<div class="flex items-center justify-between border-b border-border/50 pb-4">
 			<div class="flex items-center gap-3">
 				<div class="p-2 bg-primary/20 text-primary rounded-xl">
-					<Blocks class="size-6" />
+					<CloudSun class="size-6" />
 				</div>
 				<div>
 					<h2 class="text-xl font-bold uppercase tracking-wider text-foreground">Aggiunta Rapida Widget</h2>
@@ -640,8 +660,13 @@
 				
 				<button onclick={() => isWidgetModalOpen = !isWidgetModalOpen} class="w-12 h-12 flex items-center justify-center rounded-xl {isWidgetModalOpen ? 'bg-primary/20 ring-2 ring-primary/50' : 'hover:bg-primary/10'} text-primary transition-colors relative group" title={isWidgetModalOpen ? "Chiudi Aggiunta Widget" : "Aggiungi Widget"}>
 					<div class="relative flex items-center justify-center">
-						<Blocks class="size-6 group-hover:scale-110 transition-transform" />
+						<CloudSun class="size-6 group-hover:scale-110 transition-transform" />
 						<div class="absolute -bottom-2 -right-2 bg-primary text-primary-foreground rounded-full shadow-sm ring-2 ring-card p-0.5">
+							{#if isWidgetModalOpen}
+								<X class="size-2.5" strokeWidth={4} />
+							{:else}
+								<Plus class="size-2.5" strokeWidth={4} />
+							{/if}
 						</div>
 					</div>
 				</button>
