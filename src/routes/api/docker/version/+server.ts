@@ -68,9 +68,11 @@ export const GET: RequestHandler = async ({ url }) => {
     tag = parts[1];
   }
 
-  if (repo.startsWith("ghcr.io/")) {
-    const ghcrRepo = repo.replace("ghcr.io/", "");
-    updateUrl = `https://github.com/${ghcrRepo.split("/")[0]}/${ghcrRepo.split("/")[1] || ghcrRepo}`;
+  if (repo.startsWith("ghcr.io/") || repo.startsWith("lscr.io/")) {
+    let ghcrRepo = repo.replace("ghcr.io/", "").replace("lscr.io/", "");
+    updateUrl = repo.startsWith("lscr.io/")
+      ? `https://fleet.linuxserver.io/image?name=${ghcrRepo.split("/")[1] || ghcrRepo}`
+      : `https://github.com/${ghcrRepo.split("/")[0]}/${ghcrRepo.split("/")[1] || ghcrRepo}`;
 
     try {
       const tokenRes = await fetch(
@@ -78,6 +80,7 @@ export const GET: RequestHandler = async ({ url }) => {
       );
       if (tokenRes.ok) {
         const tokenData = await tokenRes.json();
+        // Even for lscr.io, we can query ghcr.io directly since it's an alias
         const manifestRes = await fetch(
           `https://ghcr.io/v2/${ghcrRepo}/manifests/${tag}`,
           {
@@ -94,7 +97,7 @@ export const GET: RequestHandler = async ({ url }) => {
         }
       }
     } catch (e) {
-      console.error("GHCR fetch error", e);
+      console.error("GHCR/lscr.io fetch error", e);
     }
   } else {
     // Docker Hub
