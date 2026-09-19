@@ -54,12 +54,9 @@ export const GET: RequestHandler = async () => {
     if (password) password = decryptString(password);
 
     const normalizedUrl = url.replace(/\/$/, "");
-    const requireAuth =
-      settings.filebrowser_require_auth === true ||
-      settings.filebrowser_require_auth === "true";
 
     let token = "";
-    if (requireAuth) {
+    if (username || password) {
       token = await getAuthToken(normalizedUrl, username, password);
     }
 
@@ -77,9 +74,9 @@ export const GET: RequestHandler = async () => {
 
     if (!res.ok) {
       if (res.status === 401 || res.status === 403) cachedToken = null; // force relogin next time
-      if (res.status === 401 && !requireAuth) {
+      if (res.status === 401 && !username && !password) {
         throw new Error(
-          "Il servizio richiede l'autenticazione. Abilita 'Richiede autenticazione' e inserisci le credenziali.",
+          "Il servizio richiede l'autenticazione. Inserisci le credenziali di Filebrowser nelle impostazioni del widget.",
         );
       }
       throw new Error(`Errore fetch usage (Status ${res.status})`);
