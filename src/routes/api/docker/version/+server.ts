@@ -62,75 +62,75 @@ export const GET: RequestHandler = async ({ url }) => {
   let repo = image;
   let tag = "latest";
 
-  if (repo.includes(":")) {
-    const parts = repo.split(":");
-    repo = parts[0];
-    tag = parts[1];
+  let registry = "registry-1.docker.io";
+  let registryPath = repo;
+
+  // Se ha un dominio, lo estraiamo (es. ghcr.io, lscr.io, quay.io, portainer.io)
+  if (repo.includes("/")) {
+    const firstPart = repo.split("/")[0];
+    if (firstPart.includes(".")) {
+      registry = firstPart;
+      registryPath = repo.substring(registry.length + 1);
+    }
+  }
+  // Se è Docker Hub e non ha l'utente (es. ubuntu -> library/ubuntu)
+  if (registry === "registry-1.docker.io" && !registryPath.includes("/")) {
+    registryPath = `library/${registryPath}`;
   }
 
-  if (repo.startsWith("ghcr.io/") || repo.startsWith("lscr.io/")) {
-    let ghcrRepo = repo.replace("ghcr.io/", "").replace("lscr.io/", "");
-    updateUrl = repo.startsWith("lscr.io/")
-      ? `https://fleet.linuxserver.io/image?name=${ghcrRepo.split("/")[1] || ghcrRepo}`
-      : `https://github.com/${ghcrRepo.split("/")[0]}/${ghcrRepo.split("/")[1] || ghcrRepo}`;
-
-    try {
-      const tokenRes = await fetch(
-        `https://ghcr.io/token?scope=repository:${ghcrRepo}:pull`,
-      );
-      if (tokenRes.ok) {
-        const tokenData = await tokenRes.json();
-        // Even for lscr.io, we can query ghcr.io directly since it's an alias
-        const manifestRes = await fetch(
-          `https://ghcr.io/v2/${ghcrRepo}/manifests/${tag}`,
-          {
-            headers: {
-              Authorization: `Bearer ${tokenData.token}`,
-              Accept:
-                "application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.index.v1+json",
-              "Cache-Control": "no-cache",
-            },
-          },
-        );
-        if (manifestRes.ok) {
-          remoteDigest = manifestRes.headers.get("docker-content-digest") || "";
-        }
-      }
-    } catch (e) {
-      console.error("GHCR/lscr.io fetch error", e);
-    }
+  // URL per gli esseri umani
+  if (registry === "registry-1.docker.io") {
+    updateUrl = `https://hub.docker.com/r/${registryPath.replace("library/", "")}`;
+  } else if (registry === "ghcr.io") {
+    updateUrl = `https://github.com/${registryPath.split("/")[0]}/${registryPath.split("/")[1] || registryPath}`;
+  } else if (registry === "lscr.io") {
+    updateUrl = `https://fleet.linuxserver.io/image?name=${registryPath.split("/")[1] || registryPath}`;
   } else {
-    // Docker Hub
-    let dhRepo = repo;
-    if (!dhRepo.includes("/")) {
-      dhRepo = `library/${dhRepo}`;
-    }
-    updateUrl = `https://hub.docker.com/r/${dhRepo.replace("library/", "")}`;
+    updateUrl = `https://${registry}/${registryPath}`;
+  }
 
-    try {
-      const tokenRes = await fetch(
-        `https://auth.docker.io/token?service=registry.docker.io&scope=repository:${dhRepo}:pull`,
-      );
-      if (tokenRes.ok) {
-        const tokenData = await tokenRes.json();
-        const manifestRes = await fetch(
-          `https://registry-1.docker.io/v2/${dhRepo}/manifests/${tag}`,
-          {
-            headers: {
-              Authorization: `Bearer ${tokenData.token}`,
-              Accept:
-                "application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.index.v1+json",
-              "Cache-Control": "no-cache",
-            },
-          },
-        );
-        if (manifestRes.ok) {
-          remoteDigest = manifestRes.headers.get("docker-content-digest") || "";
+  try {
+    const manifestUrl = `https://${registry}/v2/${registryPath}/manifests/${tag}`;
+    let manifestRes = await fetch(manifestUrl, {
+      headers: {
+        Accept:
+          "application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.index.v1+json",
+      },
+    });
+
+    if (manifestRes.status === 401) {
+      const authHeader = manifestRes.headers.get("www-authenticate");
+      if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
+        // Parse realm="...",service="..."
+        const realmMatch = authHeader.match(/realm="([^"]+)"/);
+        const serviceMatch = authHeader.match(/service="([^"]+)"/);
+
+        if (realmMatch) {
+          const realm = realmMatch[1];
+          let tokenUrl = `${realm}?scope=repository:${registryPath}:pull`;
+          if (serviceMatch) tokenUrl += `&service=${serviceMatch[1]}`;
+
+          const tokenRes = await fetch(tokenUrl);
+          if (tokenRes.ok) {
+            const tokenData = await tokenRes.json();
+            manifestRes = await fetch(manifestUrl, {
+              headers: {
+                Authorization: `Bearer ${tokenData.token}`,
+                Accept:
+                  "application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.index.v1+json",
+                "Cache-Control": "no-cache",
+              },
+            });
+          }
         }
       }
-    } catch (e) {
-      console.error("Docker Hub fetch error", e);
     }
+
+    if (manifestRes.ok) {
+      remoteDigest = manifestRes.headers.get("docker-content-digest") || "";
+    }
+  } catch (e) {
+    console.error(`Generic registry fetch error for ${registry}:`, e);
   }
 
   if (remoteDigest && remoteDigest !== localDigest) {
