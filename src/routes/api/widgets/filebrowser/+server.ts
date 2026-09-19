@@ -9,11 +9,7 @@ const agent = new Agent({ connect: { rejectUnauthorized: false } });
 let cachedToken: string | null = null;
 let tokenExpiry: number | null = null;
 
-async function getAuthToken(
-  url: string,
-  username?: string,
-  password?: string,
-) {
+async function getAuthToken(url: string, username?: string, password?: string) {
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry)
     return cachedToken;
 
@@ -51,13 +47,10 @@ export const GET: RequestHandler = async () => {
     const normalizedUrl = url.replace(/\/$/, "");
     const token = await getAuthToken(normalizedUrl, username, password);
 
-    const res = await undiciFetch(
-      `${normalizedUrl}/api/usage`,
-      {
-        headers: { "X-Auth": token },
-        dispatcher: agent,
-      },
-    );
+    const res = await undiciFetch(`${normalizedUrl}/api/usage/`, {
+      headers: { "X-Auth": token },
+      dispatcher: agent,
+    });
 
     if (!res.ok) {
       if (res.status === 401 || res.status === 403) cachedToken = null; // force relogin next time

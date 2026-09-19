@@ -41,6 +41,12 @@
     let dockhandUsername = $state('');
     let dockhandPassword = $state('');
 
+    // Filebrowser
+    let filebrowser_url = $state('');
+    let filebrowser_username = $state('');
+    let filebrowser_password = $state('');
+    let filebrowser_require_auth = $state(false);
+
     let isExpanded = $state(true); // Always expand in this card
 
     $effect(() => {
@@ -83,6 +89,11 @@
                     dockhandUrl = data.dockhand_url || '';
                     dockhandUsername = data.dockhand_username || '';
                     dockhandPassword = data.dockhand_password || '';
+                } else if (widgetType === 'filebrowser') {
+                    filebrowser_url = data.filebrowser_url || '';
+                    filebrowser_username = data.filebrowser_username || '';
+                    filebrowser_password = data.filebrowser_password || '';
+                    filebrowser_require_auth = data.filebrowser_require_auth === true || data.filebrowser_require_auth === 'true';
                 }
             }
         } catch (e) {
@@ -209,6 +220,21 @@
                     bind:password={dockhandPassword}
                     bind:isExpanded={isExpanded}
                     onSave={() => saveSettings({ dockhand_url: dockhandUrl, dockhand_username: dockhandUsername, dockhand_password: dockhandPassword })}
+                    {isSaving}
+                />
+            {:else if widgetType === 'filebrowser'}
+                <WidgetSettingsForm
+                    title="Filebrowser Quantum"
+                    icon="filebrowser"
+                    usernameLabel="Username (Admin)"
+                    passwordLabel="Password"
+                    urlLabel="Filebrowser URL (es. http://192.168.1.10:8085)"
+                    bind:username={filebrowser_username}
+                    bind:password={filebrowser_password}
+                    bind:url={filebrowser_url}
+                    bind:requireAuth={filebrowser_require_auth}
+                    bind:isExpanded={isExpanded}
+                    onSave={() => saveSettings({ filebrowser_url, filebrowser_username, filebrowser_password, filebrowser_require_auth })}
                     {isSaving}
                 />
             {/if}
