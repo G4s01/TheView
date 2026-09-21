@@ -6,6 +6,8 @@
     import { Button } from "$lib/components/ui/button";
     import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
     import EditWidgetSettingsCard from '$lib/components/EditWidgetSettingsCard.svelte';
+    import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
+    import BackButton from '$lib/components/ui/BackButton.svelte';
 
     import { page } from "$app/stores";
 
@@ -89,20 +91,13 @@
                 </Sheet.Header>
                 
                 <div class="pb-2">
-
-
                     {#if appState.editingService.isWidget}
-                        <div class="flex flex-col gap-4">
-                            <p class="text-sm text-muted-foreground">Stai modificando un widget indipendente. Usa il pannello sottostante per configurarne le opzioni globali se previste.</p>
-                            <div class="flex items-center gap-3 mt-4">
-                                <Button type="button" variant="outline" onclick={() => onOpenChange(false)} disabled={isSaving} class="flex-1 bg-card hover:bg-muted">
-                                    Annulla
-                                </Button>
-                                <Button type="button" variant="destructive" onclick={deleteService} disabled={isSaving} class="flex-1">
-                                    Elimina Widget
-                                </Button>
-                            </div>
-                        </div>
+                        <EditWidgetSettingsCard 
+                            widgetType={appState.editingService.widgetType} 
+                            onDelete={deleteService}
+                            onCancel={() => onOpenChange(false)}
+                            isStandalone={true}
+                        />
                     {:else}
                         <ServiceForm 
                             mode="edit" 
@@ -117,7 +112,7 @@
                 </div>
             </div>
             
-            {#if appState.editingService.widgetType && appState.editingService.widgetType !== 'none' && appState.editingService.widgetType !== 'spacer'}
+            {#if appState.editingService.widgetType && appState.editingService.widgetType !== 'none' && appState.editingService.widgetType !== 'spacer' && !appState.editingService.isWidget}
                 <EditWidgetSettingsCard widgetType={appState.editingService.widgetType} />
             {/if}
         {/if}

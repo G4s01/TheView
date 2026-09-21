@@ -12,7 +12,9 @@
 
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
-	let isWide = $derived(nodeW > nodeH);
+	let rectW = $state(0);
+	let rectH = $state(0);
+	let isWide = $derived(rectW && rectH ? rectW > rectH * 1.1 : nodeW > nodeH);
 
 	let query = useWgEasy();
     let actions = useWgEasyActions();

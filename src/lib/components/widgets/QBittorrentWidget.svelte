@@ -8,7 +8,9 @@
 
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
-	let isWidgetLayout = $derived(nodeW !== nodeH || (nodeW >= 4 && nodeH >= 4));
+	let rectW = $state(0);
+	let rectH = $state(0);
+	let isWidgetLayout = $derived(rectW && rectH ? Math.abs(rectW - rectH) > 50 || (rectW >= 280 && rectH >= 280) : nodeW !== nodeH || (nodeW >= 4 && nodeH >= 4));
 	
 	const query = useQbittorrent();
 	const pauseMutation = useQbittorrentPause();
@@ -35,7 +37,7 @@
 	}
 </script>
 
-<div class="flex flex-col gap-2 h-full min-h-0">
+<div bind:clientWidth={rectW} bind:clientHeight={rectH} class="flex flex-col gap-2 h-full min-h-0">
 	{#if query.isPending}
 		<div class="flex flex-col gap-3 h-full animate-pulse w-full">
 			<div class="flex items-center justify-between text-xs w-full gap-2 shrink-0">

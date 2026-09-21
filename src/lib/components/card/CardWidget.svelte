@@ -20,7 +20,8 @@
 		latencyMs, 
 		iconStyle, 
 		currentSize, 
-		showDescription, 
+		showDescriptionDesktop,
+		showDescriptionMobile, 
 		dockerVersionInfo,
 		iconBgColor = 'hsl(var(--muted-foreground))',
 		separateCells,
@@ -31,7 +32,8 @@
 		latencyMs?: number | null;
 		iconStyle: string;
 		currentSize: string;
-		showDescription: boolean;
+		showDescriptionDesktop: boolean;
+		showDescriptionMobile: boolean;
 		dockerVersionInfo: any;
 		iconBgColor?: string;
 		separateCells: boolean;
@@ -112,7 +114,7 @@
 			</div>
 		{/if}
 		
-		<CardLink {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescription} {dockerVersionInfo} {iconBgColor} centerText={true} />
+		<CardLink {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescriptionDesktop} {showDescriptionMobile} {dockerVersionInfo} {iconBgColor} centerText={true} />
 	</svelte:element>
 
 	<div class="bg-card border border-border p-4 rounded-xl {isWide ? 'rounded-l-none' : 'rounded-t-none'} shadow-sm hover:shadow-md transition-all duration-500 flex flex-col h-full w-full overflow-hidden col-span-1 row-span-1 {appState.isEditMode ? 'pointer-events-none' : ''}">
@@ -159,7 +161,7 @@
 		{/if}
 	</div>
 {:else}
-	<CardLink {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescription} {dockerVersionInfo} {iconBgColor} centerText={true} hidePing={service.widgetType === 'dockhand' || service.widgetType === 'docker'}>
+	<CardLink {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescriptionDesktop} {showDescriptionMobile} {dockerVersionInfo} {iconBgColor} centerText={true} hidePing={service.widgetType === 'dockhand' || service.widgetType === 'docker'}>
 		{#if service.widgetType === 'qbittorrent'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
 				<QBittorrentWidget size={currentSize} />

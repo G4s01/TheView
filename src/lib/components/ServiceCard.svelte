@@ -11,7 +11,7 @@
 	import CardWidget from './card/CardWidget.svelte';
 	import { WIDGET_REGISTRY, getWidgetRequireAuthKey } from '$lib/config/widgetRegistry';
 
-	let { service, showDescription = true, iconStyle = 'rounded-xl' } = $props<{
+	let { service, showDescriptionDesktop = true, showDescriptionMobile = true, iconStyle = 'rounded-xl' } = $props<{
 		service: {
 			id: number;
 			name: string;
@@ -29,7 +29,8 @@
 			h?: number;
 			requireAuth?: boolean;
 		};
-		showDescription?: boolean;
+		showDescriptionDesktop?: boolean;
+		showDescriptionMobile?: boolean;
 		iconStyle?: string;
 	}>();
 	
@@ -137,7 +138,7 @@
 			{/if}
 		</div>
 	{:else if service.isWidget}
-		<CardWidget {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescription} {dockerVersionInfo} {iconBgColor} {separateCells} {startEdit} />
+		<CardWidget {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescriptionDesktop} {showDescriptionMobile} {dockerVersionInfo} {iconBgColor} {separateCells} {startEdit} />
 	{:else}
 		{#if appState.isEditMode && (!separateCells || !isWidgetLayout)}
 			<div class="absolute top-2 right-2 flex gap-1.5 z-20">
@@ -167,9 +168,9 @@
 		onclick={(e: Event) => { if (appState.isEditMode) e.preventDefault(); }}
 	>
 		{#if showWidget}
-			<CardWidget {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescription} {dockerVersionInfo} {iconBgColor} {separateCells} {startEdit} />
+			<CardWidget {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescriptionDesktop} {showDescriptionMobile} {dockerVersionInfo} {iconBgColor} {separateCells} {startEdit} />
 		{:else}
-			<CardLink {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescription} {dockerVersionInfo} {iconBgColor} />
+			<CardLink {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescriptionDesktop} {showDescriptionMobile} {dockerVersionInfo} {iconBgColor} />
 		{/if}
 	</svelte:element>
 	{/if}

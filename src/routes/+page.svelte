@@ -282,6 +282,24 @@
 			grid!.on('resizestop', (event: Event, el: HTMLElement) => {
 				if (appState.isEditMode) saveGridState();
 			});
+			
+			grid!.on('resize', (event: Event, el: HTMLElement) => {
+				if (el && el.id) {
+					const id = parseInt(el.id);
+					const mountedS = mountedServices.get(id);
+					if (mountedS) {
+						// @ts-ignore
+						const node = el.gridstackNode;
+						if (node) {
+							mountedS.w = node.w || parseInt(el.getAttribute('gs-w') || '2');
+							mountedS.h = node.h || parseInt(el.getAttribute('gs-h') || '2');
+						} else {
+							mountedS.w = parseInt(el.getAttribute('gs-w') || '2');
+							mountedS.h = parseInt(el.getAttribute('gs-h') || '2');
+						}
+					}
+				}
+			});
 
 			
 			grid!.on('dragstart', () => {
@@ -397,7 +415,8 @@
 				context: allContexts,
 				props: { 
 					get service() { return mountedServices.get(service.id); },
-					showDescription: data.showServiceDescriptions,
+					showDescriptionDesktop: data.showServiceDescriptionsDesktop,
+					showDescriptionMobile: data.showServiceDescriptionsMobile,
 					iconStyle: data.iconStyle
 				}
 			});

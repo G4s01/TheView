@@ -8,7 +8,9 @@
 
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
-	let isWide = $derived(nodeW > nodeH);
+	let rectW = $state(0);
+	let rectH = $state(0);
+	let isWide = $derived(rectW && rectH ? rectW > rectH * 1.1 : nodeW > nodeH);
 
 	let query = useDocker();
 	let actions = useDockerActions();
@@ -27,7 +29,7 @@
     }
 </script>
 
-<div class="h-full w-full flex flex-col p-2 bg-card rounded-xl border border-border shadow-sm overflow-hidden text-card-foreground">
+<div bind:clientWidth={rectW} bind:clientHeight={rectH} class="h-full w-full flex flex-col p-2 bg-card rounded-xl border border-border shadow-sm overflow-hidden text-card-foreground">
 	<div class="flex items-center justify-between pb-2 mb-2 border-b border-border/50 shrink-0">
 		<div class="flex items-center gap-2">
 			<Box class="size-4 text-primary" />

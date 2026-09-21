@@ -24,17 +24,24 @@
 	import { toast } from 'svelte-sonner';
 
 	// State for Appearance initialized directly from server data
-	let showCategoriesDesktop = $state($page.data.settings?.showCategoriesDesktop !== false);
-	let showCategoriesMobile = $state($page.data.settings?.showCategoriesMobile !== false);
-	let customNavbarTitleDesktop = $state($page.data.settings?.customNavbarTitleDesktop || $page.data.settings?.customNavbarTitle || '');
-	let customNavbarTitleMobile = $state($page.data.settings?.customNavbarTitleMobile || $page.data.settings?.customNavbarTitle || '');
-	let showCategoryCounts = $state($page.data.settings?.showCategoryCounts !== false);
-	let showServiceDescriptions = $state($page.data.settings?.showServiceDescriptions !== false);
+	let showCategoriesDesktop = $state($page.data.settings?.showCategoriesDesktop === 'true' || $page.data.settings?.showCategoriesDesktop === true);
+	let showCategoriesMobile = $state($page.data.settings?.showCategoriesMobile === 'true' || $page.data.settings?.showCategoriesMobile === true);
+	let customNavbarTitleDesktop = $state($page.data.settings?.customNavbarTitleDesktop || $page.data.settings?.customNavbarTitle || 'HOMELAB');
+	let customNavbarTitleMobile = $state($page.data.settings?.customNavbarTitleMobile || $page.data.settings?.customNavbarTitle || 'HOMELAB');
+	let showCategoryCounts = $state($page.data.settings?.showCategoryCounts === 'true' || $page.data.settings?.showCategoryCounts === true);
+	let showServiceDescriptionsDesktop = $state(
+		$page.data.settings?.showServiceDescriptionsDesktop === 'false' || $page.data.settings?.showServiceDescriptionsDesktop === false ? false :
+		($page.data.settings?.showServiceDescriptionsDesktop === 'true' || $page.data.settings?.showServiceDescriptionsDesktop === true ? true :
+		($page.data.settings?.showServiceDescriptions !== false))
+	);
+	let showServiceDescriptionsMobile = $state(
+		$page.data.settings?.showServiceDescriptionsMobile === 'true' || $page.data.settings?.showServiceDescriptionsMobile === true
+	);
 	let iconStyle = $state($page.data.settings?.iconStyle || 'rounded-xl');
 	let stickyNavbar = $state($page.data.settings?.stickyNavbar !== false);
 	let showEditButton = $state($page.data.settings?.showEditButton !== false);
 	let editModeSidebarPosition = $state($page.data.settings?.editModeSidebarPosition || 'right');
-	let editServiceSheetPosition = $state($page.data.settings?.editServiceSheetPosition || 'right');
+	let editServiceSheetPosition = $state($page.data.settings?.editServiceSheetPosition || 'left');
 	let isSavingAppearance = $state(false);
 
 	async function saveAppearanceSettings() {
@@ -43,7 +50,7 @@
 			const res = await fetch('/api/settings', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ showCategoriesDesktop, showCategoriesMobile, customNavbarTitleDesktop, customNavbarTitleMobile, showCategoryCounts, showServiceDescriptions, iconStyle, stickyNavbar, showEditButton, editModeSidebarPosition, editServiceSheetPosition })
+				body: JSON.stringify({ showCategoriesDesktop, showCategoriesMobile, customNavbarTitleDesktop, customNavbarTitleMobile, showCategoryCounts, showServiceDescriptionsDesktop, showServiceDescriptionsMobile, iconStyle, stickyNavbar, showEditButton, editModeSidebarPosition, editServiceSheetPosition })
 			});
 			if (res.ok) {
 				await invalidateAll();
@@ -87,7 +94,7 @@
 		bind:customNavbarTitleDesktop
 		bind:customNavbarTitleMobile
 		bind:showCategoryCounts
-		bind:showServiceDescriptions
+		bind:showServiceDescriptionsDesktop bind:showServiceDescriptionsMobile
 		bind:iconStyle
 		bind:stickyNavbar
 		bind:showEditButton

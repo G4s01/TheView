@@ -13,7 +13,8 @@
 		customNavbarTitleDesktop = $bindable(),
 		customNavbarTitleMobile = $bindable(),
 		showCategoryCounts = $bindable(),
-		showServiceDescriptions = $bindable(),
+		showServiceDescriptionsDesktop = $bindable(),
+		showServiceDescriptionsMobile = $bindable(),
 		iconStyle = $bindable(),
 		stickyNavbar = $bindable(),
 		showEditButton = $bindable(),
@@ -27,7 +28,8 @@
 		customNavbarTitleDesktop: string;
 		customNavbarTitleMobile: string;
 		showCategoryCounts: boolean;
-		showServiceDescriptions: boolean;
+		showServiceDescriptionsDesktop: boolean;
+		showServiceDescriptionsMobile: boolean;
 		iconStyle: string;
 		stickyNavbar: boolean;
 		showEditButton: boolean;
@@ -45,7 +47,8 @@
 		showCategoriesDesktop;
 		showCategoriesMobile;
 		showCategoryCounts;
-		showServiceDescriptions;
+		showServiceDescriptionsDesktop;
+		showServiceDescriptionsMobile;
 		iconStyle;
 		stickyNavbar;
 		showEditButton;
@@ -110,9 +113,14 @@
 									bind:checked={showCategoryCounts} 
 								/>
 								<ToggleOptionCard 
-									title="DESCRIZIONI" 
-									description="MOSTRA LE DESCRIZIONI DEI SERVIZI" 
-									bind:checked={showServiceDescriptions} 
+									title="DESCRIZIONI DESKTOP" 
+									description="SU SCHERMI GRANDI" 
+									bind:checked={showServiceDescriptionsDesktop} 
+								/>
+								<ToggleOptionCard 
+									title="DESCRIZIONI MOBILE" 
+									description="SU SCHERMI PICCOLI" 
+									bind:checked={showServiceDescriptionsMobile} 
 								/>
 							</div>
 							

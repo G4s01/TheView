@@ -6,8 +6,16 @@
 	import { invalidateAll } from '$app/navigation';
 	import { useQueryClient } from '@tanstack/svelte-query';
 
-	let { widgetType } = $props<{
+	let {
+		widgetType,
+		onDelete,
+		onCancel,
+		isStandalone = false
+	} = $props<{
 		widgetType: string;
+		onDelete?: () => void;
+		onCancel?: () => void;
+		isStandalone?: boolean;
 	}>();
 
 	let settingsValues = $state<Record<string, any>>({});
@@ -78,12 +86,13 @@
 	});
 </script>
 
-<div class="mt-8 border-t border-border pt-8">
+<div class={isStandalone ? "flex flex-col gap-4" : "mt-8 border-t border-border pt-8"}>
+	{#if !isStandalone}
 	<h3 class="text-sm font-bold uppercase tracking-wider text-primary mb-4 flex items-center gap-2">
 		Impostazioni Widget
 	</h3>
-
-	<div class="bg-card text-card-foreground rounded-xl shadow-lg border border-border p-5 relative flex flex-col gap-4">
+	{/if}
+	<div class={isStandalone ? "relative flex flex-col gap-4 w-full" : "bg-card text-card-foreground rounded-xl shadow-lg border border-border p-5 relative flex flex-col gap-4"}>
 		{#if widgetDef}
 			<DynamicWidgetForm 
 				widget={widgetDef}
@@ -92,6 +101,8 @@
 				hideHeader={true}
 				onSave={saveSettings}
 				isSaving={isSaving}
+				onDelete={onDelete}
+				onCancel={onCancel}
 			/>
 		{:else}
 			<p class="text-sm text-muted-foreground italic text-center py-4">

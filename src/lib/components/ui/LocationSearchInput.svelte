@@ -3,7 +3,7 @@
 	import { Label } from "$lib/components/ui/label";
 	import { Search, Loader2 } from "@lucide/svelte";
 	import { cn } from "$lib/utils";
-	import { onMount } from "svelte";
+	
 
 	let {
 		value = $bindable(),
@@ -27,8 +27,8 @@
 	let inputRef: HTMLInputElement | null = null;
 	let searchTimeout: any;
 
-	onMount(() => {
-		if (value && typeof value === 'string') {
+	$effect(() => {
+		if (value && typeof value === 'string' && searchTerm === '') {
 			const parts = value.split(',');
 			if (parts.length >= 3) {
 				searchTerm = parts.slice(2).join(',').trim();

@@ -22,10 +22,14 @@
 	
 	let strokeDasharray = $derived(2 * Math.PI * 36);
 	let strokeDashoffset = $derived(strokeDasharray - (percentage / 100) * strokeDasharray);
-	let isWide = $derived(size.includes('2x1') || size.includes('2x2') || size.includes('3x1') || size.includes('4x1'));
+	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 1);
+	let nodeH = $derived(parseInt(size.split('x')[1]) || 1);
+	let rectW = $state(0);
+	let rectH = $state(0);
+	let isWide = $derived(rectW && rectH ? rectW > rectH * 1.1 : nodeW > nodeH);
 </script>
 
-<div class="w-full h-full flex {isWide ? 'flex-row' : 'flex-col'} justify-center items-center p-2 min-h-0 text-foreground gap-4">
+<div bind:clientWidth={rectW} bind:clientHeight={rectH} class="w-full h-full flex {isWide ? 'flex-row' : 'flex-col'} justify-center items-center p-2 min-h-0 text-foreground gap-4">
 	{#if filebrowser.isPending}
 		<div class="flex flex-col items-center justify-center gap-3 w-full h-full">
 			<div class="size-16 sm:size-20 rounded-full border-4 border-muted flex items-center justify-center animate-pulse shrink-0">

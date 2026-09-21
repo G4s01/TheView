@@ -7,7 +7,9 @@
 	let { size = 'gs-2x2' } = $props<{ size?: string }>();
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
-	let isWide = $derived(nodeW > nodeH);
+	let rectW = $state(0);
+	let rectH = $state(0);
+	let isWide = $derived(rectW && rectH ? rectW > rectH * 1.1 : nodeW > nodeH);
 	
 	let query = useDuplicati();
 	let actions = useDuplicatiActions();
@@ -132,7 +134,7 @@
 
             <!-- Backups List -->
             {#if backups.length > 0}
-                <div class="grid {isWide && nodeW >= 4 ? 'grid-cols-2' : 'grid-cols-1'} gap-2 pb-1">
+                <div class="grid {isWide && (rectW ? rectW >= 450 : nodeW >= 4) ? 'grid-cols-2' : 'grid-cols-1'} gap-2 pb-1">
                     {#each backups as b}
                         {@const isActive = isBackupRunning && activeTask?.Item2 === b.Backup.ID}
                         <div class="flex flex-col p-3 rounded-xl bg-card border {isActive ? 'border-primary/50 bg-primary/5' : 'border-border shadow-sm'} text-muted-foreground transition-colors relative overflow-hidden">

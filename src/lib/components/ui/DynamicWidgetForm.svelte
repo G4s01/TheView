@@ -6,6 +6,8 @@
 	import SelectInput from '$lib/components/ui/SelectInput.svelte';
 	import { Eye, EyeOff, Pencil, Plus, X } from "@lucide/svelte";
 	import SaveButton from "$lib/components/ui/SaveButton.svelte";
+	import ConfirmDeleteButton from "$lib/components/ui/ConfirmDeleteButton.svelte";
+	import BackButton from "$lib/components/ui/BackButton.svelte";
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
 	import { clickOutside } from '$lib/actions/clickOutside';
 	import { page } from '$app/stores';
@@ -17,7 +19,9 @@
 		isExpanded = $bindable(false),
 		onSave,
 		isSaving,
-		hideHeader = false
+		hideHeader = false,
+		onDelete,
+		onCancel
 	} = $props<{
 		widget: WidgetDef;
 		values: Record<string, any>;
@@ -25,6 +29,8 @@
 		onSave: (values: Record<string, any>) => void;
 		isSaving: boolean;
 		hideHeader?: boolean;
+		onDelete?: () => void;
+		onCancel?: () => void;
 	}>();
 
 	let iconStyle = $derived($page.data.settings?.iconStyle || "rounded-xl");
@@ -130,7 +136,15 @@
 						<ToggleInput label={field.label} checked={values[field.id] ?? false} onCheckedChange={(v) => values[field.id] = v} />
 					{/each}
 					</div>
-					<SaveButton class="w-32 h-10" onclick={handleSave} isLoading={isSaving} />
+					<div class="flex items-center justify-end gap-2 shrink-0">
+						{#if onDelete}
+							<ConfirmDeleteButton onConfirm={onDelete} disabled={isSaving} />
+						{/if}
+						{#if onCancel}
+							<BackButton onclick={onCancel} disabled={isSaving} text="" title="ANNULLA" />
+						{/if}
+						<SaveButton class="w-32 h-10" onclick={handleSave} isLoading={isSaving} />
+					</div>
 				</div>
 			</div>
 		</div>
@@ -178,7 +192,15 @@
 				<ToggleInput label={field.label} checked={values[field.id] ?? false} onCheckedChange={(v) => values[field.id] = v} />
 			{/each}
 			</div>
-			<SaveButton class="w-32 h-10 shrink-0" onclick={handleSave} isLoading={isSaving} />
+			<div class="flex items-center justify-end gap-2 shrink-0">
+				{#if onDelete}
+					<ConfirmDeleteButton onConfirm={onDelete} disabled={isSaving} />
+				{/if}
+				{#if onCancel}
+					<BackButton onclick={onCancel} disabled={isSaving} text="" title="ANNULLA" />
+				{/if}
+				<SaveButton class="w-32 h-10 shrink-0" onclick={handleSave} isLoading={isSaving} />
+			</div>
 		</div>
 	</div>
 {/if}

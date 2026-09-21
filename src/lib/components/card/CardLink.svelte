@@ -10,7 +10,8 @@
 		latencyMs, 
 		iconStyle, 
 		currentSize, 
-		showDescription, 
+		showDescriptionDesktop,
+		showDescriptionMobile, 
 		dockerVersionInfo,
 		iconBgColor = 'hsl(var(--muted-foreground))',
 		centerText = false,
@@ -22,7 +23,8 @@
 		latencyMs?: number | null;
 		iconStyle: string;
 		currentSize: string;
-		showDescription: boolean;
+		showDescriptionDesktop: boolean;
+		showDescriptionMobile: boolean;
 		dockerVersionInfo: any;
 		iconBgColor?: string;
 		centerText?: boolean;
@@ -79,8 +81,11 @@
 	</h3>
 
 	<div class="w-full flex flex-col shrink-0 min-h-0">
-		{#if showDescription && service.description}
-		<p class="mt-1 {!isBaseSize ? 'text-base' : 'text-sm'} text-muted-foreground line-clamp-2">
+		{#if service.description && (showDescriptionDesktop || showDescriptionMobile)}
+		<p class="mt-1 {!isBaseSize ? 'text-base' : 'text-sm'} text-muted-foreground line-clamp-2
+			{showDescriptionDesktop && showDescriptionMobile ? '' : 
+			(showDescriptionDesktop ? 'hidden md:block' : 
+			(showDescriptionMobile ? 'block md:hidden' : 'hidden'))}">
 			{service.description}
 		</p>
 		{/if}

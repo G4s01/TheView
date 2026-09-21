@@ -19,13 +19,15 @@
 
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
-	let isWide = $derived(nodeW > nodeH);
+	let rectW = $state(0);
+	let rectH = $state(0);
+	let isWide = $derived(rectW && rectH ? rectW > rectH * 1.1 : nodeW > nodeH);
 
 	let query = useBeszel();
 	let items = $derived(query.data?.items || []);
 
 	// Layout responsive basato sulle dimensioni reali di Gridstack
-	let cols = $derived(isWide || nodeW >= 4 ? 'grid-cols-2' : 'grid-cols-1');
+	let cols = $derived((rectW ? rectW >= 450 : nodeW >= 4) || isWide ? 'grid-cols-2' : 'grid-cols-1');
 </script>
 
 <div class="h-full w-full flex flex-col p-4">
