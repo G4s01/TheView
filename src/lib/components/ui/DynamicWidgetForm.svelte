@@ -1,6 +1,8 @@
 <script lang="ts">
 	import TextInput from '$lib/components/ui/TextInput.svelte';
 	import ToggleInput from '$lib/components/ui/ToggleInput.svelte';
+	import SearchableCombobox from '$lib/components/ui/SearchableCombobox.svelte';
+	import LocationSearchInput from '$lib/components/ui/LocationSearchInput.svelte';
 	import SelectInput from '$lib/components/ui/SelectInput.svelte';
 	import { Eye, EyeOff, Pencil, Plus, X } from "@lucide/svelte";
 	import SaveButton from "$lib/components/ui/SaveButton.svelte";
@@ -27,6 +29,25 @@
 
 	let iconStyle = $derived($page.data.settings?.iconStyle || "rounded-xl");
 	let showPassword = $state<Record<string, boolean>>({});
+
+	$effect(() => {
+		if (widget && widget.fields) {
+			widget.fields.forEach((f: any) => {
+				if (f.type === 'combobox' && f.options && f.options.length > 0 && !values[f.id]) {
+					// Fallback specifici
+					if (f.id === 'clock_timezone') {
+						const defaultRome = f.options.find((o: any) => o.value === 'Europe/Rome');
+						if (defaultRome) values[f.id] = defaultRome.value;
+						else values[f.id] = f.options[0].value;
+					} else if (f.id === 'weather_location') {
+						values[f.id] = '41.90278,12.49637,Roma';
+					} else {
+						values[f.id] = f.options[0].value;
+					}
+				}
+			});
+		}
+	});
 
 	let componentId = $derived("widget-" + widget.id);
 
@@ -91,6 +112,14 @@
 							<div class="md:col-span-6 h-10">
 								<SelectInput label={field.label} bind:value={values[field.id]} options={field.options} />
 							</div>
+						{:else if field.type === 'combobox' && field.options}
+							<div class="md:col-span-6 h-10 z-50">
+								<SearchableCombobox label={field.label} bind:value={values[field.id]} options={field.options} />
+							</div>
+						{:else if field.type === 'location'}
+							<div class="md:col-span-6 h-10 z-[60]">
+								<LocationSearchInput label={field.label} bind:value={values[field.id]} />
+							</div>
 						{/if}
 					{/each}
 				</div>
@@ -130,6 +159,14 @@
 				{:else if field.type === 'select' && field.options}
 					<div class="md:col-span-12 h-10">
 						<SelectInput label={field.label} bind:value={values[field.id]} options={field.options} />
+					</div>
+				{:else if field.type === 'combobox' && field.options}
+					<div class="md:col-span-12 h-10 z-50">
+						<SearchableCombobox label={field.label} bind:value={values[field.id]} options={field.options} />
+					</div>
+				{:else if field.type === 'location'}
+					<div class="md:col-span-12 h-10 z-[60]">
+						<LocationSearchInput label={field.label} bind:value={values[field.id]} />
 					</div>
 				{/if}
 			{/each}

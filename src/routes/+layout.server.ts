@@ -27,8 +27,10 @@ export async function load({ locals }) {
   }
 
   const allServices = await db
-    .select({ categoryId: services.categoryId, grid_id: services.grid_id })
+    .select({ categoryId: services.categoryId, grid_id: services.grid_id, widgetType: services.widgetType })
     .from(services);
+    
+  const usedWidgetTypes = Array.from(new Set(allServices.map(s => s.widgetType).filter(t => t && t !== 'none' && t !== 'spacer')));
 
   const gridsWithCount = allGrids.map((g) => {
     const count = allServices.filter(
@@ -72,5 +74,6 @@ export async function load({ locals }) {
     editModeSidebarPosition: settings.editModeSidebarPosition || "right",
     editServiceSheetPosition: settings.editServiceSheetPosition || "right",
     settings,
+    usedWidgetTypes,
   };
 }

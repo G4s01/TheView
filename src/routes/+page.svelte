@@ -11,6 +11,7 @@
 	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
 	import { enhance } from '$app/forms';
+	import { clickOutside } from '$lib/actions/clickOutside';
 
 	import * as Dialog from '$lib/components/ui/dialog/index';
 	import AdminDiscovery from './admin/components/AdminDiscovery.svelte';
@@ -451,7 +452,7 @@
 	<div class="flex-1 w-full flex flex-col gap-6 min-w-0">
 
 {#if isDiscoveryModalOpen}
-	<div transition:slide class="w-full bg-card rounded-2xl border-2 border-primary/20 p-6 shadow-lg mb-6 flex flex-col gap-6 relative overflow-hidden">
+	<div transition:slide use:clickOutside={{ handler: () => isDiscoveryModalOpen = false, ignore: '.ignore-click-outside' }} class="w-full bg-card rounded-2xl border-2 border-primary/20 p-6 shadow-lg mb-6 flex flex-col gap-6 relative overflow-hidden">
 		<!-- Decorazione sfondo -->
 		<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 -translate-y-1/2 translate-x-1/3"></div>
 
@@ -495,10 +496,11 @@
 							action="/admin?/createService" 
 							useEnhance={true} 
 							enhanceFn={() => {
-								return async ({ result }: any) => {
+								return async ({ result, update }: any) => {
 									if (result.type === 'success' || result.type === 'redirect') {
 										hasAddedServices = true;
 										isDiscoveryModalOpen = false;
+										await update();
 									}
 								};
 							}} 
@@ -519,7 +521,7 @@
 {/if}
 
 {#if isWidgetModalOpen}
-	<div transition:slide class="w-full bg-card rounded-2xl border-2 border-primary/20 p-6 shadow-lg mb-6 flex flex-col gap-6 relative overflow-hidden">
+	<div transition:slide use:clickOutside={{ handler: () => isWidgetModalOpen = false, ignore: '.ignore-click-outside' }} class="w-full bg-card rounded-2xl border-2 border-primary/20 p-6 shadow-lg mb-6 flex flex-col gap-6 relative overflow-hidden">
 		<!-- Decorazione sfondo -->
 		<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 -translate-y-1/2 translate-x-1/3"></div>
 
@@ -550,13 +552,22 @@
 				{ name: 'Filebrowser', type: 'filebrowser', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/filebrowser.svg', w: 2, h: 2 },
 				{ name: 'Docker', type: 'docker', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/docker.svg', w: 2, h: 2 },
 				{ name: 'Dockhand', type: 'dockhand', icon: 'dockhand', w: 2, h: 2 },
-			] as widget}
-				<div class="drag-in-widget grid-stack-item cursor-grab active:cursor-grabbing flex flex-col items-center justify-center gap-3 p-4 bg-background rounded-xl border border-border shadow-sm hover:bg-primary/10 hover:border-primary/50 transition-colors group text-primary" data-type="widget" data-widget-type={widget.type} data-widget-name={widget.name} data-widget-icon={widget.icon} {...{'gs-w': widget.w.toString(), 'gs-h': widget.h.toString(), 'gs-min-w': widget.w.toString(), 'gs-min-h': widget.h.toString()}} title="Trascina nella griglia per aggiungerlo">
-					<div class="grid-stack-item-content pointer-events-none flex flex-col items-center justify-center static! bg-transparent border-none shadow-none inset-0 w-full h-full gap-2">
-						<ServiceIcon icon={widget.icon} name={widget.name} size="lg" class="shadow-sm border border-border bg-card group-hover:scale-110 transition-transform" />
-						<span class="text-xs font-semibold text-foreground uppercase tracking-wider text-center">{widget.name}</span>
+			].map(w => ({ ...w, isUsed: data.usedWidgetTypes?.includes(w.type) })) as widget}
+				{#if widget.isUsed}
+					<div class="flex flex-col items-center justify-center gap-3 p-4 bg-background/50 rounded-xl border border-border/50 opacity-40 cursor-not-allowed group text-primary relative" title="Widget già in uso nella dashboard">
+						<div class="pointer-events-none flex flex-col items-center justify-center inset-0 w-full h-full gap-2 grayscale">
+							<ServiceIcon icon={widget.icon} name={widget.name} size="lg" class="shadow-sm border border-border bg-card" />
+							<span class="text-xs font-semibold text-foreground uppercase tracking-wider text-center">{widget.name}</span>
+						</div>
 					</div>
-				</div>
+				{:else}
+					<div class="drag-in-widget grid-stack-item cursor-grab active:cursor-grabbing flex flex-col items-center justify-center gap-3 p-4 bg-background rounded-xl border border-border shadow-sm hover:bg-primary/10 hover:border-primary/50 transition-colors group text-primary" data-type="widget" data-widget-type={widget.type} data-widget-name={widget.name} data-widget-icon={widget.icon} {...{'gs-w': widget.w.toString(), 'gs-h': widget.h.toString(), 'gs-min-w': widget.w.toString(), 'gs-min-h': widget.h.toString()}} title="Trascina nella griglia per aggiungerlo">
+						<div class="grid-stack-item-content pointer-events-none flex flex-col items-center justify-center static! bg-transparent border-none shadow-none inset-0 w-full h-full gap-2">
+							<ServiceIcon icon={widget.icon} name={widget.name} size="lg" class="shadow-sm border border-border bg-card group-hover:scale-110 transition-transform" />
+							<span class="text-xs font-semibold text-foreground uppercase tracking-wider text-center">{widget.name}</span>
+						</div>
+					</div>
+				{/if}
 			{/each}
 		</div>
 	</div>
@@ -647,7 +658,7 @@
 		<aside class="fixed top-1/2 -translate-y-1/2 {editModeSidebarPosition === 'left' ? 'left-4' : 'right-4'} z-50 flex flex-col gap-2 w-16">
 			<div class="bg-card py-4 rounded-xl border border-border shadow-2xl flex flex-col items-center gap-5">
                 
-                <button onclick={() => isDiscoveryModalOpen = !isDiscoveryModalOpen} class="w-12 h-12 flex items-center justify-center rounded-xl {isDiscoveryModalOpen ? 'bg-primary/20 ring-2 ring-primary/50' : 'hover:bg-primary/10'} text-primary transition-colors relative group" title={isDiscoveryModalOpen ? "Chiudi Aggiunta Servizio" : "Aggiungi Servizio"}>
+                <button onclick={(e) => { e.stopPropagation(); isDiscoveryModalOpen = !isDiscoveryModalOpen; if (isDiscoveryModalOpen) { isWidgetModalOpen = false; window.scrollTo({ top: 0, behavior: 'smooth' }); } }} class="w-12 h-12 flex items-center justify-center rounded-xl {isDiscoveryModalOpen ? 'bg-primary/20 ring-2 ring-primary/50' : 'hover:bg-primary/10'} text-primary transition-colors relative group ignore-click-outside" title={isDiscoveryModalOpen ? "Chiudi Aggiunta Servizio" : "Aggiungi Servizio"}>
 					<div class="relative flex items-center justify-center">
 						<Search class="size-6 group-hover:scale-110 transition-transform" />
 						<div class="absolute -bottom-2 -right-2 bg-primary text-primary-foreground rounded-full shadow-sm ring-2 ring-card p-0.5">
@@ -660,7 +671,7 @@
 					</div>
 				</button>
 				
-				<button onclick={() => isWidgetModalOpen = !isWidgetModalOpen} class="w-12 h-12 flex items-center justify-center rounded-xl {isWidgetModalOpen ? 'bg-primary/20 ring-2 ring-primary/50' : 'hover:bg-primary/10'} text-primary transition-colors relative group" title={isWidgetModalOpen ? "Chiudi Aggiunta Widget" : "Aggiungi Widget"}>
+				<button onclick={(e) => { e.stopPropagation(); isWidgetModalOpen = !isWidgetModalOpen; if (isWidgetModalOpen) { isDiscoveryModalOpen = false; window.scrollTo({ top: 0, behavior: 'smooth' }); } }} class="w-12 h-12 flex items-center justify-center rounded-xl {isWidgetModalOpen ? 'bg-primary/20 ring-2 ring-primary/50' : 'hover:bg-primary/10'} text-primary transition-colors relative group ignore-click-outside" title={isWidgetModalOpen ? "Chiudi Aggiunta Widget" : "Aggiungi Widget"}>
 					<div class="relative flex items-center justify-center">
 						<CloudSun class="size-6 group-hover:scale-110 transition-transform" />
 						<div class="absolute -bottom-2 -right-2 bg-primary text-primary-foreground rounded-full shadow-sm ring-2 ring-card p-0.5">

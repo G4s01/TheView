@@ -3,6 +3,8 @@
 	import { toast } from 'svelte-sonner';
 	import { WIDGET_REGISTRY } from '$lib/config/widgetRegistry';
 	import DynamicWidgetForm from '$lib/components/ui/DynamicWidgetForm.svelte';
+	import { invalidateAll } from '$app/navigation';
+	import { useQueryClient } from '@tanstack/svelte-query';
 
 	let { widgetType } = $props<{
 		widgetType: string;
@@ -10,6 +12,7 @@
 
 	let settingsValues = $state<Record<string, any>>({});
 	let isSaving = $state(false);
+	const queryClient = useQueryClient();
 
 	let widgetDef = $derived(WIDGET_REGISTRY.find(w => w.id === widgetType));
 
@@ -29,7 +32,11 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(payload)
 			});
-			if (res.ok) toast.success(`Impostazioni ${widgetDef.name} salvate con successo!`);
+			if (res.ok) {
+				toast.success(`Impostazioni ${widgetDef.name} salvate con successo!`);
+				await invalidateAll();
+				queryClient.invalidateQueries();
+			}
 			else toast.error('Errore durante il salvataggio.');
 		} catch (e) {
 			toast.error('Errore di rete.');

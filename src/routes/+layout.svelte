@@ -66,6 +66,7 @@
 	let versionInfo = $state<{currentVersion?: string, latestVersion?: string, url?: string}>({});
 	
 	let isNavbarHidden = $state(false);
+	let scrollY = $state(0);
 	let lastScrollY = $state(0);
 
 	$effect(() => {
@@ -95,7 +96,7 @@
 	});
 </script>
 
-<svelte:window onscroll={handleScroll} />
+<svelte:window onscroll={handleScroll} bind:scrollY />
 
 <QueryClientProvider client={queryClient}>
 <Toaster />
@@ -116,7 +117,7 @@
 		class="sticky top-0 z-40 bg-card border-b border-border transition-transform duration-300 {isNavbarHidden ? '-translate-y-full' : 'translate-y-0'}"
 		onmouseleave={() => { if (!data.stickyNavbar && !$page.url.pathname.startsWith('/admin')) isNavbarHidden = true; }}
 	>
-		<div class="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16 max-w-[1920px] mx-auto">
+		<div class="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 transition-all duration-300 max-w-[1920px] mx-auto {scrollY > 20 ? 'h-12' : 'h-16'}">
 			
 			<!-- Left Column (Logo & Back) -->
 			<div class="flex-1 flex items-center justify-start min-w-50">
@@ -127,7 +128,7 @@
 						</a>
 					{/if}
 					<a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-						<img src="/favicon.svg" alt="TheView Logo" class="size-8" />
+						<img src="/favicon.svg" alt="TheView Logo" class="transition-all duration-300 {scrollY > 20 ? 'size-6' : 'size-8'}" />
 						<span class="hidden sm:inline text-xl font-bold text-foreground tracking-tight">TheView</span>
 					</a>
 				</div>

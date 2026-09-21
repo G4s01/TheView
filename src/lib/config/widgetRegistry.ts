@@ -1,7 +1,7 @@
 export type WidgetField = {
   id: string; // e.g., 'qbit_url', 'clock_timezone'
   label: string;
-  type: 'text' | 'password' | 'checkbox' | 'select';
+  type: 'text' | 'password' | 'checkbox' | 'select' | 'combobox';
   options?: { value: string; label: string }[]; // for 'select'
   description?: string;
 };
@@ -113,7 +113,14 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     icon: 'lucide:clock',
     description: 'Impostazioni Widget Orologio',
     fields: [
-      { id: 'clock_timezone', label: 'Fuso Orario (es. Europe/Rome)', type: 'text' },
+      { 
+        id: 'clock_timezone', 
+        label: 'Fuso Orario', 
+        type: 'combobox', 
+        options: typeof Intl !== 'undefined' && Intl.supportedValuesOf ? 
+          Intl.supportedValuesOf('timeZone').map(tz => ({ value: tz, label: tz })) : 
+          [{ value: 'Europe/Rome', label: 'Europe/Rome' }] 
+      },
       { id: 'clock_format', label: 'Formato', type: 'select', options: [
         { value: 'digital', label: 'Digitale (Testo)' },
         { value: 'analog', label: 'Analogico (Lancette)' }
@@ -127,7 +134,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     icon: 'lucide:cloud-sun',
     description: 'Impostazioni Widget Meteo',
     fields: [
-      { id: 'weather_location', label: 'Località (es. Milan, Italy)', type: 'text' },
+      { id: 'weather_location', label: 'Cerca Località', type: 'location' },
       { id: 'weather_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
     ]
   }

@@ -15,7 +15,7 @@
 		onchange
 	} = $props<{
 		value?: string | number | null;
-		options?: { value: string | number; label: string; class?: string }[];
+		options?: { value: string | number; label: string; class?: string; disabled?: boolean }[];
 		label?: string;
 		id?: string;
 		class?: string;
@@ -82,8 +82,9 @@
 					<li>
 						<button 
 							type="button"
-							class="w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors {String(value) === String(opt.value) ? 'bg-muted font-semibold text-primary' : 'text-foreground'} {opt.class || ''}"
-							onclick={(e) => { e.preventDefault(); handleSelect(opt.value); }}
+							class="w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors {String(value) === String(opt.value) ? 'bg-muted font-semibold text-primary' : 'text-foreground'} {opt.class || ''} {opt.disabled ? 'opacity-50 cursor-not-allowed' : ''}"
+							disabled={opt.disabled}
+							onclick={(e) => { e.preventDefault(); if (!opt.disabled) handleSelect(opt.value); }}
 						>
 							{opt.label}
 						</button>

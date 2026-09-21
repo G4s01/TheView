@@ -3,6 +3,8 @@
 	import * as Card from "$lib/components/ui/card";
 	import SettingsHeader from '$lib/components/ui/SettingsHeader.svelte';
 	import DynamicWidgetForm from '$lib/components/ui/DynamicWidgetForm.svelte';
+	import { invalidateAll } from '$app/navigation';
+	import { useQueryClient } from '@tanstack/svelte-query';
 	import { toast } from 'svelte-sonner';
 	import { WIDGET_REGISTRY } from '$lib/config/widgetRegistry';
 
@@ -28,7 +30,11 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(payload)
 			});
-			if (res.ok) toast.success(`Impostazioni ${widgetDef.name} salvate con successo!`);
+			if (res.ok) {
+				toast.success(`Impostazioni ${widgetDef.name} salvate con successo!`);
+				await invalidateAll();
+				queryClient.invalidateQueries();
+			}
 			else toast.error('Errore durante il salvataggio.');
 		} catch (e) {
 			toast.error('Errore di rete.');
@@ -72,7 +78,7 @@
 </script>
 
 <div class="space-y-6">
-	<Card.Root class="border border-border bg-card shadow-sm overflow-hidden">
+	<Card.Root class="border border-border bg-card shadow-sm">
 		<Card.Header class="pb-4 bg-muted/20 border-b border-border">
 			<SettingsHeader
 				title="IMPOSTAZIONI WIDGET"

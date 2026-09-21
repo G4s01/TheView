@@ -232,11 +232,12 @@
 									action="/admin?/createService" 
 									useEnhance={true}
 									enhanceFn={() => {
-										return async ({ result }: any) => {
+										return async ({ result, update }: any) => {
 											if (result.type === 'success' || result.type === 'redirect') {
 												ds.added = true;
 												expandedId = null;
 												if (onServiceAdded) onServiceAdded();
+												await update();
 											}
 										};
 									}}
