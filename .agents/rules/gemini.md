@@ -9,7 +9,7 @@ Benvenuto! Questo file contiene il contesto architetturale, i vincoli di sicurez
 
 ## 📌 Cos'è TheView?
 
-**TheView** è una dashboard web moderna per homelab e self-hosting. Utilizza un layout "Bento Grid" (Tetris-style) per organizzare link e widget interattivi in formati dinamici (1x1, 1x2, 2x1, 2x2). I widget integrati (qBittorrent, AdGuard Home) offrono controllo diretto sui servizi tramite proxy SvelteKit e polling con TanStack Query.
+**TheView** è una dashboard web moderna per homelab e self-hosting. Utilizza un layout "Bento Grid" (Tetris-style) per organizzare link e widget interattivi in formati dinamici (1x1, 1x2, 2x1, 2x2). I widget integrati (Meteo, Docker, qBittorrent, AdGuard Home, FileBrowser, Beszel, WgEasy, Duplicati) offrono controllo diretto sui servizi tramite proxy SvelteKit e polling con TanStack Query.
 
 ## 🧠 INTEGRAZIONE SKILL E MCP (OBBLIGATORIA)
 
@@ -81,7 +81,7 @@ I widget seguono un pattern architetturale rigoroso a 4 livelli:
 2. **Layout e Spaziature:**
    - Evita classi come `space-y-*` o `space-x-*`. Usa `flex` combinato con `gap-*` per prevedibilità.
    - Usa `size-*` (es. `size-6`) al posto di `w-6 h-6`.
-3. **Bento Grid Fluidity:** I contenuti delle Card devono essere fluidi (`w-full h-full`) e usare Flexbox per adattarsi dinamicamente ai formati espansi/verticali, preservando i padding. Le celle devono auto-crescere in altezza per il contenuto (MAI scrollbar nei widget).
+3. **Bento Grid Fluidity (Physical Pixels):** I contenuti delle Card devono essere fluidi (`w-full h-full`). **Vietato** basare la logica responsive (es. `isWide`, `isTall`) sulle coordinate `nodeW` / `nodeH` di Gridstack. Usa sempre `bind:clientWidth` e `bind:clientHeight` sul container radice per determinare le proporzioni fisiche reali a schermo, dato che le colonne variano per ogni device.
 4. **Modali e Dialoghi:** Mai modali custom sovrapposti. Usa i primitivi `<Dialog>` per UI o `<AlertDialog>` per conferme distruttive.
 5. **Componenti DRY:** L'icona va delegata a `<ServiceIcon>`. I form di inserimento/modifica devono condividere `<ServiceForm>`, differenziando per `mode`.
 6. **Iconografia:** Usa esclusivamente `lucide-svelte` per la UI strutturale.
@@ -93,4 +93,4 @@ I widget seguono un pattern architetturale rigoroso a 4 livelli:
 2. **Lavoro Modulare & Verifica:** Lavora su un file alla volta. Prima di alterare lo stato reattivo (`$state`), valuta sempre l'impatto sulle librerie terze (come `gridstack` o TanStack Query).
 3. **Inizializza con la Ricerca:** Prima di ipotizzare come implementare una feature in Svelte 5 o Tailwind v4, usa i tool a tua disposizione (Skill + MCP) per verificare la sintassi corretta ed evitare allucinazioni su versioni vecchie dei framework.
 4. **Root Pulita (Zero Spazzatura):** È SEVERAMENTE VIETATO creare file temporanei, script di test/debug, documenti di appoggio, lock file o qualsiasi artefatto IA nella directory principale del progetto. Se hai bisogno di file scratch, test one-off, note, o qualsiasi file di supporto, creali ESCLUSIVAMENTE nella directory `.gemini/` (es. `.gemini/scratch/`). La root del progetto deve contenere solo file che fanno parte integrante del codebase.
-5. **Widget Pattern:** Per aggiungere un nuovo widget, segui SEMPRE il pattern a 4 livelli (Admin Settings → Proxy API → TanStack Hook → Widget UI). Non deviare dalla separazione delle responsabilità.
+5. **Widget Pattern:** Per aggiungere un nuovo widget, segui SEMPRE il pattern a 4 livelli (Admin Settings → Proxy API → TanStack Hook → Widget UI). I widget possono essere collegati a un servizio o "Standalone" (senza URL). I widget standalone vengono modificati interamente via l'EditServiceSheet, sfruttando `ConfirmDeleteButton` e `BackButton`.

@@ -1,7 +1,7 @@
 <div align="center">
   <img src="static/favicon.svg" width="150" alt="TheView Logo" />
 
-  <h1>TheView 2.0</h1>
+  <h1>TheView 2.0.2</h1>
 
   <p>
     <strong>A modern, dynamic, and blazing-fast homelab dashboard.</strong>
@@ -29,20 +29,31 @@ Built with **Svelte 5 Runes**, `shadcn-svelte`, **Tailwind CSS v4**, **TanStack 
 
 - 🖥️ **100% Web UI Driven**: Forget editing YAML files. Add, edit, remove, and configure categories and services using an intuitive web interface.
 - 🍱 **Multi-Grid Bento Layout**: Create distinct grid areas per category, each with its own Title and Widget arrangement. The elegant 12-column Gridstack engine allows components to perfectly adapt to your screen size.
-- 📐 **Interactive 2D Drag & Resize**: In Edit Mode, effortlessly resize any service card in true 2D space. Drag items, change their dimensions, and lock them in place. The grid natively handles empty spaces—no "Spacer Cards" needed anymore!
-- 🔐 **Two-Factor Authentication (2FA)**: Secure your admin panel with TOTP-based 2FA. Fully integrated with your favorite authenticator apps (Google Authenticator, Authy, etc.) for maximum security.
-- 🔍 **Hybrid Icon Search Engine**: The built-in icon picker works like a search engine. Start typing to get instant autocomplete suggestions with visual previews directly from the `homarr-labs/dashboard-icons` repository, **or fetch millions of icons directly from the Iconify API**. You can also paste a custom direct URL.
+- 📐 **Interactive 2D Drag & Resize**: In Edit Mode, effortlessly resize any service card in true 2D space. Drag items, change their dimensions, and lock them in place. The grid natively handles empty spaces.
+- 🔐 **Two-Factor Authentication (2FA)**: Secure your admin panel with TOTP-based 2FA. Fully integrated with your favorite authenticator apps (Google Authenticator, Authy, etc.).
+- 🔍 **Hybrid Icon Search Engine**: The built-in icon picker works like a search engine. Start typing to get instant autocomplete suggestions with visual previews directly from the `homarr-labs/dashboard-icons` repository, or fetch millions of icons directly from the Iconify API.
 - 📡 **Live Health Checks (Ping)**: Built-in pinging system powered by TanStack Query. Shows live online/offline status with an elegant pulsating glow, and tracks latency (ms) for all your tracked services.
-- 📦 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click. The smart icon parser automatically matches services.
-- 🔄 **Docker Update Notifications**: Automatically checks if your Docker containers have new versions available on Docker Hub or GHCR by comparing image SHA256 digests. A notification badge will alert you directly on the dashboard!
-- ⚡ **Zero Layout-Shift Edit Mode**: Click the edit icon on any service card to summon the elegant **Edit Service Sheet** — a non-intrusive, sliding side panel that lets you configure services and widgets without disrupting or squishing your beautifully crafted dashboard.
-- 🔌 **Interactive Widgets**:
-  - **qBittorrent**: Live download/upload speeds, active torrent list with pause/resume controls, and torrent addition via magnet link or `.torrent` file upload.
-  - **AdGuard Home**: Real-time DNS query stats, protection toggle with timed pause via a scrollable time wheel picker, and automatic countdown to re-activation.
-  - _Both widgets are highly responsive, magically adapting their internal layouts based on the Gridstack dimensions you assign them!_
-- 🎨 **Advanced Theming**: Pick your vibe. Full support for Dark/Light modes powered by semantic `shadcn-svelte` HSL variables for pixel-perfect contrast. The entire UI is built on a clean, scalable Tailwind v4 design system, with no hardcoded colors.
-- 🦴 **Beautiful Loading States**: Skeletons that match actual component layouts instead of basic spinners, providing a native application feel while TanStack Query fetches data in the background.
-- 📱 **Fully Responsive**: Carefully designed to look stunning and function perfectly on desktops, tablets, and smartphones.
+- 📦 **Auto-Discovery Engine**: Seamlessly integrates with your local **Docker socket** and **Nginx Proxy Manager**. TheView automatically finds running containers and active proxy hosts, allowing you to add them in a single click.
+- 🔄 **Docker Update Notifications**: Automatically checks if your Docker containers have new versions available on Docker Hub or GHCR by comparing image SHA256 digests.
+- ⚡ **Zero Layout-Shift Edit Mode**: Non-intrusive, sliding side panels let you configure services and widgets without disrupting or squishing your beautifully crafted dashboard.
+- 🎨 **Advanced Theming & Appearance**: Pick your vibe. Full support for Dark/Light modes. Extensive appearance settings allow toggling categories, service counts, and mobile/desktop-specific layouts.
+
+---
+
+## 🔌 Widget Integrations
+
+TheView goes beyond simple links by offering deep integrations with your favorite self-hosted services via rich, responsive widgets. **Every widget dynamically adapts its internal layout based on its physical GridStack proportions (wide, tall, square, or compact).**
+
+- **Weather (Meteo)**: Real-time weather, hourly, and daily forecasts. Features a matrix layout that perfectly conforms to its aspect ratio. Uses Open-Meteo for blazing-fast geocoding.
+- **Docker**: Live container stats (CPU, RAM, Status). Check for updates and issue Start/Stop/Restart commands without leaving the dashboard.
+- **qBittorrent**: Real-time speeds, active torrent list with pause/resume controls, and torrent addition via magnet link or `.torrent` file upload.
+- **AdGuard Home**: DNS queries and protection controls. Includes a custom scrollable Time Wheel Picker to pause protection for a specific duration.
+- **Wg-Easy**: Track active Wireguard VPN clients, toggle connections, view transfer speeds, and download config files or QR Codes.
+- **Duplicati**: Live backup monitoring, progress tracking, and the ability to start/stop backup tasks directly.
+- **FileBrowser**: Disk usage monitoring visualized with dynamic SVG radial progress bars.
+- **Beszel**: System stats, CPU, RAM, and Network usage monitoring.
+- **Dockhand**: Quick execution of configured docker backup/restore scripts.
+- **Clock**: A beautifully minimal analog/digital clock widget.
 
 ---
 
@@ -50,16 +61,15 @@ Built with **Svelte 5 Runes**, `shadcn-svelte`, **Tailwind CSS v4**, **TanStack 
 
 The recommended and most robust way to deploy TheView is via Docker Compose.
 
-### Basic Setup (Host Network - Recommended)
-
-Using `network_mode: host` is highly recommended if you want TheView to easily ping local services on your host machine without complicated Docker bridge routing.
+> [!TIP]
+> Using `network_mode: host` is highly recommended if you want TheView to easily ping local services on your host machine without complicated Docker bridge routing.
 
 ```yaml
 services:
   theview:
     image: ghcr.io/g4s01/theview:latest
     container_name: theview_portal
-    network_mode: host
+    network_mode: host # Or use standard bridge and ports: - "3001:3001"
     restart: unless-stopped
     volumes:
       - ./data:/app/data
@@ -68,32 +78,8 @@ services:
       - TZ=Europe/Rome
       - NODE_ENV=production
       - PORT=3001
-      - ORIGIN=http://your-homelab-ip:3001 # Or your public domain
+      - ORIGIN=http://your-homelab-ip:3001
       - SECURE_COOKIE=false # Set to true ONLY if you are accessing via HTTPS
-```
-
-### Advanced Setup (Bridge Network)
-
-If you prefer to keep TheView in a custom Docker bridge network (e.g., behind a reverse proxy like NGINX Proxy Manager or Traefik):
-
-```yaml
-services:
-  theview:
-    image: ghcr.io/g4s01/theview:latest
-    container_name: theview_portal
-    restart: unless-stopped
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./data:/app/data
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - TZ=Europe/Rome
-      - NODE_ENV=production
-      - PORT=3001
-      # Essential when running behind a proxy:
-      - ORIGIN=https://dashboard.yourdomain.com
-      - SECURE_COOKIE=true # Set to true because we are using HTTPS
 ```
 
 ### First Access & Admin Setup
@@ -102,91 +88,37 @@ services:
 2. Navigate to `http://your-homelab-ip:3001` (or your configured `ORIGIN`).
 3. Click the login icon ➜] in the top right corner of the navbar to access the **Admin Panel**.
 4. By default, there is no password. You will be prompted to set your secure **Admin Password** on your first login.
-5. If no services are set up, clicking "Accedi e Imposta i Tuoi Servizi" will conveniently redirect you directly to the **Discovery tab** to auto-populate your dashboard!
+5. Navigate to the **Discovery tab** to auto-populate your dashboard!
 
 ---
 
 ## ⚙️ Configuration & Security
 
-TheView stores all state (Categories, Services, uploaded Icons, Grid Layouts, and UI Settings) in a robust local SQLite database inside the `/app/data` volume. This means your dashboard is entirely portable just by backing up the `data/sqlite.db` file!
+TheView stores all state in a robust local SQLite database inside the `/app/data` volume. 
+
+> [!IMPORTANT]
+> Your dashboard is entirely portable just by backing up the `data/sqlite.db` file!
 
 ### 👤 Volume Permissions (PUID/PGID & UMASK)
 
-To avoid permission issues with the mounted `/app/data` volume (such as `EACCES` or `readonly database` errors with SQLite), TheView supports standard **`PUID`**, **`PGID`**, and **`UMASK`** environment variables.
-These variables ensure that the container's internal process runs with the same User ID and Group ID as the host system user that owns the directory, and that any files created have the correct permissions.
-
-If you don't provide them, the container defaults to `1000:1000` and `UMASK=022`. Set them in your `docker-compose.yml` to match your host user:
-
-```yaml
-environment:
-  - PUID=1000
-  - PGID=1000
-  - UMASK=022
-```
+To avoid permission issues with the mounted `/app/data` volume, TheView supports standard **`PUID`**, **`PGID`**, and **`UMASK`** environment variables. Set them in your `docker-compose.yml` to match your host user (e.g., PUID=1000).
 
 ### 🔐 Security & Encryption
 
-All sensitive data (Admin Password, NPM credentials, Widget passwords, and 2FA secrets) are **strongly encrypted or hashed** (AES-256-GCM / SHA-256) inside the database. The system automatically generates a unique `APP_SECRET` on first boot. This secret is safely stored inside the persistent `/app/data/secret.key` file to survive Docker updates flawlessly. TheView does not store plaintext passwords anywhere.
+All sensitive data (Passwords, API keys, and 2FA secrets) are **strongly encrypted or hashed** (AES-256-GCM / SHA-256) inside the database. The system automatically generates a unique `APP_SECRET` safely stored inside the persistent `/app/data/secret.key` file.
 
 ### 💾 Backup & Restore
 
-You can easily backup or migrate your dashboard directly from the web interface:
-
-1. Go to **Settings** in the Admin panel.
-2. Scroll down to the **Backup e Ripristino** section.
-3. Click **ESPORTA** to instantly download your entire SQLite database, fully named and timestamped.
-4. You can restore an old backup by uploading it via **IMPORTA**. The dashboard will automatically restart to apply the new database.
-
-### Nginx Proxy Manager Discovery
-
-To enable automatic discovery of your Nginx Proxy Manager hosts:
-
-1. Go to **Settings** in the Admin panel.
-2. Enter your NPM instance URL (e.g., `http://192.168.1.100:81`).
-3. Enter your NPM Email and Password.
-4. Navigate to the **Discovery** tab to see your proxy hosts merged with your Docker containers!
-
----
-
-## 🔌 Widget Integrations
-
-Widget settings are managed in a **dedicated "Widgets" tab** in the Admin Panel, separated from general settings for clearer navigation.
-
-### qBittorrent
-
-Live torrent monitoring and management directly from your dashboard card.
-
-1. Go to the **Widgets** tab in the Admin panel.
-2. Expand the qBittorrent section and enter your credentials (URL, Username, Password).
-3. Create or edit a service, select `qBittorrent` as the Widget type.
-
-**Features:**
-
-- Real-time download/upload speeds with 3-second TanStack Query polling.
-- Active torrent list with individual pause/resume buttons.
-- Add new torrents via magnet link or `.torrent` file upload directly from the widget.
-- Fluid Gridstack integration natively responds to sizing changes.
-
-### AdGuard Home
-
-Real-time DNS protection monitoring and control.
-
-1. Go to the **Widgets** tab in the Admin panel.
-2. Expand the AdGuard Home section and enter your credentials (URL, Username, Password).
-3. Create or edit a service, select `adguard` as the Widget type.
-
-**Features:**
-
-- DNS Queries count and Blocked Queries count — live stats.
-- Protection ON/OFF toggle with visual status indicator.
-- Timed pause via a custom **Time Wheel Picker** (Days / Hours / Minutes). Scroll to select a duration, disable protection, and watch the countdown timer for automatic re-activation.
-- All data powered by TanStack Query with smart polling.
+Backup or migrate your dashboard directly from the web interface:
+1. Go to **Settings > Backup e Ripristino**.
+2. Click **ESPORTA** to instantly download your entire SQLite database.
+3. You can restore an old backup by uploading it via **IMPORTA**. The dashboard will automatically restart to apply the new database.
 
 ---
 
 ## 🛠️ Local Development
 
-Want to contribute or run from source? TheView is built on SvelteKit 5 and Tailwind CSS v4.
+Want to contribute or run from source?
 
 ```bash
 # Clone the repo
@@ -204,12 +136,6 @@ npm run db:seed
 npm run dev
 ```
 
-To update the database schema after making changes to `src/lib/server/db/schema.ts`:
-
-```bash
-npx drizzle-kit push
-```
-
 ---
 
 ## 🧩 Tech Stack
@@ -224,10 +150,3 @@ npx drizzle-kit push
 | **Icons**         | lucide-svelte + Homarr Dashboard Icons + Iconify API |
 | **Encryption**    | AES-256-GCM / SHA-256                                |
 | **Deployment**    | Docker / Docker Compose                              |
-
----
-
-## 🛡️ License & Credits
-
-TheView is open-source and free to use. Built with ❤️ for the self-hosting community.
-Icons automatically fetched from [Homarr-Labs](https://github.com/homarr-labs/dashboard-icons) and [Iconify API](https://iconify.design/).
