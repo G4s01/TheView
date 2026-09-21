@@ -23,7 +23,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       size,
     } = await request.json();
 
-    if (!id || !name || !url || !categoryId) {
+    if (!id || !name || categoryId === undefined) {
       return json({ error: "Missing required fields" }, { status: 400 });
     }
 

@@ -9,6 +9,7 @@
 	
 	import CardLink from './card/CardLink.svelte';
 	import CardWidget from './card/CardWidget.svelte';
+	import { WIDGET_REGISTRY, getWidgetRequireAuthKey } from '$lib/config/widgetRegistry';
 
 	let { service, showDescription = true, iconStyle = 'rounded-xl' } = $props<{
 		service: {
@@ -23,6 +24,10 @@
 			dockerImage?: string | null;
 			iconDetails?: { type: 'custom' | 'brand' | 'lucide', value: string } | null;
 			size?: string;
+			isWidget?: boolean;
+			w?: number;
+			h?: number;
+			requireAuth?: boolean;
 		};
 		showDescription?: boolean;
 		iconStyle?: string;
@@ -58,7 +63,8 @@
 			pingEnabled: service.pingEnabled ?? true,
 			widgetType: service.widgetType || 'none',
 			dockerImage: service.dockerImage || '',
-			size: service.size || '1x1'
+			size: service.size || '1x1',
+			isWidget: service.isWidget === true
 		};
 	}
 
@@ -95,20 +101,23 @@
 
 	let isWidgetLayout = $derived(nodeW !== nodeH || (nodeW >= 4 && nodeH >= 4));
 
-	let requireAuth = $derived(
-		service.widgetType === 'qbittorrent' ? (appState.settings?.qbit_require_auth === 'true' || appState.settings?.qbit_require_auth === true)
-		: service.widgetType === 'adguard' ? (appState.settings?.adguard_require_auth === 'true' || appState.settings?.adguard_require_auth === true)
-		: service.widgetType === 'filebrowser' ? (appState.settings?.filebrowser_require_auth === 'true' || appState.settings?.filebrowser_require_auth === true)
-		: false // Wg-easy handles its own cookies/session
-	);
+	let requireAuth = $derived.by(() => {
+		const authKey = getWidgetRequireAuthKey(service.widgetType);
+		if (authKey && appState.settings) {
+			return appState.settings[authKey] === 'true' || appState.settings[authKey] === true;
+		}
+		return service.requireAuth === true;
+	});
 
 	let showWidget = $derived(
-		(service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand' || service.widgetType === 'filebrowser' || service.widgetType === 'clock' || service.widgetType === 'weather') &&
+		service.widgetType && service.widgetType !== 'none' && service.widgetType !== 'spacer' &&
+		WIDGET_REGISTRY.some(w => w.id === service.widgetType) &&
 		(!requireAuth || appState.isAdmin)
 	);
 
 	let separateCells = $derived(
-		service.widgetType === 'qbittorrent' || service.widgetType === 'adguard' || service.widgetType === 'beszel' || service.widgetType === 'wgeasy' || service.widgetType === 'duplicati' || service.widgetType === 'docker' || service.widgetType === 'dockhand' || service.widgetType === 'filebrowser' || service.widgetType === 'clock' || service.widgetType === 'weather'
+		service.widgetType && service.widgetType !== 'none' && service.widgetType !== 'spacer' &&
+		WIDGET_REGISTRY.some(w => w.id === service.widgetType)
 	);
 </script>
 

@@ -51,7 +51,7 @@
 	let isAddServiceExpanded = $state(false);
 
 	let sortedServices = $derived(
-		[...services].filter(s => s && s.widgetType !== 'spacer').sort((a, b) => (a.name || "").localeCompare(b.name || "", undefined, { sensitivity: 'base' }))
+		[...services].filter(s => s && s.widgetType !== 'spacer' && !s.isWidget).sort((a, b) => (a.name || "").localeCompare(b.name || "", undefined, { sensitivity: 'base' }))
 	);
 
 	let iconStyle = $derived($page.data.settings?.iconStyle || "rounded-xl");

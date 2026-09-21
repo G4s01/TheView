@@ -3,6 +3,7 @@
     import { appState } from '$lib/client/state.svelte';
     import ServiceForm from '$lib/components/ServiceForm.svelte';
     import { invalidateAll } from '$app/navigation';
+    import { Button } from "$lib/components/ui/button";
     import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
     import EditWidgetSettingsCard from '$lib/components/EditWidgetSettingsCard.svelte';
 
@@ -66,7 +67,15 @@
     }
 </script>
 
-<Sheet.Root {open} {onOpenChange}>
+{#snippet iconSlot()}
+                        <div class="size-12 rounded-xl flex items-center justify-center bg-muted border border-border shadow-inner">
+                            {#if appState.editingService}
+                                <ServiceIcon name={appState.editingService.name} icon={appState.editingService.icon} />
+                            {/if}
+                        </div>
+                    {/snippet}
+
+<Sheet.Root open={open} {onOpenChange}>
     <Sheet.Content side={sidePosition} class="w-[95vw]! sm:w-[90vw]! sm:max-w-none! md:w-200! md:max-w-200! overflow-y-auto p-4 sm:p-6 bg-muted/20">
         {#if appState.editingService}
             <div class="bg-card border border-border rounded-3xl p-6 shadow-sm flex flex-col gap-6">
@@ -80,26 +89,37 @@
                 </Sheet.Header>
                 
                 <div class="pb-2">
-                    {#snippet iconSlot()}
-                        <div class="size-12 rounded-xl flex items-center justify-center bg-muted border border-border shadow-inner">
-                            <ServiceIcon name={appState.editingService.name} icon={appState.editingService.icon} />
-                        </div>
-                    {/snippet}
 
-                    <ServiceForm 
-                        mode="edit" 
-                        bind:service={appState.editingService} 
-                        {isSaving}
-                        {iconSlot}
-                        onSubmit={saveEdit} 
-                        onCancel={() => onOpenChange(false)} 
-                        onDelete={deleteService} 
-                    />
+
+                    {#if appState.editingService.isWidget}
+                        <div class="flex flex-col gap-4">
+                            <p class="text-sm text-muted-foreground">Stai modificando un widget indipendente. Usa il pannello sottostante per configurarne le opzioni globali se previste.</p>
+                            <div class="flex items-center gap-3 mt-4">
+                                <Button type="button" variant="outline" onclick={() => onOpenChange(false)} disabled={isSaving} class="flex-1 bg-card hover:bg-muted">
+                                    Annulla
+                                </Button>
+                                <Button type="button" variant="destructive" onclick={deleteService} disabled={isSaving} class="flex-1">
+                                    Elimina Widget
+                                </Button>
+                            </div>
+                        </div>
+                    {:else}
+                        <ServiceForm 
+                            mode="edit" 
+                            bind:service={appState.editingService} 
+                            {isSaving}
+                            {iconSlot}
+                            onSubmit={saveEdit} 
+                            onCancel={() => onOpenChange(false)} 
+                            onDelete={deleteService} 
+                        />
+                    {/if}
                 </div>
             </div>
             
-            <EditWidgetSettingsCard widgetType={appState.editingService.widgetType} />
+            {#if appState.editingService.widgetType && appState.editingService.widgetType !== 'none' && appState.editingService.widgetType !== 'spacer'}
+                <EditWidgetSettingsCard widgetType={appState.editingService.widgetType} />
+            {/if}
         {/if}
     </Sheet.Content>
 </Sheet.Root>
-

@@ -89,7 +89,7 @@
 					<DynamicWidgetForm 
 						{widget}
 						bind:values={settingsValues}
-						bind:isExpanded={expandedStates[widget.id]}
+						
 						onSave={(vals) => saveWidgetSettings(widget.id, vals)}
 						isSaving={savingStates[widget.id] || false}
 					/>

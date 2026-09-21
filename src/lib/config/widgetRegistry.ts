@@ -48,6 +48,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: 'beszel_url', label: 'URL', type: 'text' },
       { id: 'beszel_username', label: 'Username', type: 'text' },
       { id: 'beszel_password', label: 'Password', type: 'password' },
+      { id: 'beszel_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
     ]
   },
   {
@@ -58,6 +59,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     fields: [
       { id: 'wgeasy_url', label: 'URL', type: 'text' },
       { id: 'wgeasy_password', label: 'Password', type: 'password' },
+      { id: 'wgeasy_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
     ]
   },
   {
@@ -68,6 +70,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     fields: [
       { id: 'duplicati_url', label: 'URL', type: 'text' },
       { id: 'duplicati_password', label: 'Password', type: 'password' },
+      { id: 'duplicati_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
     ]
   },
   {
@@ -89,6 +92,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     description: 'Impostazioni per l\'API di Docker Socket',
     fields: [
       { id: 'docker_socket_path', label: 'Socket Path (es: /var/run/docker.sock)', type: 'text' },
+      { id: 'docker_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
     ]
   },
   {
@@ -100,6 +104,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: 'dockhand_url', label: 'URL', type: 'text' },
       { id: 'dockhand_username', label: 'Username', type: 'text' },
       { id: 'dockhand_password', label: 'Password', type: 'password' },
+      { id: 'dockhand_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
     ]
   },
   {
@@ -113,6 +118,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
         { value: 'digital', label: 'Digitale (Testo)' },
         { value: 'analog', label: 'Analogico (Lancette)' }
       ] },
+      { id: 'clock_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
     ]
   },
   {
@@ -122,6 +128,15 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     description: 'Impostazioni Widget Meteo',
     fields: [
       { id: 'weather_location', label: 'Località (es. Milan, Italy)', type: 'text' },
+      { id: 'weather_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
     ]
   }
 ];
+
+export function getWidgetRequireAuthKey(widgetId: string | null | undefined): string | null {
+  if (!widgetId || widgetId === 'none' || widgetId === 'spacer') return null;
+  const def = WIDGET_REGISTRY.find(w => w.id === widgetId);
+  if (!def) return null;
+  const authField = def.fields.find(f => f.id.endsWith('_require_auth'));
+  return authField ? authField.id : null;
+}

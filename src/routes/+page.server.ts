@@ -13,13 +13,16 @@ export async function load() {
       .select()
       .from(dashboard_grids)
       .orderBy(dashboard_grids.position);
-      
+
     if (grids.length === 0) {
-      const inserted = await db.insert(dashboard_grids).values({
-        name: "MAIN",
-        position: 0,
-        show_header: false
-      }).returning();
+      const inserted = await db
+        .insert(dashboard_grids)
+        .values({
+          name: "MAIN",
+          position: 0,
+          show_header: false,
+        })
+        .returning();
       grids = inserted;
     }
   } catch (e) {
@@ -45,6 +48,8 @@ export async function load() {
       y: services.y,
       w: services.w,
       h: services.h,
+      isWidget: services.isWidget,
+      requireAuth: services.requireAuth,
     })
     .from(services);
 
