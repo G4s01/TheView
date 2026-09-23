@@ -18,7 +18,8 @@ export const GET: RequestHandler = async ({ locals }) => {
     const existingNames = existingServices.map((s) => s.name.toLowerCase());
 
     const settings = await getSettings();
-    const npmEnabled = settings.npm_enabled === true || settings.npm_enabled === 'true';
+    const npmEnabled =
+      settings.npm_enabled === true || settings.npm_enabled === "true";
     const npmUrl = npmEnabled ? settings.npmUrl : undefined;
     const npmEmail = npmEnabled ? settings.npmEmail : undefined;
     const npmPassword = npmEnabled ? settings.npmPassword : undefined;

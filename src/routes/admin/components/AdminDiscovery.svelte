@@ -37,6 +37,7 @@
 		npmUrlCombined = ''; npmEmail = ''; npmPassword = '';
 		isNpmEditing = true;
 		showNpmPassword = false;
+		await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: '', npmEmail: '', npmPassword: '' }) });
 		npmEnabled = false;
 		await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: '', npmEmail: '', npmPassword: '', npm_enabled: false }) });
 	}

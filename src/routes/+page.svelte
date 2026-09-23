@@ -529,9 +529,9 @@
 		
 		<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 z-10">
 			{#each [
-				{ name: 'Orologio', type: 'clock', icon: 'lucide:clock', w: 2, h: 2 },
+				{ name: 'Orologio', type: 'clock', icon: 'noto:alarm-clock', w: 2, h: 2 },
 				{ name: 'Jellyfin', type: 'jellyfin', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/jellyfin.svg', w: 3, h: 2 },
-				{ name: 'Meteo', type: 'weather', icon: 'lucide:cloud-sun', w: 2, h: 2 },
+				{ name: 'Meteo', type: 'weather', icon: 'noto:sun-behind-large-cloud', w: 2, h: 2 },
 				{ name: 'qBittorrent', type: 'qbittorrent', icon: 'qbittorrent', w: 3, h: 2 },
 				{ name: 'AdGuard Home', type: 'adguard', icon: 'adguard-home', w: 3, h: 2 },
 				{ name: 'Beszel', type: 'beszel', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/beszel.svg', w: 3, h: 2 },
@@ -540,6 +540,7 @@
 				{ name: 'Filebrowser', type: 'filebrowser', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/filebrowser.svg', w: 2, h: 2 },
 				{ name: 'Docker', type: 'docker', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/docker.svg', w: 2, h: 2 },
 				{ name: 'Dockhand', type: 'dockhand', icon: 'dockhand', w: 2, h: 2 },
+				{ name: 'OpenWRT', type: 'openwrt', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/openwrt.svg', w: 2, h: 2 },
 			].sort((a,b) => a.name.localeCompare(b.name)).map(w => ({ ...w, isUsed: data.usedWidgetTypes?.includes(w.type) })) as widget}
 				{#if widget.isUsed}
 					<div class="flex flex-col items-center justify-center gap-3 p-4 bg-background/50 rounded-xl border border-border/50 opacity-40 cursor-not-allowed group text-primary relative" title="Widget già in uso nella dashboard">

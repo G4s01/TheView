@@ -33,10 +33,16 @@ export const GET: RequestHandler = async ({ locals }) => {
       safeSettings.dockhand_password,
     );
   if (safeSettings.jellyfin_api_key)
-    safeSettings.jellyfin_api_key = decryptString(safeSettings.jellyfin_api_key);
+    safeSettings.jellyfin_api_key = decryptString(
+      safeSettings.jellyfin_api_key,
+    );
   if (safeSettings.filebrowser_password)
     safeSettings.filebrowser_password = decryptString(
       safeSettings.filebrowser_password,
+    );
+  if (safeSettings.openwrt_password)
+    safeSettings.openwrt_password = decryptString(
+      safeSettings.openwrt_password,
     );
 
   return json(safeSettings);
@@ -116,6 +122,8 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       delete newSettings.jellyfin_api_key;
     if (newSettings.filebrowser_password === "********")
       delete newSettings.filebrowser_password;
+    if (newSettings.openwrt_password === "********")
+      delete newSettings.openwrt_password;
 
     // Crittografia/Hash dinamico
     const { hashPassword, encryptString } = await import("$lib/server/crypto");
@@ -150,11 +158,18 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       );
     }
     if (newSettings.jellyfin_api_key) {
-      newSettings.jellyfin_api_key = encryptString(newSettings.jellyfin_api_key);
+      newSettings.jellyfin_api_key = encryptString(
+        newSettings.jellyfin_api_key,
+      );
     }
     if (newSettings.filebrowser_password) {
       newSettings.filebrowser_password = encryptString(
         newSettings.filebrowser_password,
+      );
+    }
+    if (newSettings.openwrt_password) {
+      newSettings.openwrt_password = encryptString(
+        newSettings.openwrt_password,
       );
     }
 

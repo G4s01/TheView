@@ -11,6 +11,7 @@
 	import ClockWidget from '../widgets/ClockWidget.svelte';
 	import WeatherWidget from '../widgets/WeatherWidget.svelte';
 	import JellyfinWidget from '../widgets/JellyfinWidget.svelte';
+	import OpenwrtWidget from '../widgets/OpenwrtWidget.svelte';
 	import { appState } from '$lib/client/state.svelte';
 	import { Pencil, GripHorizontal } from "@lucide/svelte";
 	import { Button } from "$lib/components/ui/button";
@@ -107,6 +108,10 @@
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
 					<JellyfinWidget size={currentSize} />
 				</div>
+			{:else if service.widgetType === 'openwrt'}
+				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
+					<OpenwrtWidget />
+				</div>
 			{/if}
 		{:else}
 			<div class="flex-1 w-full flex items-center justify-center">
@@ -175,6 +180,10 @@
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
 					<JellyfinWidget size={currentSize} />
 				</div>
+			{:else if service.widgetType === 'openwrt'}
+				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
+					<OpenwrtWidget />
+				</div>
 		{/if}
 	</div>
 {:else}
@@ -222,6 +231,10 @@
 			{:else if service.widgetType === 'jellyfin'}
 				<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
 					<JellyfinWidget size={currentSize} />
+				</div>
+			{:else if service.widgetType === 'openwrt'}
+				<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
+					<OpenwrtWidget hideHeader={true} />
 				</div>
 		{/if}
 	</CardLink>
