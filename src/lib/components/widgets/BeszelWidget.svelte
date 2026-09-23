@@ -13,8 +13,9 @@
 		return `${m}m`;
 	}
 
-	let { size = 'gs-2x2' } = $props<{
+	let { size = 'gs-2x2', hideHeader = false } = $props<{
 		size?: string;
+		hideHeader?: boolean;
 	}>();
 
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
@@ -31,13 +32,15 @@
 </script>
 
 <div class="h-full w-full flex flex-col p-4">
+	{#if !hideHeader}
 	<div class="flex items-center justify-between mb-4">
 		<div class="flex items-center gap-2">
 			<Activity class="size-5 text-primary" />
 			<h3 class="font-semibold tracking-wider text-sm">MONITORAGGIO NODI</h3>
 		</div>
 
-	</div>
+		</div>
+	{/if}
 
 	<div class="flex-1 overflow-y-auto overflow-x-hidden min-h-0 custom-scrollbar pr-2">
 		{#if query.isPending}

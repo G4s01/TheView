@@ -149,9 +149,7 @@
 						onkeydown={(e) => {
 							if (e.key === 'Enter' && addUrl.trim()) {
 								e.preventDefault();
-								const fd = new FormData();
-								fd.append('urls', addUrl.trim());
-								addMutation.mutate({ formData: fd }, {
+								addMutation.mutate({ url: addUrl.trim() }, {
 									onSuccess: () => { addUrl = ''; }
 								});
 							}
@@ -163,9 +161,7 @@
 							title="Aggiungi"
 							disabled={addMutation.isPending}
 							onclick={() => {
-								const fd = new FormData();
-								fd.append('urls', addUrl.trim());
-								addMutation.mutate({ formData: fd }, {
+								addMutation.mutate({ url: addUrl.trim() }, {
 									onSuccess: () => { addUrl = ''; }
 								});
 							}}

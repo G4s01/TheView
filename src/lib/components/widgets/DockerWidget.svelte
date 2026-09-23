@@ -4,7 +4,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { appState } from "$lib/client/state.svelte";
 
-	let { size = "gs-2x2" } = $props<{ size?: string }>();
+	let { size = "gs-2x2", hideHeader = false } = $props<{ size?: string, hideHeader?: boolean }>();
 
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
@@ -29,7 +29,8 @@
     }
 </script>
 
-<div bind:clientWidth={rectW} bind:clientHeight={rectH} class="h-full w-full flex flex-col p-2 bg-card rounded-xl border border-border shadow-sm overflow-hidden text-card-foreground">
+<div bind:clientWidth={rectW} bind:clientHeight={rectH} class="h-full w-full flex flex-col p-2  overflow-hidden text-card-foreground">
+	{#if !hideHeader}
 	<div class="flex items-center justify-between pb-2 mb-2 border-b border-border/50 shrink-0">
 		<div class="flex items-center gap-2">
 			<Box class="size-4 text-primary" />
@@ -47,7 +48,8 @@
                 </Button>
             {/if}
 		</div>
-	</div>
+		</div>
+	{/if}
 
 	<div class="flex flex-col flex-1 min-h-0 overflow-hidden pr-1">
 		{#if query.isPending}
@@ -103,10 +105,10 @@
 				{/if}
 
 				<!-- Lista container -->
-				<div class="flex flex-col gap-2 mt-1 pb-1 flex-1 overflow-y-auto pr-1 custom-scrollbar">
+				<div class="flex flex-col gap-2 mt-1 pb-1 flex-1 overflow-y-auto pr-1 custom-scrollbar max-lg:max-h-[250px]">
 					{#each containers as container}
                         {@const isActionPending = actions.isPending && actions.variables?.id === container.id}
-						<div class="flex flex-col shrink-0 p-2.5 rounded-lg bg-card border shadow-sm text-xs transition-opacity relative overflow-hidden {container.state === 'running' ? '' : 'opacity-60'} {container.updateAvailable ? 'border-primary shadow-[0_0_8px_var(--color-primary)]' : 'border-border'} {isActionPending ? 'pointer-events-none' : ''}">
+						<div class="flex flex-col shrink-0 p-2.5 rounded-lg  text-xs transition-opacity relative overflow-hidden {container.state === 'running' ? '' : 'opacity-60'} {container.updateAvailable ? 'border-primary shadow-[0_0_8px_var(--color-primary)]' : 'border-border'} {isActionPending ? 'pointer-events-none' : ''}">
                             {#if isActionPending}
                                 <div class="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
                                     <LoaderCircle class="size-5 text-primary animate-spin" />

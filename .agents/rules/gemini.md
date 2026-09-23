@@ -9,7 +9,7 @@ Benvenuto! Questo file contiene il contesto architetturale, i vincoli di sicurez
 
 ## 📌 Cos'è TheView?
 
-**TheView** è una dashboard web moderna per homelab e self-hosting. Utilizza un layout "Bento Grid" (Tetris-style) per organizzare link e widget interattivi in formati dinamici (1x1, 1x2, 2x1, 2x2). I widget integrati (Meteo, Docker, qBittorrent, AdGuard Home, FileBrowser, Beszel, WgEasy, Duplicati) offrono controllo diretto sui servizi tramite proxy SvelteKit e polling con TanStack Query.
+**TheView** è una dashboard web moderna per homelab e self-hosting. Utilizza un layout "Bento Grid" (Tetris-style) per organizzare link e widget interattivi in formati dinamici (1x1, 1x2, 2x1, 2x2). I widget integrati (Meteo, Docker, Dockhand, qBittorrent, AdGuard Home, FileBrowser, Beszel, WgEasy, Duplicati, Jellyfin) offrono controllo diretto sui servizi tramite proxy SvelteKit e polling con TanStack Query.
 
 ## 🧠 INTEGRAZIONE SKILL E MCP (OBBLIGATORIA)
 
@@ -38,7 +38,7 @@ Per garantirti sempre il contesto più aggiornato e idiomatico, devi **SEMPRE** 
 
 ## 📂 Struttura e Volumi (Docker)
 
-- `src/routes/+page.svelte`: Dashboard pubblica — Flexbox wrapping con spacer items per DnD verticale. Celle responsive (`--cols` CSS variable, 1→5 colonne). Altezza minima `136px` per riga, auto-crescita per widget.
+- `src/routes/+page.svelte`: Dashboard pubblica — Su Desktop usa Gridstack (Drag & Drop), mentre su Mobile applica overrrides CSS per imporre una flexbox a colonna che consente crescita e scroll verticali naturali. Altezza base `136px` per riga su Desktop.
 - `src/routes/admin/...`: Pannello di amministrazione (tab: Servizi, Categorie, Discovery, **Widget**, Impostazioni).
 - `src/lib/components/widgets/`: Widget interattivi (`QBittorrentWidget.svelte`, `AdGuardWidget.svelte`).
 - `src/lib/components/ui/TimeWheelPicker.svelte`: Selettore tempo a rotella per pausa temporizzata AdGuard.
@@ -60,7 +60,8 @@ I widget seguono un pattern architetturale rigoroso a 4 livelli:
 
 ### Multi-Grid Drag & Drop (Gridstack.js)
 
-- **Libreria:** `gridstack` (engine primario) integrato nativamente in Svelte 5.
+- **Libreria Desktop:** `gridstack` (engine primario) integrato nativamente in Svelte 5, limitato esclusivamente al layout Desktop (min-width: 1024px).
+- **Layout Mobile:** Su mobile (max-width: 1024px), Gridstack è bypassato a favore di una classica Flexbox a colonna (layout fluido e scroll nativo). Non applicare logiche Gridstack su schermi piccoli.
 - **Architettura Multi-Grid:** Ogni categoria sulla dashboard è un'istanza Gridstack separata, isolata all'interno di un `GridContainer.svelte`. I widget possono essere spostati all'interno della propria categoria.
 - **Bento Grid:** Layout fluido a 12 colonne (`cellHeight: '136px'`). Ogni servizio definisce i vincoli di dimensione (`1x1`, `2x2`, `2x1`, ecc.).
 - **Resize Dinamico:** Durante l'Edit Mode, i widget espongono le maniglie di ridimensionamento per essere alterati fluidamente, salvando le coordinate (`w`, `h`, `x`, `y`) su SQLite.

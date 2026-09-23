@@ -15,7 +15,7 @@
 		onchange
 	} = $props<{
 		value?: string | number | null;
-		options?: { value: string | number; label: string; class?: string; disabled?: boolean }[];
+		options?: { value: string | number; label: string; class?: string; disabled?: boolean; icon?: any }[];
 		label?: string;
 		id?: string;
 		class?: string;
@@ -53,7 +53,13 @@
 		class="peer flex items-center justify-between px-3 py-2 w-full h-full text-sm text-left text-foreground bg-transparent border-0 focus:outline-none focus:ring-0 focus:border-0 z-10 relative shadow-none"
 		onclick={(e) => { e.preventDefault(); isOpen = !isOpen; }}
 	>
-		<span class="truncate {(!isSelected && !isOpen) ? 'opacity-0' : 'opacity-100'}">{selectedLabel}</span>
+		<span class="truncate {(!isSelected && !isOpen) ? 'opacity-0' : 'opacity-100'} flex items-center gap-2">
+			{#if options.find(o => String(o.value) === String(value))?.icon}
+				{@const Icon = options.find(o => String(o.value) === String(value))?.icon}
+				<Icon class="size-4 shrink-0" />
+			{/if}
+			{selectedLabel}
+		</span>
 		<ChevronDown class="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}" strokeWidth={1.5} />
 	</button>
 	
@@ -86,7 +92,13 @@
 							disabled={opt.disabled}
 							onclick={(e) => { e.preventDefault(); if (!opt.disabled) handleSelect(opt.value); }}
 						>
-							{opt.label}
+							<div class="flex items-center gap-2">
+								{#if opt.icon}
+									{@const Icon = opt.icon}
+									<Icon class="size-4 shrink-0" />
+								{/if}
+								<span>{opt.label}</span>
+							</div>
 						</button>
 					</li>
 				{/each}

@@ -7,7 +7,7 @@
 	import ConfirmDeleteButton from "$lib/components/ui/ConfirmDeleteButton.svelte";
 	import BackButton from "$lib/components/ui/BackButton.svelte";
 	import SaveButton from "$lib/components/ui/SaveButton.svelte";
-	import { Upload, Check, Save, Plus } from "@lucide/svelte";
+	import { Upload, Check, Save, Plus, Circle, CheckCircle2 } from "@lucide/svelte";
 	import { enhance } from "$app/forms";
 	import type { Action } from "svelte/action";
 	import { Button } from "$lib/components/ui/button";
@@ -247,14 +247,15 @@
 				bind:value={service.widgetType}
 				options={
 					[
-						{ value: "none", label: "NESSUNO" },
-						...WIDGET_REGISTRY.map(w => {
+						{ value: "none", label: "NESSUNO", icon: Circle },
+						...[...WIDGET_REGISTRY].sort((a,b) => a.name.localeCompare(b.name)).map(w => {
 							const isUsed = $page.data.usedWidgetTypes?.includes(w.id);
 							const isCurrent = service.widgetType === w.id;
 							return {
 								value: w.id,
-								label: w.name.toUpperCase() + (isUsed && !isCurrent ? ' (IN USO)' : ''),
-								disabled: isUsed && !isCurrent
+								label: w.name.toUpperCase(),
+								disabled: isUsed && !isCurrent,
+								icon: (isUsed && !isCurrent) ? CheckCircle2 : Circle
 							};
 						})
 					]

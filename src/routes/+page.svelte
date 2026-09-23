@@ -7,7 +7,7 @@
 	import { navigating } from '$app/stores';
 	import { slide } from 'svelte/transition';
 	import { invalidateAll } from '$app/navigation';
-	import { Plus, X, Trash, EyeOff, Eye, Pencil, Layers, PlusSquare, Undo2, SquareDashed, LayoutGrid, Search, ChevronUp, ChevronDown, LayoutDashboard, CloudSun } from '@lucide/svelte';
+	import { Plus, X, Trash, EyeOff, Eye, Pencil, Layers, PlusSquare, SquareDashed, LayoutGrid, Search, ChevronUp, ChevronDown, LayoutDashboard, CloudSun } from '@lucide/svelte';
 	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
 	import { enhance } from '$app/forms';
@@ -31,42 +31,6 @@
 	
 	let editModeSidebarPosition = $derived(data.settings?.editModeSidebarPosition || 'right');
 	let grids = new Map<string, GridStack>();
-	let undoStack = $state<Array<{ grid: string, state: any[] }>>([]);
-	
-	async function performUndo() {
-		const last = undoStack.pop();
-		if (!last) return;
-		
-		const gridIdStr = last.grid;
-		const gridId = gridIdStr === 'Inbox' ? null : parseInt(gridIdStr);
-		const grid = grids.get(last.grid);
-
-		const itemsWithPositions = last.state.map((n: any) => ({
-			id: parseInt(n.id as string),
-			x: n.x,
-			y: n.y,
-			w: n.w,
-			h: n.h,
-		})).filter((n: any) => !isNaN(n.id));
-
-		if (grid) {
-			// Restore positions visually
-			for (const savedNode of last.state) {
-				const existing = grid.engine.nodes.find(n => n.id === savedNode.id);
-				if (existing && existing.el) {
-					grid.update(existing.el, { x: savedNode.x, y: savedNode.y, w: savedNode.w, h: savedNode.h });
-				}
-			}
-		}
-
-		try {
-			await fetch('/api/services/reorder', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ itemsWithPositions, gridId })
-			});
-		} catch (e) {}
-	}
 	let mountedWidgets = new Map<number, any>();
 	let mountedServices = new Map<number, any>();
 	let isDiscoveryModalOpen = $state(false);
@@ -108,6 +72,7 @@
 
 	let newServiceModal = $state({ name: '', url: '', icon: '', description: '', categoryId: null, pingEnabled: true, widgetType: '', dockerImage: '' });
 	let localGroups = $state<Record<string, any[]>>({});
+	let visibleGridsCount = $derived(Object.entries(localGroups).filter(([id, services]) => id !== "Inbox" && services.length > 0).length);
 
 	onDestroy(() => {
 		for (const instance of mountedWidgets.values()) {
@@ -179,7 +144,9 @@
 				resizable: { handles: 'e, se, s, sw, w' },
 				margin: '0.5rem',
 				float: gridName !== 'Inbox', // L'inbox si auto-compatta verso l'alto
-				acceptWidgets: true
+				acceptWidgets: true,
+					// @ts-ignore
+				disableOneColumnMode: true
 			}, node);
 			
 			GridStackClass.setupDragIn('.drag-in-spacer', { scroll: false, appendTo: 'body', helper: 'clone' });
@@ -303,11 +270,9 @@
 
 			
 			grid!.on('dragstart', () => {
-				if (appState.isEditMode) undoStack.push({ grid: gridName, state: grid!.save() as any[] });
-			});
+							});
 			grid!.on('resizestart', () => {
-				if (appState.isEditMode) undoStack.push({ grid: gridName, state: grid!.save() as any[] });
-			});
+							});
 
 			grid!.on('dragstop', () => {
 				if (appState.isEditMode) saveGridState();
@@ -402,6 +367,9 @@
 		});
 
 		if (!widgetEl) return;
+		if (service.widgetType === 'spacer') {
+			widgetEl.classList.add('is-spacer');
+		}
 		
 		// @ts-ignore
 		if (widgetEl.gridstackNode) widgetEl.gridstackNode.id = service.id.toString();
@@ -446,7 +414,7 @@
 	<svelte:window onkeydown={(e) => {
 		if (appState.isEditMode && e.key === 'z' && (e.ctrlKey || e.metaKey)) {
 			e.preventDefault();
-			performUndo();
+			
 		}
 	}} />
 
@@ -471,7 +439,7 @@
 	<div class="flex-1 w-full flex flex-col gap-6 min-w-0">
 
 {#if isDiscoveryModalOpen}
-	<div transition:slide use:clickOutside={{ handler: () => isDiscoveryModalOpen = false, ignore: '.ignore-click-outside' }} class="w-full bg-card rounded-2xl border-2 border-primary/20 p-6 shadow-lg mb-6 flex flex-col gap-6 relative overflow-hidden">
+	<div transition:slide use:clickOutside={{ enabled: true, handler: () => isDiscoveryModalOpen = false, ignore: '.ignore-click-outside' }} class="w-full bg-card rounded-2xl border-2 border-primary/20 p-6 shadow-lg mb-6 flex flex-col gap-6 relative ">
 		<!-- Decorazione sfondo -->
 		<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 -translate-y-1/2 translate-x-1/3"></div>
 
@@ -492,7 +460,7 @@
 		
 		<div class="flex flex-col gap-8 z-10">
 			<!-- Manual Add Accordion -->
-			<div class="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+			<div class="bg-card rounded-xl border border-border shadow-sm ">
 				<button 
 					onclick={() => isAddManualExpanded = !isAddManualExpanded} 
 					class="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
@@ -540,7 +508,7 @@
 {/if}
 
 {#if isWidgetModalOpen}
-	<div transition:slide use:clickOutside={{ handler: () => isWidgetModalOpen = false, ignore: '.ignore-click-outside' }} class="w-full bg-card rounded-2xl border-2 border-primary/20 p-6 shadow-lg mb-6 flex flex-col gap-6 relative overflow-hidden">
+	<div transition:slide use:clickOutside={{ enabled: true, handler: () => isWidgetModalOpen = false, ignore: '.ignore-click-outside' }} class="w-full bg-card rounded-2xl border-2 border-primary/20 p-6 shadow-lg mb-6 flex flex-col gap-6 relative ">
 		<!-- Decorazione sfondo -->
 		<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 -translate-y-1/2 translate-x-1/3"></div>
 
@@ -562,6 +530,7 @@
 		<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 z-10">
 			{#each [
 				{ name: 'Orologio', type: 'clock', icon: 'lucide:clock', w: 2, h: 2 },
+				{ name: 'Jellyfin', type: 'jellyfin', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/jellyfin.svg', w: 3, h: 2 },
 				{ name: 'Meteo', type: 'weather', icon: 'lucide:cloud-sun', w: 2, h: 2 },
 				{ name: 'qBittorrent', type: 'qbittorrent', icon: 'qbittorrent', w: 3, h: 2 },
 				{ name: 'AdGuard Home', type: 'adguard', icon: 'adguard-home', w: 3, h: 2 },
@@ -571,7 +540,7 @@
 				{ name: 'Filebrowser', type: 'filebrowser', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/filebrowser.svg', w: 2, h: 2 },
 				{ name: 'Docker', type: 'docker', icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/docker.svg', w: 2, h: 2 },
 				{ name: 'Dockhand', type: 'dockhand', icon: 'dockhand', w: 2, h: 2 },
-			].map(w => ({ ...w, isUsed: data.usedWidgetTypes?.includes(w.type) })) as widget}
+			].sort((a,b) => a.name.localeCompare(b.name)).map(w => ({ ...w, isUsed: data.usedWidgetTypes?.includes(w.type) })) as widget}
 				{#if widget.isUsed}
 					<div class="flex flex-col items-center justify-center gap-3 p-4 bg-background/50 rounded-xl border border-border/50 opacity-40 cursor-not-allowed group text-primary relative" title="Widget già in uso nella dashboard">
 						<div class="pointer-events-none flex flex-col items-center justify-center inset-0 w-full h-full gap-2 grayscale">
@@ -645,7 +614,7 @@
 									</h2>
 								{/if}
 							{:else if gridObj?.show_header !== false || appState.isEditMode}
-								<h2 class="text-lg font-bold uppercase tracking-wider text-foreground flex items-center">
+								<h2 class="text-lg font-bold uppercase tracking-wider text-foreground flex items-center {visibleGridsCount === 1 ? 'hide-on-mobile' : ''}">
 									{#if data.showCategoryCounts}
 									<span class="bg-primary/20 text-primary text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
 										{services.length}
@@ -712,10 +681,7 @@
 					</div>
 				</button>
 
-				<button onclick={performUndo} disabled={undoStack.length === 0} class="w-12 h-12 flex items-center justify-center rounded-xl {undoStack.length > 0 ? 'hover:bg-primary/10 text-primary cursor-pointer' : 'opacity-50 cursor-not-allowed'} transition-colors group" title="Annulla Modifica (Ctrl+Z)">
-					<Undo2 class="size-6 {undoStack.length > 0 ? 'group-hover:-rotate-12 transition-transform' : ''}" />
-				</button>
-
+				
 				<div class="w-8 h-px bg-border/50"></div>
 
 				<div class="drag-in-spacer grid-stack-item cursor-grab active:cursor-grabbing w-12 h-12 rounded-xl border-2 border-dashed border-primary/50 bg-primary/10 flex items-center justify-center transition-colors hover:bg-primary/20 hover:border-primary text-primary" {...{'gs-w':"2", 'gs-h':"2", 'gs-min-w':"2", 'gs-min-h':"2"}} data-type="spacer" title="Trascina in griglia per creare una Blank Card">
@@ -760,11 +726,85 @@
 
 <EditServiceSheet />
 
+
+
+
 <style>
 	:global(.grid-stack-item-content) {
 		overflow: visible !important;
 		display: flex;
 		flex-direction: column;
 	}
-</style>
 
+
+
+	@media (max-width: 1024px) {
+		.hide-on-mobile { display: none !important; }
+		:global(.grid-stack) {
+			display: grid !important;
+			grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+			grid-auto-rows: max-content !important;
+			align-items: stretch !important;
+			gap: 1rem !important;
+			height: auto !important;
+			min-height: 0 !important;
+			padding-bottom: 2rem !important;
+		}
+		
+		:global(.grid-stack-item.is-spacer) {
+			display: none !important;
+		}
+		
+		:global(.grid-stack-item) {
+			position: relative !important;
+			top: auto !important;
+			left: auto !important;
+			right: auto !important;
+			bottom: auto !important;
+			transform: none !important;
+			margin: 0 !important;
+			width: 100% !important;
+			height: auto !important;
+			min-height: 136px !important;
+			display: flex !important;
+			flex-direction: column !important;
+		}
+		
+		
+		:global(.grid-stack-item-content) {
+			position: static !important;
+			inset: auto !important;
+			width: 100% !important;
+			height: auto !important;
+			display: flex !important;
+			flex-direction: column !important;
+			flex: 1 1 auto !important;
+			transform: none !important;
+			margin: 0 !important;
+		}
+		
+		/* Propagate flex stretching through ServiceCard wrappers */
+		:global(.grid-stack-item-content > div) {
+			display: flex !important;
+			flex-direction: column !important;
+			flex: 1 1 auto !important;
+			height: auto !important;
+			width: 100% !important;
+		}
+		
+		:global(.grid-stack-item-content > div > div),
+		:global(.grid-stack-item-content > div > a) {
+			display: flex !important;
+			flex-direction: column !important;
+			flex: 1 1 auto !important;
+			height: auto !important;
+			width: 100% !important;
+		}
+		
+		/* Convert h-full to flex-grow to prevent collapse in auto-height parents */
+		:global(.grid-stack-item .h-full) {
+			flex-grow: 1 !important;
+		}
+	}
+
+</style>

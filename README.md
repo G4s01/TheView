@@ -27,6 +27,7 @@
 
 Built with **Svelte 5 Runes**, `shadcn-svelte`, **Tailwind CSS v4**, **TanStack Query**, and powered by **Gridstack.js**, TheView delivers a pristine, highly-polished interface that feels like a native desktop app.
 
+- 📱 **Native Mobile Experience**: Enjoy an optimized mobile view where grids gracefully fallback to native vertical stacking for fluid scrolling and content expansion.
 - 🖥️ **100% Web UI Driven**: Forget editing YAML files. Add, edit, remove, and configure categories and services using an intuitive web interface.
 - 🍱 **Multi-Grid Bento Layout**: Create distinct grid areas per category, each with its own Title and Widget arrangement. The elegant 12-column Gridstack engine allows components to perfectly adapt to your screen size.
 - 📐 **Interactive 2D Drag & Resize**: In Edit Mode, effortlessly resize any service card in true 2D space. Drag items, change their dimensions, and lock them in place. The grid natively handles empty spaces.
@@ -51,6 +52,7 @@ TheView goes beyond simple links by offering deep integrations with your favorit
 - **Wg-Easy**: Track active Wireguard VPN clients, toggle connections, view transfer speeds, and download config files or QR Codes.
 - **Duplicati**: Live backup monitoring, progress tracking, and the ability to start/stop backup tasks directly.
 - **FileBrowser**: Disk usage monitoring visualized with dynamic SVG radial progress bars.
+- **Jellyfin**: Live "Now Playing" monitoring with beautiful backdrop UI and playback progression. Library statistics when idle.
 - **Beszel**: System stats, CPU, RAM, and Network usage monitoring.
 - **Dockhand**: Quick execution of configured docker backup/restore scripts.
 - **Clock**: A beautifully minimal analog/digital clock widget.

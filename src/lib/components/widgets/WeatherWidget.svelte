@@ -8,9 +8,9 @@
   let { nodeW = 1, nodeH = 1 } = $props<{ nodeW?: number, nodeH?: number }>();
   let rectW = $state(0);
   let rectH = $state(0);
-  let isWide = $derived(rectW && rectH ? rectW > rectH * 1.1 : nodeW > nodeH);
-  let isTall = $derived(rectW && rectH ? rectH > rectW * 1.1 : nodeH > nodeW);
-  let isLarge = $derived(rectW && rectH ? rectW >= 280 && rectH >= 250 : nodeW >= 2 && nodeH >= 2);
+  let isWide = $derived(rectW > 450 || (rectW && rectH ? rectW > rectH * 1.2 : nodeW > nodeH));
+  let isTall = $derived(rectW < 350 || (rectW && rectH ? rectH > rectW * 1.2 : nodeH > nodeW));
+  let isLarge = $derived(rectW >= 250 || (nodeW >= 2 && nodeH >= 2));
   
   const query = useWeather();
   let selectedDayIndex = $state(0);

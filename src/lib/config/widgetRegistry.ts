@@ -1,7 +1,7 @@
 export type WidgetField = {
   id: string; // e.g., 'qbit_url', 'clock_timezone'
   label: string;
-  type: 'text' | 'password' | 'checkbox' | 'select' | 'combobox';
+  type: 'text' | 'password' | 'checkbox' | 'select' | 'combobox' | 'location' | 'url';
   options?: { value: string; label: string }[]; // for 'select'
   description?: string;
 };
@@ -21,7 +21,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     icon: 'qbittorrent',
     description: 'Impostazioni per l\'API di qBittorrent',
     fields: [
-      { id: 'qbit_url', label: 'URL', type: 'text' },
+      { id: 'qbit_url', label: 'URL', type: 'url' },
       { id: 'qbit_username', label: 'Username', type: 'text' },
       { id: 'qbit_password', label: 'Password', type: 'password' },
       { id: 'qbit_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
@@ -33,7 +33,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     icon: 'adguard-home',
     description: 'Impostazioni per l\'API di AdGuard Home',
     fields: [
-      { id: 'adguard_url', label: 'URL', type: 'text' },
+      { id: 'adguard_url', label: 'URL', type: 'url' },
       { id: 'adguard_username', label: 'Username', type: 'text' },
       { id: 'adguard_password', label: 'Password', type: 'password' },
       { id: 'adguard_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
@@ -45,7 +45,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/beszel.svg',
     description: 'Impostazioni per l\'API di Beszel',
     fields: [
-      { id: 'beszel_url', label: 'URL', type: 'text' },
+      { id: 'beszel_url', label: 'URL', type: 'url' },
       { id: 'beszel_username', label: 'Username', type: 'text' },
       { id: 'beszel_password', label: 'Password', type: 'password' },
       { id: 'beszel_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
@@ -57,7 +57,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/wireguard.svg',
     description: 'Impostazioni per l\'API di Wg-easy',
     fields: [
-      { id: 'wgeasy_url', label: 'URL', type: 'text' },
+      { id: 'wgeasy_url', label: 'URL', type: 'url' },
       { id: 'wgeasy_password', label: 'Password', type: 'password' },
       { id: 'wgeasy_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
     ]
@@ -68,7 +68,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/duplicati.svg',
     description: 'Impostazioni per l\'API di Duplicati',
     fields: [
-      { id: 'duplicati_url', label: 'URL', type: 'text' },
+      { id: 'duplicati_url', label: 'URL', type: 'url' },
       { id: 'duplicati_password', label: 'Password', type: 'password' },
       { id: 'duplicati_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
     ]
@@ -79,7 +79,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/filebrowser.svg',
     description: 'Impostazioni per l\'API di Filebrowser',
     fields: [
-      { id: 'filebrowser_url', label: 'URL', type: 'text' },
+      { id: 'filebrowser_url', label: 'URL', type: 'url' },
       { id: 'filebrowser_username', label: 'Username', type: 'text' },
       { id: 'filebrowser_password', label: 'Password', type: 'password' },
       { id: 'filebrowser_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
@@ -101,7 +101,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
     icon: 'dockhand',
     description: 'Impostazioni per l\'API di Dockhand',
     fields: [
-      { id: 'dockhand_url', label: 'URL', type: 'text' },
+      { id: 'dockhand_url', label: 'URL', type: 'url' },
       { id: 'dockhand_username', label: 'Username', type: 'text' },
       { id: 'dockhand_password', label: 'Password', type: 'password' },
       { id: 'dockhand_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
@@ -126,6 +126,17 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
         { value: 'analog', label: 'Analogico (Lancette)' }
       ] },
       { id: 'clock_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
+    ]
+  },
+  {
+    id: 'jellyfin',
+    name: 'Jellyfin',
+    icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/jellyfin.svg',
+    description: 'Impostazioni per l\'API di Jellyfin',
+    fields: [
+      { id: 'jellyfin_url', label: 'URL', type: 'url' },
+      { id: 'jellyfin_api_key', label: 'API Key', type: 'password' },
+      { id: 'jellyfin_require_auth', label: 'Nascondi ad utenti non loggati', type: 'checkbox' },
     ]
   },
   {

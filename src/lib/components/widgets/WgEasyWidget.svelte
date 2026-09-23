@@ -8,7 +8,8 @@
     import ConfirmDeleteButton from "$lib/components/ui/ConfirmDeleteButton.svelte";
     import { appState } from '$lib/client/state.svelte';
 
-	let { size = 'gs-2x2' } = $props<{ size?: string; }>();
+	let { size = 'gs-2x2', hideHeader = false } = $props<{ size?: string;
+		hideHeader?: boolean; }>();
 
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
@@ -101,7 +102,8 @@
     }
 </script>
 
-<div class="h-full w-full flex flex-col p-2 bg-card rounded-xl border border-border shadow-sm overflow-hidden text-card-foreground @container">
+<div class="h-full w-full flex flex-col p-2  overflow-hidden text-card-foreground @container">
+	{#if !hideHeader}
 	<div class="flex items-center justify-between pb-2 mb-2 border-b border-border/50 shrink-0">
 		<div class="flex items-center gap-2">
 			<Shield class="size-4 text-primary" />
@@ -114,7 +116,8 @@
                 </Button>
             {/if}
         </div>
-	</div>
+		</div>
+	{/if}
 
 	<div class="flex flex-col flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
 		{#if query.isPending}

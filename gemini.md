@@ -9,7 +9,7 @@ Benvenuto! Questo file contiene il contesto architetturale, i vincoli di sicurez
 
 ## 📌 Cos'è TheView?
 
-**TheView** è una dashboard web moderna per homelab e self-hosting. Utilizza un layout "Bento Grid" (Tetris-style) per organizzare link e widget interattivi in formati dinamici (1x1, 1x2, 2x1, 2x2). I widget integrati (qBittorrent, AdGuard Home) offrono controllo diretto sui servizi tramite proxy SvelteKit e polling con TanStack Query.
+**TheView** è una dashboard web moderna per homelab e self-hosting. Utilizza un layout "Bento Grid" (Tetris-style) per organizzare link e widget interattivi in formati dinamici (1x1, 1x2, 2x1, 2x2). I widget integrati (Meteo, Docker, Dockhand, qBittorrent, AdGuard Home, FileBrowser, Beszel, WgEasy, Duplicati, Jellyfin) offrono controllo diretto sui servizi tramite proxy SvelteKit e polling con TanStack Query.
 
 ## 🧠 INTEGRAZIONE SKILL E MCP (OBBLIGATORIA)
 
@@ -38,7 +38,7 @@ Per garantirti sempre il contesto più aggiornato e idiomatico, devi **SEMPRE** 
 
 ## 📂 Struttura e Volumi (Docker)
 
-- `src/routes/+page.svelte`: Dashboard pubblica — Flexbox wrapping con spacer items per DnD verticale. Celle responsive (`--cols` CSS variable, 1→5 colonne). Altezza minima `136px` per riga, auto-crescita per widget.
+- `src/routes/+page.svelte`: Dashboard pubblica — Su Desktop usa Gridstack (Drag & Drop), mentre su Mobile applica overrrides CSS per imporre una flexbox a colonna che consente crescita e scroll verticali naturali. Altezza base `136px` per riga su Desktop.
 - `src/routes/admin/...`: Pannello di amministrazione (tab: Servizi, Categorie, Discovery, **Widget**, Impostazioni).
 - `src/lib/components/widgets/`: Widget interattivi (`QBittorrentWidget.svelte`, `AdGuardWidget.svelte`).
 - `src/lib/components/ui/TimeWheelPicker.svelte`: Selettore tempo a rotella per pausa temporizzata AdGuard.
@@ -58,17 +58,21 @@ I widget seguono un pattern architetturale rigoroso a 4 livelli:
 3. **TanStack Query Hook** (`src/lib/queries/use*.ts`): `createQuery` con `refetchInterval` configurato (3s per velocità, 30s per ping). Gestisce `isPending`, `isError`, `isSuccess`.
 4. **Widget UI** (`src/lib/components/widgets/*Widget.svelte`): Componente Svelte 5 che consuma il query hook e renderizza stati (Skeleton → Errore → Dati).
 
-### Drag & Drop (Bento Grid)
+### Multi-Grid Drag & Drop (Gridstack.js)
 
-- **Libreria:** `svelte-dnd-action` v0.9.x.
-- **Layout:** Flexbox con `flex-wrap` (NON CSS Grid) per compatibilità DnD. Larghezze celle calcolate via CSS custom property `--cols`.
-- **Spacer Items:** In edit mode, 10 item invisibili (`_isSpacer: true`) vengono iniettati per creare target di rilascio su righe aggiuntive. Vengono filtrati nel salvataggio (`handleDndFinalize`).
-- **Stato separato:** `localGroups` (view mode, senza spacer) e `dndGroups` (edit mode, con spacer). Transizione gestita da `$effect.pre` con `untrack()`.
+- **Libreria Desktop:** `gridstack` (engine primario) integrato nativamente in Svelte 5, limitato esclusivamente al layout Desktop (min-width: 1024px).
+- **Layout Mobile:** Su mobile (max-width: 1024px), Gridstack è bypassato a favore di una classica Flexbox a colonna (layout fluido e scroll nativo). Non applicare logiche Gridstack su schermi piccoli.
+- **Architettura Multi-Grid:** Ogni categoria sulla dashboard è un'istanza Gridstack separata, isolata all'interno di un `GridContainer.svelte`. I widget possono essere spostati all'interno della propria categoria.
+- **Bento Grid:** Layout fluido a 12 colonne (`cellHeight: '136px'`). Ogni servizio definisce i vincoli di dimensione (`1x1`, `2x2`, `2x1`, ecc.).
+- **Resize Dinamico:** Durante l'Edit Mode, i widget espongono le maniglie di ridimensionamento per essere alterati fluidamente, salvando le coordinate (`w`, `h`, `x`, `y`) su SQLite.
+- **Edit Service Sheet:** L'apertura del form di modifica NON espande più il widget inline (causando layout shift), ma sfrutta un elegante `EditServiceSheet` (Shadcn Sheet) sovrapposto a destra/sinistra per modificare configurazioni e widget comodamente.
 
 ## 🛡️ REGOLE BACKEND E SICUREZZA (TASSATIVE)
 
 1. **Nessun Bypass TLS Globale:** Vietato usare `process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"`. Per interrogare servizi self-signed, inietta un `Agent` custom di `undici` (`rejectUnauthorized: false`) solo nella specifica chiamata `fetch`.
-2. **Integrità Database (Drizzle-Only):** Non eseguire MAI query SQL grezze (`CREATE TABLE`, `ALTER TABLE`) per manipolare lo schema. Usa sempre e solo `migrate()` di `drizzle-orm/better-sqlite3/migrator`. Modifiche allo schema richiedono `drizzle-kit generate` come descritto nella skill.
+2. **Integrità Database e Migrazioni (Retrocompatibilità):** Per supportare il caricamento di vecchi backup `sqlite.db` che non possiedono la tabella `__drizzle_migrations`, **È VIETATO usare `migrate()`** di Drizzle in avvio. Ogni modifica allo schema deve essere fatta in due passaggi:
+   - Aggiornare `src/lib/server/db/schema.ts` per Drizzle.
+   - Aggiungere il codice di migrazione manuale in `src/lib/server/db/index.ts` usando `PRAGMA table_info(nome_tabella)` per verificare l'esistenza delle colonne prima di eseguire `ALTER TABLE ... ADD COLUMN ...`. Questo garantisce l'aggiornamento sicuro di istanze o backup esistenti. Le nuove tabelle vanno aggiunte al blocco `CREATE TABLE IF NOT EXISTS`.
 3. **API Documentation:** Qualsiasi endpoint in `src/routes/api/` deve essere documentato nel file `ARCHITECTURE_AUDIT.md`.
 4. **Proxy Multipart Streaming:** Per upload `multipart/form-data` via proxy SvelteKit (es. file `.torrent`), NON usare `new FormData()` lato Node — distrugge il boundary. Estrarre il `Content-Type` originale e streamare il body raw con `duplex: 'half'`.
 
@@ -78,15 +82,16 @@ I widget seguono un pattern architetturale rigoroso a 4 livelli:
 2. **Layout e Spaziature:**
    - Evita classi come `space-y-*` o `space-x-*`. Usa `flex` combinato con `gap-*` per prevedibilità.
    - Usa `size-*` (es. `size-6`) al posto di `w-6 h-6`.
-3. **Bento Grid Fluidity:** I contenuti delle Card devono essere fluidi (`w-full h-full`) e usare Flexbox per adattarsi dinamicamente ai formati espansi/verticali, preservando i padding. Le celle devono auto-crescere in altezza per il contenuto (MAI scrollbar nei widget).
+3. **Bento Grid Fluidity (Physical Pixels):** I contenuti delle Card devono essere fluidi (`w-full h-full`). **Vietato** basare la logica responsive (es. `isWide`, `isTall`) sulle coordinate `nodeW` / `nodeH` di Gridstack. Usa sempre `bind:clientWidth` e `bind:clientHeight` sul container radice per determinare le proporzioni fisiche reali a schermo, dato che le colonne variano per ogni device.
 4. **Modali e Dialoghi:** Mai modali custom sovrapposti. Usa i primitivi `<Dialog>` per UI o `<AlertDialog>` per conferme distruttive.
 5. **Componenti DRY:** L'icona va delegata a `<ServiceIcon>`. I form di inserimento/modifica devono condividere `<ServiceForm>`, differenziando per `mode`.
 6. **Iconografia:** Usa esclusivamente `lucide-svelte` per la UI strutturale.
+7. **Stati di Caricamento (Skeleton):** Qualsiasi caricamento UI in cui si attendono dati (fetch, refresh, queries TanStack, server-side data loading, ritardi di navigazione) DEVE essere sempre accompagnato da un'animazione Skeleton (`animate-pulse` di Tailwind o componenti simili) coerente con la forma del contenuto in arrivo. Vietati i semplici messaggi di testo grezzi ("Caricamento...").
 
 ## ⚙️ REGOLE DI VIBECODING
 
 1. **Zero Regex:** Vietato usare `sed`, `awk` o script Python per iniettare codice. Analizza, comprendi il contesto e sovrascrivi l'intero componente in modo pulito.
-2. **Lavoro Modulare & Verifica:** Lavora su un file alla volta. Prima di alterare lo stato reattivo (`$state`), valuta sempre l'impatto sulle librerie terze (come `svelte-dnd-action` o TanStack Query).
+2. **Lavoro Modulare & Verifica:** Lavora su un file alla volta. Prima di alterare lo stato reattivo (`$state`), valuta sempre l'impatto sulle librerie terze (come `gridstack` o TanStack Query).
 3. **Inizializza con la Ricerca:** Prima di ipotizzare come implementare una feature in Svelte 5 o Tailwind v4, usa i tool a tua disposizione (Skill + MCP) per verificare la sintassi corretta ed evitare allucinazioni su versioni vecchie dei framework.
 4. **Root Pulita (Zero Spazzatura):** È SEVERAMENTE VIETATO creare file temporanei, script di test/debug, documenti di appoggio, lock file o qualsiasi artefatto IA nella directory principale del progetto. Se hai bisogno di file scratch, test one-off, note, o qualsiasi file di supporto, creali ESCLUSIVAMENTE nella directory `.gemini/` (es. `.gemini/scratch/`). La root del progetto deve contenere solo file che fanno parte integrante del codebase.
-5. **Widget Pattern:** Per aggiungere un nuovo widget, segui SEMPRE il pattern a 4 livelli (Admin Settings → Proxy API → TanStack Hook → Widget UI). Non deviare dalla separazione delle responsabilità.
+5. **Widget Pattern:** Per aggiungere un nuovo widget, segui SEMPRE il pattern a 4 livelli (Admin Settings → Proxy API → TanStack Hook → Widget UI). I widget possono essere collegati a un servizio o "Standalone" (senza URL). I widget standalone vengono modificati interamente via l'EditServiceSheet, sfruttando `ConfirmDeleteButton` e `BackButton`.

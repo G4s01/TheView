@@ -79,14 +79,24 @@ export function useQbittorrentDelete() {
 export function useQbittorrentAdd() {
   const queryClient = useQueryClient();
   return createMutation(() => ({
-    mutationFn: async ({ formData }: { formData: FormData }) => {
-      formData.append("action", "add");
-      const res = await fetch("/api/widgets/qbittorrent", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Add failed");
-      return res.json();
+    mutationFn: async ({ formData, url }: { formData?: FormData, url?: string }) => {
+      if (formData) {
+        formData.append("action", "add");
+        const res = await fetch("/api/widgets/qbittorrent", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) throw new Error("Add failed");
+        return res.json();
+      } else if (url) {
+        const res = await fetch("/api/widgets/qbittorrent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "add_url", url }),
+        });
+        if (!res.ok) throw new Error("Add URL failed");
+        return res.json();
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["qbittorrent"] });

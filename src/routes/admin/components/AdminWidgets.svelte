@@ -8,6 +8,7 @@
 	import { toast } from 'svelte-sonner';
 	import { WIDGET_REGISTRY } from '$lib/config/widgetRegistry';
 
+	const queryClient = useQueryClient();
 	let expandedStates = $state<Record<string, boolean>>({});
 	let settingsValues = $state<Record<string, any>>({});
 	let savingStates = $state<Record<string, boolean>>({});

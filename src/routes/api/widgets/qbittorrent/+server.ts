@@ -270,7 +270,29 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				return json({ error: "Payload JSON mancante o non valido" }, { status: 400 });
 			}
 
-			const { hash, action } = jsonBody as QBittorrentActionBody;
+			const { hash, action, url: magnetUrl } = jsonBody as any;
+
+			if (action === "add_url") {
+				if (!magnetUrl) return json({ error: "URL mancante" }, { status: 400 });
+				const form = new URLSearchParams();
+				form.append("urls", magnetUrl);
+				const res = await undiciFetch(`${targetUrl}/api/v2/torrents/add`, {
+					method: "POST",
+					headers: {
+						Referer: targetUrl,
+						"Content-Type": "application/x-www-form-urlencoded",
+						...(cookieCache ? { Cookie: cookieCache } : {})
+					},
+					body: form.toString(),
+					dispatcher: agent
+				});
+				if (!res.ok) {
+					const err = await res.text().catch(() => 'err');
+					return json({ error: "Add URL fallito", details: err }, { status: res.status });
+				}
+				return json({ success: true });
+			}
+
 			if (!hash || !["pause", "resume", "delete"].includes(action)) {
 				return json({ error: "Parametri non validi" }, { status: 400 });
 			}

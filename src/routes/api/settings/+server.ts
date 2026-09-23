@@ -32,6 +32,8 @@ export const GET: RequestHandler = async ({ locals }) => {
     safeSettings.dockhand_password = decryptString(
       safeSettings.dockhand_password,
     );
+  if (safeSettings.jellyfin_api_key)
+    safeSettings.jellyfin_api_key = decryptString(safeSettings.jellyfin_api_key);
   if (safeSettings.filebrowser_password)
     safeSettings.filebrowser_password = decryptString(
       safeSettings.filebrowser_password,
@@ -110,6 +112,8 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       delete newSettings.duplicati_password;
     if (newSettings.dockhand_password === "********")
       delete newSettings.dockhand_password;
+    if (newSettings.jellyfin_api_key === "********")
+      delete newSettings.jellyfin_api_key;
     if (newSettings.filebrowser_password === "********")
       delete newSettings.filebrowser_password;
 
@@ -144,6 +148,9 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       newSettings.dockhand_password = encryptString(
         newSettings.dockhand_password,
       );
+    }
+    if (newSettings.jellyfin_api_key) {
+      newSettings.jellyfin_api_key = encryptString(newSettings.jellyfin_api_key);
     }
     if (newSettings.filebrowser_password) {
       newSettings.filebrowser_password = encryptString(

@@ -1,20 +1,23 @@
 # Changelog
 
-## [2.0.2] - 2026-09-21
+Tutte le modifiche più significative a **TheView** saranno documentate in questo file.
 
-### ✨ New Features & Enhancements
-- **Massive Widget Expansion**: Added 7 completely new native widgets to supercharge your dashboard: **Docker, FileBrowser, Duplicati, Beszel, Wg-Easy, Dockhand, and Clock**.
-- **Physical Pixel Responsiveness**: Completely rewrote the responsiveness engine for all widgets. Instead of relying on abstract Gridstack columns, widgets now observe their true *physical pixel dimensions* in real-time. This guarantees perfect UI scaling across mobile, tablet, and 4K displays.
-- **Live Drag & Resize**: The dashboard UI now instantly adapts and re-renders *during* the GridStack drag-and-drop resize action, providing a seamless, native-app feel without waiting for the drop event.
-- **Intelligent Weather Matrix**: The Weather widget has been fully overhauled. It now features an intelligent spatial matrix that perfectly calculates the best layout (Horizontal Hourly, Vertical Daily, or both) depending on the exact physical aspect ratio of the widget.
-- **Blazing Fast Geocoding**: The Weather widget now utilizes the Open-Meteo Geocoding API for instantaneous, autocomplete location searches globally.
-- **Standalone Widget Editor**: Revamped standalone widget editing via the sliding `EditServiceSheet`, eliminating full-screen layout shifts and intrusive inline forms.
-- **Granular Appearance Settings**: Added discrete Admin settings for Desktop vs Mobile UI preferences, allowing you to independently hide service descriptions based on the device.
-- **Pristine Defaults**: Fresh installations now feature a much cleaner default configuration (Counters Off, Grid Indexes Off, Sidebar Right, streamlined titles).
+## [2.0.2] - 2026-09-23
 
-### 🐛 Bug Fixes
-- Fixed a critical GridStack mathematical bug where `gs-*` class parsing resulted in `NaN`, completely breaking FileBrowser layouts.
-- Fixed a highly disruptive regression where `use:clickOutside` directives aggressively closed newly opened Shadcn dropdowns and dialogs.
-- Fixed an issue where the top navigation bar animation would stutter or pop when scrolling down.
-- Resolved SvelteKit reactivity state mismatches. Settings changes now deeply integrate `await update()` with TanStack Query's `invalidateQueries()`, ensuring the dashboard updates instantly without ever requiring a manual page reload.
-- Polished the Edit form UI by swapping confusing icons (replaced `Undo2` with `X` for cancel actions) to clearly differentiate from navigation buttons.
+### ✨ Nuove Funzionalità
+- **Nuovo Widget Integrato: Jellyfin!** 
+  - Visualizzazione in tempo reale di ciò che è in riproduzione (Now Playing), con sfondo sfocato immersivo basato sul backdrop del film/episodio.
+  - Informazioni dettagliate: utente, titolo, stagione/episodio, barra di progressione temporale.
+  - Statistiche libreria (Film, Serie, Canzoni) in modalità IDLE (quando non c'è nulla in riproduzione).
+  - Piena responsività al formato della griglia (layout largo o quadrato).
+- **Nuovo Componente `UrlInput`**: Adesso le impostazioni per gli indirizzi web di tutti i widget (Jellyfin, qBittorrent, AdGuard, ecc.) godono di un nuovo e comodo selettore grafico `http://` / `https://` al posto del classico campo di testo generico.
+
+### 🐛 Bug Fix
+- **Drag & Drop (GridStack)**: Risolto un problema per cui la tendina manuale (Aggiungi Servizio) e il pannello di aggiunta Widget Standalone "tagliavano" o nascondevano i menu a discesa (dropdown/combobox) a causa di regole di overflow restrittive ereditate dalle vecchie card.
+- **qBittorrent Widget**: Risolto un bug critico che impediva l'inserimento corretto dei **Magnet Link** tramite tasto Invio o bottone dedicato. Il payload dell'API è stato convertito da `multipart/form-data` a `application/x-www-form-urlencoded` nel proxy interno.
+- **FileBrowser Widget**: Sistemazione estetica. L'indicatore dei GB in uso e totali è stato spostato centralmente e integrato in maniera elegante all'interno della barra circolare SVG (anziché affiancato disordinatamente all'esterno).
+- **Crittografia API Key**: Risolta la mancata decrittografia/crittografia del campo dell'API Key per Jellyfin nel pannello Admin che portava l'API proxy a generare chiavi invalide.
+- **Header Autenticazione Jellyfin**: Migrazione dell'header storico `X-Emby-Token` a favore dell'ufficiale `Authorization: MediaBrowser Token="..."` per risolvere errori **401 Unauthorized** (silenziosi) con le versioni moderne di Jellyfin.
+
+### ♻️ Refactoring & Sicurezza
+- Pulizia estensiva dell'architettura e disaccoppiamento controlli multimediali ridondanti nel proxy Jellyfin per mantenere un'interfaccia pulita e priva di bottoni non reattivi.

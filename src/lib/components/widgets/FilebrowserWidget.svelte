@@ -29,7 +29,7 @@
 	let isWide = $derived(rectW && rectH ? rectW > rectH * 1.1 : nodeW > nodeH);
 </script>
 
-<div bind:clientWidth={rectW} bind:clientHeight={rectH} class="w-full h-full flex {isWide ? 'flex-row' : 'flex-col'} justify-center items-center p-2 min-h-0 text-foreground gap-4">
+<div bind:clientWidth={rectW} bind:clientHeight={rectH} class="w-full h-full flex justify-center items-center p-2 min-h-0 text-foreground">
 	{#if filebrowser.isPending}
 		<div class="flex flex-col items-center justify-center gap-3 w-full h-full">
 			<div class="size-16 sm:size-20 rounded-full border-4 border-muted flex items-center justify-center animate-pulse shrink-0">
@@ -47,7 +47,7 @@
 	{:else}
 		<div class="relative flex items-center justify-center shrink-0">
 			<!-- Background Circle -->
-			<svg class="size-20 sm:size-28 -rotate-90 transform" viewBox="0 0 80 80">
+			<svg class="size-28 sm:size-32 min-h-[110px] min-w-[110px] -rotate-90 transform" viewBox="0 0 80 80">
 				<circle
 					cx="40"
 					cy="40"
@@ -69,17 +69,12 @@
 					stroke-dashoffset={strokeDashoffset}
 				/>
 			</svg>
-			<div class="absolute inset-0 flex flex-col items-center justify-center">
-				<span class="text-base sm:text-xl font-bold">{percentage.toFixed(1)}%</span>
+			<div class="absolute inset-0 flex flex-col items-center justify-center pt-1">
+				<span class="text-xl sm:text-2xl font-bold leading-none">{percentage.toFixed(0)}%</span>
+				<span class="text-[9px] sm:text-[10px] text-muted-foreground mt-1 text-center font-medium leading-tight">
+					{formatBytes(used)}<br/>su {formatBytes(total)}
+				</span>
 			</div>
-		</div>
-		<div class="flex flex-col {isWide ? 'items-start text-left' : 'items-center text-center'} gap-0.5 mt-1 sm:mt-2 w-full min-w-0">
-			<span class="text-xs sm:text-sm font-medium text-muted-foreground truncate w-full px-2 {isWide ? 'px-0' : ''}">
-				{formatBytes(used)} / {formatBytes(total)}
-			</span>
-			<span class="text-[10px] sm:text-xs text-muted-foreground/70 uppercase tracking-widest truncate w-full {isWide ? 'px-0' : ''}">
-				{formatBytes(free)} Liberi
-			</span>
 		</div>
 	{/if}
 </div>

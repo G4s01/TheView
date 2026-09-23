@@ -10,6 +10,7 @@
 	import FilebrowserWidget from '../widgets/FilebrowserWidget.svelte';
 	import ClockWidget from '../widgets/ClockWidget.svelte';
 	import WeatherWidget from '../widgets/WeatherWidget.svelte';
+	import JellyfinWidget from '../widgets/JellyfinWidget.svelte';
 	import { appState } from '$lib/client/state.svelte';
 	import { Pencil, GripHorizontal } from "@lucide/svelte";
 	import { Button } from "$lib/components/ui/button";
@@ -96,9 +97,13 @@
 				<ClockWidget />
 			</div>
 		{:else if service.widgetType === 'weather'}
-			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-				<WeatherWidget nodeW={nodeW} nodeH={nodeH} />
-			</div>
+				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
+					<WeatherWidget nodeW={nodeW} nodeH={nodeH} />
+				</div>
+			{:else if service.widgetType === 'jellyfin'}
+				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
+					<JellyfinWidget size={currentSize} />
+				</div>
 		{/if}
 	</div>
 {:else if separateCells && isWidgetLayout}
@@ -155,9 +160,13 @@
 				<ClockWidget />
 			</div>
 		{:else if service.widgetType === 'weather'}
-			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-				<WeatherWidget nodeW={nodeW} nodeH={nodeH} />
-			</div>
+				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
+					<WeatherWidget nodeW={nodeW} nodeH={nodeH} />
+				</div>
+			{:else if service.widgetType === 'jellyfin'}
+				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
+					<JellyfinWidget size={currentSize} />
+				</div>
 		{/if}
 	</div>
 {:else}
@@ -172,23 +181,23 @@
 			</div>
 		{:else if service.widgetType === 'beszel'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<BeszelWidget size={currentSize} />
+				<BeszelWidget size={currentSize} hideHeader={true} />
 			</div>
 		{:else if service.widgetType === 'wgeasy'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<WgEasyWidget size={currentSize} />
+				<WgEasyWidget size={currentSize} hideHeader={true} />
 			</div>
 		{:else if service.widgetType === 'duplicati'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<DuplicatiWidget size={currentSize} />
+				<DuplicatiWidget size={currentSize} hideHeader={true} />
 			</div>
 		{:else if service.widgetType === 'docker'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<DockerWidget size={currentSize} />
+				<DockerWidget size={currentSize} hideHeader={true} />
 			</div>
 		{:else if service.widgetType === 'dockhand'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<DockhandWidget size={currentSize} />
+				<DockhandWidget size={currentSize} hideHeader={true} />
 			</div>
 		{:else if service.widgetType === 'filebrowser'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
@@ -199,9 +208,13 @@
 				<ClockWidget />
 			</div>
 		{:else if service.widgetType === 'weather'}
-			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<WeatherWidget nodeW={nodeW} nodeH={nodeH} />
-			</div>
+				<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
+					<WeatherWidget nodeW={nodeW} nodeH={nodeH} />
+				</div>
+			{:else if service.widgetType === 'jellyfin'}
+				<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
+					<JellyfinWidget size={currentSize} />
+				</div>
 		{/if}
 	</CardLink>
 {/if}

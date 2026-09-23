@@ -1,5 +1,6 @@
 <script lang="ts">
 	import TextInput from '$lib/components/ui/TextInput.svelte';
+	import UrlInput from '$lib/components/ui/UrlInput.svelte';
 	import ToggleInput from '$lib/components/ui/ToggleInput.svelte';
 	import SearchableCombobox from '$lib/components/ui/SearchableCombobox.svelte';
 	import LocationSearchInput from '$lib/components/ui/LocationSearchInput.svelte';
@@ -102,6 +103,10 @@
 							<div class="md:col-span-6 h-10">
 								<TextInput label={field.label} bind:value={values[field.id]} />
 							</div>
+						{:else if field.type === 'url'}
+							<div class="md:col-span-6 h-10">
+								<UrlInput label={field.label} bind:value={values[field.id]} />
+							</div>
 						{:else if field.type === 'password'}
 							<div class="md:col-span-6 h-10">
 								<TextInput label={field.label} type={showPassword[field.id] ? "text" : "password"} bind:value={values[field.id]} class="pr-10">
@@ -157,6 +162,10 @@
 				{#if field.type === 'text'}
 					<div class="md:col-span-12 h-10">
 						<TextInput label={field.label} bind:value={values[field.id]} />
+					</div>
+				{:else if field.type === 'url'}
+					<div class="md:col-span-12 h-10">
+						<UrlInput label={field.label} bind:value={values[field.id]} />
 					</div>
 				{:else if field.type === 'password'}
 					<div class="md:col-span-12 h-10">

@@ -28,13 +28,28 @@
 		appState.settings = data.settings || {};
 	});
 
+
+		$effect(() => {
+			if (browser && appState.isEditMode) {
+				if (window.matchMedia('(max-width: 1024px)').matches) {
+					appState.isEditMode = false;
+				}
+			}
+		});
+
 	$effect(() => {
 		if (browser && data.isAdmin && !hasInitializedEditMode) {
-			const saved = localStorage.getItem('isEditMode');
-			if (saved !== null) {
-				appState.isEditMode = saved === 'true';
+			const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+			if (isMobile) {
+				appState.isEditMode = false;
+				localStorage.setItem('isEditMode', 'false');
 			} else {
-				appState.isEditMode = true;
+				const saved = localStorage.getItem('isEditMode');
+				if (saved !== null) {
+					appState.isEditMode = saved === 'true';
+				} else {
+					appState.isEditMode = true;
+				}
 			}
 			hasInitializedEditMode = true;
 		}
@@ -63,6 +78,7 @@
 	// We'll pass categories down to the sidebar
 	// data.grids will be populated by +layout.server.ts later
 	let grids = $derived(data.grids || []);
+	let visibleGridsCount = $derived(grids.filter((g: any) => g.count > 0 || appState.isEditMode).length);
 	let versionInfo = $state<{currentVersion?: string, latestVersion?: string, url?: string}>({});
 	
 	let isNavbarHidden = $state(false);
@@ -130,6 +146,9 @@
 					<a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
 						<img src="/favicon.svg" alt="TheView Logo" class="transition-all duration-300 {scrollY > 20 ? 'size-6' : 'size-8'}" />
 						<span class="hidden sm:inline text-xl font-bold text-foreground tracking-tight">TheView</span>
+						{#if (!data.showCategoriesMobile || visibleGridsCount <= 1) && data.customNavbarTitleMobile}
+							<span class="sm:hidden text-lg font-bold text-foreground tracking-tight uppercase truncate max-w-[140px] ml-1">{data.customNavbarTitleMobile}</span>
+						{/if}
 					</a>
 				</div>
 			</div>
@@ -154,7 +173,7 @@
 				{:else}
 					<div class="relative w-full overflow-hidden flex items-center" style="-webkit-mask-image: linear-gradient(to right, transparent, black 32px, black calc(100% - 64px), transparent); mask-image: linear-gradient(to right, transparent, black 32px, black calc(100% - 64px), transparent);">
 						<nav class="flex items-center gap-2 w-full justify-start md:justify-center overflow-x-auto no-scrollbar relative z-0 px-2">
-						{#if data.showCategoriesDesktop}
+						{#if data.showCategoriesDesktop && visibleGridsCount > 1}
 							{#each grids as grid}
 								{#if grid.count > 0 || appState.isEditMode}
 									<a href="/#{grid.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-border text-muted-foreground hover:bg-muted hover:text-foreground">
@@ -185,8 +204,8 @@
 							{/if}
 						</a>
 						{#if data.showEditButton && $page.url.pathname === '/'}
-						<div class="w-px h-4 bg-border mx-1"></div>
-						<button class="p-1.5 transition-colors {appState.isEditMode ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" onclick={() => appState.isEditMode = !appState.isEditMode} title={appState.isEditMode ? "DISATTIVA" : "MODIFICA"}>
+						<div class="hidden md:block w-px h-4 bg-border mx-1"></div>
+						<button class="hidden md:flex p-1.5 transition-colors {appState.isEditMode ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" onclick={() => appState.isEditMode = !appState.isEditMode} title={appState.isEditMode ? "DISATTIVA" : "MODIFICA"}>
 							{#if appState.isEditMode}
 								<Pencil class="size-5" strokeWidth={1.5} />
 							{:else}
@@ -194,7 +213,7 @@
 							{/if}
 						</button>
 						{/if}
-						<div class="w-px h-4 bg-border mx-1"></div>
+						<div class="hidden md:block w-px h-4 bg-border mx-1"></div>
 						<button class="p-1.5 text-destructive hover:opacity-80 transition-colors" onclick={async () => { await fetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); window.location.reload(); }} title="Esci dalla sessione">
 							<LogOut class="size-5" strokeWidth={1.5} />
 						</button>
@@ -232,10 +251,9 @@
 			<div class="w-1 shrink-0"></div>
 			</nav>
 		</div>
-		{:else}
+		{:else if data.showCategoriesMobile && visibleGridsCount > 1}
 		<div class="md:hidden relative border-t border-border bg-card/90 w-full" style="-webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 40px), transparent);">
 			<nav class="flex items-center gap-2 px-4 py-3 overflow-x-auto no-scrollbar relative z-0">
-			{#if data.showCategoriesMobile}
 				{#each grids as grid}
 					{#if grid.count > 0 || appState.isEditMode}
 					<a href="/#{grid.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}" class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap border border-border text-muted-foreground hover:bg-muted hover:text-foreground">
@@ -243,11 +261,6 @@
 					</a>
 					{/if}
 				{/each}
-			{:else if data.customNavbarTitleMobile}
-				<div class="flex-1 text-center px-4 py-2 text-sm font-bold uppercase tracking-wider text-foreground whitespace-nowrap">
-					{data.customNavbarTitleMobile}
-				</div>
-			{/if}
 			<!-- spacer for right padding scroll -->
 			<div class="w-1 shrink-0"></div>
 			</nav>
