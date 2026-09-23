@@ -36,23 +36,16 @@ function dockerRequest(path: string): Promise<any> {
   });
 }
 
-export const GET: RequestHandler = async ({ url }) => {
-  const image = url.searchParams.get("image");
-  if (!image) {
-    return json({ error: "Missing image" }, { status: 400 });
-  }
-
-  // We need the local image digest to compare
+async function checkSingleImage(image: string, containers: any[]) {
   const imageInfo = await dockerRequest(`/images/${image}/json`);
   let localDigest = "";
   if (imageInfo && imageInfo.RepoDigests && imageInfo.RepoDigests.length > 0) {
-    // e.g. "linuxserver/qbittorrent@sha256:abcd..."
     const digestPart = imageInfo.RepoDigests[0].split("@")[1];
     if (digestPart) localDigest = digestPart;
   }
 
   if (!localDigest) {
-    return json({ updateAvailable: false, error: "Local digest not found" });
+    return { image, updateAvailable: false, error: "Local digest not found" };
   }
 
   let updateAvailable = false;
@@ -62,7 +55,6 @@ export const GET: RequestHandler = async ({ url }) => {
   let repo = image;
   let tag = "latest";
 
-  // Parse tag if present
   if (repo.includes(":")) {
     const parts = repo.split(":");
     tag = parts.pop() || "latest";
@@ -72,7 +64,6 @@ export const GET: RequestHandler = async ({ url }) => {
   let registry = "registry-1.docker.io";
   let registryPath = repo;
 
-  // Se ha un dominio, lo estraiamo (es. ghcr.io, lscr.io, quay.io, portainer.io)
   if (repo.includes("/")) {
     const firstPart = repo.split("/")[0];
     if (firstPart.includes(".")) {
@@ -80,12 +71,11 @@ export const GET: RequestHandler = async ({ url }) => {
       registryPath = repo.substring(registry.length + 1);
     }
   }
-  // Se è Docker Hub e non ha l'utente (es. ubuntu -> library/ubuntu)
+  
   if (registry === "registry-1.docker.io" && !registryPath.includes("/")) {
     registryPath = `library/${registryPath}`;
   }
 
-  // URL per gli esseri umani
   if (registry === "registry-1.docker.io") {
     updateUrl = `https://hub.docker.com/r/${registryPath.replace("library/", "")}`;
   } else if (registry === "ghcr.io") {
@@ -108,7 +98,6 @@ export const GET: RequestHandler = async ({ url }) => {
     if (manifestRes.status === 401) {
       const authHeader = manifestRes.headers.get("www-authenticate");
       if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
-        // Parse realm="...",service="..."
         const realmMatch = authHeader.match(/realm="([^"]+)"/);
         const serviceMatch = authHeader.match(/service="([^"]+)"/);
 
@@ -144,41 +133,62 @@ export const GET: RequestHandler = async ({ url }) => {
     updateAvailable = true;
   }
 
-  // Check if any container is running an untagged version of this image or old digest
-  if (!updateAvailable) {
-    const containers = await dockerRequest("/containers/json");
-    if (containers && Array.isArray(containers)) {
-      for (const c of containers) {
-        // If container is untagged (sha256:) and its compose image label matches OR its name resembles the image name
-        if (c.Image.startsWith("sha256:")) {
-          const composeImage = c.Labels?.["com.docker.compose.image"];
-          if (composeImage === image) {
-            updateAvailable = true;
-            break;
-          }
-          // Fallback heuristic: if container name shares the repo name
-          const repoName = image.split("/").pop()?.split(":")[0];
-          if (repoName && c.Names?.some((n: string) => n.includes(repoName))) {
-            updateAvailable = true;
-            break;
-          }
+  if (!updateAvailable && containers && Array.isArray(containers)) {
+    for (const c of containers) {
+      if (c.Image.startsWith("sha256:")) {
+        const composeImage = c.Labels?.["com.docker.compose.image"];
+        if (composeImage === image) {
+          updateAvailable = true;
+          break;
+        }
+        const repoName = image.split("/").pop()?.split(":")[0];
+        if (repoName && c.Names?.some((n: string) => n.includes(repoName))) {
+          updateAvailable = true;
+          break;
         }
       }
     }
   }
 
+  return {
+    image,
+    updateAvailable,
+    updateUrl,
+    localDigest,
+    remoteDigest,
+  };
+}
+
+export const GET: RequestHandler = async ({ url }) => {
+  const imageParam = url.searchParams.get("image");
+  if (!imageParam) {
+    return json({ error: "Missing image" }, { status: 400 });
+  }
+
+  const images = imageParam.split(",").map(img => img.trim()).filter(Boolean);
+  
+  // Fetch containers list once for all images to save docker socket calls
+  const containers = await dockerRequest("/containers/json") || [];
+
+  const results = await Promise.all(images.map(img => checkSingleImage(img, containers)));
+
+  // Aggregate results: update is available if ANY image has an update
+  const updateAvailable = results.some(res => res.updateAvailable);
+  
+  // Use the updateUrl from the first image that has an update, or fallback to the first one
+  const firstUpdate = results.find(res => res.updateAvailable) || results[0];
+
   return json(
     {
-      image,
+      image: imageParam,
       updateAvailable,
-      updateUrl,
-      localDigest,
-      remoteDigest,
+      updateUrl: firstUpdate?.updateUrl || "",
+      results // Include detailed results in case the client wants to know WHICH container needs an update
     },
     {
       headers: {
         "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
       },
-    },
+    }
   );
 };

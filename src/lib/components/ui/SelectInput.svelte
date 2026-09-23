@@ -54,8 +54,8 @@
 		onclick={(e) => { e.preventDefault(); isOpen = !isOpen; }}
 	>
 		<span class="truncate {(!isSelected && !isOpen) ? 'opacity-0' : 'opacity-100'} flex items-center gap-2">
-			{#if options.find(o => String(o.value) === String(value))?.icon}
-				{@const Icon = options.find(o => String(o.value) === String(value))?.icon}
+			{#if options.find((o: any) => String(o.value) === String(value))?.icon}
+				{@const Icon = options.find((o: any) => String(o.value) === String(value))?.icon}
 				<Icon class="size-4 shrink-0" />
 			{/if}
 			{selectedLabel}

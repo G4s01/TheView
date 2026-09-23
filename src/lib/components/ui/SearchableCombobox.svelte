@@ -40,7 +40,7 @@
 	// In Svelte 5, updating searchTerm should filter options
 	let filteredOptions = $derived(
 		searchTerm
-			? options.filter(opt => opt.label.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 1000)
+			? options.filter((opt: any) => opt.label.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 1000)
 			: options.slice(0, 1000)
 	);
 

@@ -235,7 +235,7 @@
 		<!-- ROW 3 -->
 		<div class="md:col-span-8 h-10">
 			<TextInput
-				label="IMMAGINE DOCKER"
+				label="IMMAGINI DOCKER (SEPARATE DA VIRGOLA)"
 				name="dockerImage"
 				bind:value={service.dockerImage}
 			/>

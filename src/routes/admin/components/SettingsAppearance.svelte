@@ -129,7 +129,7 @@
 								<p class="text-xs font-bold text-foreground uppercase tracking-wider">Stile Icone Servizi</p>
 								<div class="grid grid-cols-3 gap-2 sm:gap-4">
 									{#each iconStyles as style}
-										<button type="button" onclick={() => iconStyle = style.id} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === style.id ? 'border-2 border-primary bg-primary/10 shadow-sm' : 'border-2 border-transparent bg-card hover:bg-muted/50'} transition-all">
+										<button type="button" title={style.label} aria-label={style.label} onclick={() => iconStyle = style.id} class="flex flex-col items-center gap-3 p-4 rounded-xl {iconStyle === style.id ? 'border-2 border-primary bg-primary/10 shadow-sm' : 'border-2 border-transparent bg-card hover:bg-muted/50'} transition-all">
 											<div class="size-12 bg-primary shadow-sm flex items-center justify-center {style.id}">
 												<svg class="size-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
 											</div>

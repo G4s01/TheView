@@ -3,7 +3,6 @@ import { dashboardIcons } from "./dashboardIcons";
 import fs from "node:fs";
 import path from "node:path";
 
-
 const ALIASES_FILE_PATH = path.join(process.cwd(), "data", "aliases.json");
 const CACHE_TTL = 5000; // 5 secondi
 let cachedAliases: Record<string, string> | null = null;
@@ -21,16 +20,20 @@ function getAliases(): Record<string, string> {
       fs.writeFileSync(
         ALIASES_FILE_PATH,
         JSON.stringify(DEFAULT_ALIASES, null, 2),
-        "utf-8"
+        "utf-8",
       );
       cachedAliases = DEFAULT_ALIASES;
     } else {
       const content = fs.readFileSync(ALIASES_FILE_PATH, "utf-8");
       const parsed = JSON.parse(content);
-      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      if (
+        typeof parsed !== "object" ||
+        parsed === null ||
+        Array.isArray(parsed)
+      ) {
         throw new Error("Il file JSON non contiene un oggetto valido");
       }
-      
+
       // Fonde i DEFAULT_ALIASES con le preferenze dell'utente. Se sono state aggiunte nuove voci
       // in DEFAULT_ALIASES in un nuovo update, verranno inserite nel JSON esistente.
       let hasMissingDefaults = false;
@@ -45,14 +48,17 @@ function getAliases(): Record<string, string> {
         fs.writeFileSync(
           ALIASES_FILE_PATH,
           JSON.stringify(parsed, null, 2),
-          "utf-8"
+          "utf-8",
         );
       }
 
       cachedAliases = parsed as Record<string, string>;
     }
   } catch (error) {
-    console.warn("[iconResolver] Errore durante la lettura di aliases.json:", error);
+    console.warn(
+      "[iconResolver] Errore durante la lettura di aliases.json:",
+      error,
+    );
     cachedAliases = DEFAULT_ALIASES;
   }
 
@@ -77,8 +83,11 @@ export function normalizeName(name: string): string {
 export function extractFromImage(image?: string | null): string {
   if (!image) return "";
 
+  // Se è una lista di immagini separate da virgola, prendiamo solo la prima
+  const firstImage = image.split(",")[0].trim();
+
   // Rimuove registry/namespace (tutto ciò che c'è prima dell'ultimo /)
-  const parts = image.split("/");
+  const parts = firstImage.split("/");
   const lastPart = parts[parts.length - 1];
 
   // Rimuove digest se presente (es. @sha256:12345)

@@ -128,7 +128,7 @@
 								<SearchableCombobox label={field.label} bind:value={values[field.id]} options={field.options} />
 							</div>
 						{:else if field.type === 'location'}
-							<div class="md:col-span-6 h-10 z-[60]">
+							<div class="md:col-span-6 h-10 z-60">
 								<LocationSearchInput label={field.label} bind:value={values[field.id]} />
 							</div>
 						{/if}
@@ -190,7 +190,7 @@
 						<SearchableCombobox label={field.label} bind:value={values[field.id]} options={field.options} />
 					</div>
 				{:else if field.type === 'location'}
-					<div class="md:col-span-12 h-10 z-[60]">
+					<div class="md:col-span-12 h-10 z-60">
 						<LocationSearchInput label={field.label} bind:value={values[field.id]} />
 					</div>
 				{/if}
