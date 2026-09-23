@@ -12,10 +12,18 @@ export const GET: RequestHandler = async ({ locals }) => {
 
   try {
     const existingServices = await db
-      .select({ url: services.url, name: services.name })
+      .select({
+        url: services.url,
+        name: services.name,
+        dockerImage: services.dockerImage,
+      })
       .from(services);
     const existingUrls = existingServices.map((s) => s.url);
     const existingNames = existingServices.map((s) => s.name.toLowerCase());
+    const existingImages = existingServices
+      .map((s) => s.dockerImage)
+      .filter(Boolean)
+      .flatMap((img) => img!.split(",").map((i) => i.trim().toLowerCase()));
 
     const settings = await getSettings();
     const npmEnabled =
@@ -27,6 +35,7 @@ export const GET: RequestHandler = async ({ locals }) => {
     const result = await discoverAllServices(
       existingUrls,
       existingNames,
+      existingImages,
       npmUrl,
       npmEmail,
       npmPassword,

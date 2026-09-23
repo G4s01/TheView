@@ -215,6 +215,7 @@ export function getDockerServices(): Promise<{
 export async function discoverAllServices(
   existingUrls: string[],
   existingNames: string[],
+  existingImages: string[],
   npmUrl?: string,
   npmEmail?: string,
   npmPassword?: string,
@@ -388,7 +389,17 @@ export async function discoverAllServices(
   });
 
   const filtered = all.filter((s) => {
+    // 1. Controllo per Nome esatto
     if (existingNames.includes(s.name.toLowerCase())) return false;
+
+    // 2. Controllo per Immagine Docker esatta (se presente)
+    if (
+      s._dockerImage &&
+      existingImages.includes(s._dockerImage.toLowerCase())
+    ) {
+      return false;
+    }
+
     if (!s.url) return true;
     try {
       const hostname = new URL(s.url).hostname.toLowerCase();
