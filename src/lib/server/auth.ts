@@ -58,6 +58,7 @@ export async function validateSession(token: string) {
   return { session };
 }
 
-export async function invalidateSession(sessionId: string): Promise<void> {
+export async function invalidateSession(token: string): Promise<void> {
+  const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
   await db.delete(sessions).where(eq(sessions.id, sessionId));
 }

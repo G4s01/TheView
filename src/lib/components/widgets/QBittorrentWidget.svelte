@@ -85,7 +85,7 @@
 
 		{#if isWidgetLayout}
 			{#if query.data?.torrents && query.data.torrents.length > 0}
-				<div class="flex flex-col gap-2 mt-2 flex-1">
+				<div class="flex flex-col gap-2 mt-2 flex-1 min-h-0 overflow-y-auto pr-1">
 					{#each query.data.torrents as torrent}
 						<div class="flex flex-col gap-1 w-full text-xs">
 							<div class="flex flex-col w-full min-w-0 gap-0.5">

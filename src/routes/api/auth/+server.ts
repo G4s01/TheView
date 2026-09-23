@@ -59,7 +59,12 @@ export async function POST({ request, cookies }) {
     if (token && token !== "active") {
       await invalidateSession(token);
     }
-    cookies.delete("admin_session", { path: "/", secure: isSecure });
+    cookies.delete("admin_session", {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: isSecure,
+    });
 
     // Pulizia icone in background
     import("$lib/server/icons")

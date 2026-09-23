@@ -117,6 +117,7 @@
 	);
 
 	let separateCells = $derived(
+		showWidget &&
 		service.widgetType && service.widgetType !== 'none' && service.widgetType !== 'spacer' &&
 		WIDGET_REGISTRY.some(w => w.id === service.widgetType)
 	);
@@ -138,7 +139,7 @@
 			{/if}
 		</div>
 	{:else if service.isWidget}
-		<CardWidget {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescriptionDesktop} {showDescriptionMobile} {dockerVersionInfo} {iconBgColor} {separateCells} {startEdit} />
+		<CardWidget {showWidget} {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescriptionDesktop} {showDescriptionMobile} {dockerVersionInfo} {iconBgColor} {separateCells} {startEdit} />
 	{:else}
 		{#if appState.isEditMode && (!separateCells || !isWidgetLayout)}
 			<div class="absolute top-2 right-2 flex gap-1.5 z-20">
@@ -168,7 +169,7 @@
 		onclick={(e: Event) => { if (appState.isEditMode) e.preventDefault(); }}
 	>
 		{#if showWidget}
-			<CardWidget {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescriptionDesktop} {showDescriptionMobile} {dockerVersionInfo} {iconBgColor} {separateCells} {startEdit} />
+			<CardWidget {showWidget} {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescriptionDesktop} {showDescriptionMobile} {dockerVersionInfo} {iconBgColor} {separateCells} {startEdit} />
 		{:else}
 			<CardLink {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescriptionDesktop} {showDescriptionMobile} {dockerVersionInfo} {iconBgColor} />
 		{/if}

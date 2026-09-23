@@ -2,6 +2,21 @@
 
 Tutte le modifiche più significative a **TheView** saranno documentate in questo file.
 
+## [2.0.3] - 2026-09-23
+
+### 📱 Esperienza Mobile e Responsività
+- **Rivoluzione del Layout Mobile:** Su dispositivi mobili, l'interfaccia si è definitivamente svincolata dal motore Gridstack. Ora le card e i widget adottano un layout nativo in colonna (Flexbox verticale), garantendo una fluidità perfetta e uno scorrimento organico.
+- **Contenuti Dinamici:** Su schermi piccoli, i widget e le liste (es. Dockhand, Docker) non sono più vincolati ad altezze rigide e si ridimensionano in maniera naturale adattandosi al loro contenuto, eliminando antiestetici spazi vuoti.
+- **Topbar Mobile Ottimizzata:** Se è presente o visibile una sola griglia, l'ingombrante barra di navigazione secondaria (Indice Griglie) scompare. Il titolo personalizzato (es. "HOME") viene iniettato elegantemente nella Topbar principale di fianco al logo (a patto che tu l'abbia impostato), risparmiando spazio prezioso.
+- **Scrollbar Visibili:** Introdotte scrollbar semi-trasparenti personalizzate (per Webkit) per rendere immediatamente evidente la possibilità di scorrimento all'interno delle liste contenute nei widget (come Dockhand e Docker).
+
+### 🎨 Design & Widget
+- **Jellyfin Widget (Stato Idle):** Ridisegnata completamente la schermata a riposo. Rimosso il logo gigante e il testo ridondante a favore di una moderna griglia 2x2 che dà il massimo risalto alle statistiche della libreria (Film, Serie TV, Brani, Utenti).
+- **Meteo Widget:** Risolto un problema di calcolo dimensionale che inibiva la visualizzazione delle previsioni orarie sui dispositivi mobili a causa della natura fluida (senza altezze predefinite) delle card su smartphone.
+
+### 🐛 Bug Fix
+- **Compilazione Svelte 5:** Corretto un grave errore di "shadowing" reattivo (`$state` vs `let state`) nel Widget Duplicati, e sanata la dichiarazione mancante della prop `hideHeader` in vari widget integrati che rischiavano di mandare in crash l'intera griglia Desktop.
+
 ## [2.0.2] - 2026-09-23
 
 ### ✨ Nuove Funzionalità

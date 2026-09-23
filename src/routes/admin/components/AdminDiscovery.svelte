@@ -43,7 +43,13 @@
 			const res = await fetch('/api/settings');
 			if (res.ok) {
 				const data = await res.json();
+				if (data.npmUrl) npmUrlCombined = data.npmUrl;
+				if (data.npmEmail) npmEmail = data.npmEmail;
 				if (data.npmPassword) npmPassword = data.npmPassword;
+				
+				if (data.npmUrl && data.npmEmail && data.npmPassword) {
+					isNpmEditing = false;
+				}
 			}
 		} catch (e) {
 			console.error("Failed to load settings:", e);
