@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Switch } from "$lib/components/ui/switch";
 	import { Label } from "$lib/components/ui/label";
+	import { Eye } from "@lucide/svelte";
 
 	let {
 		label = '',
@@ -26,6 +27,9 @@
 				for={id} 
 				class="text-sm font-bold uppercase tracking-wider text-foreground cursor-pointer flex items-center gap-2"
 			>
+				{#if label.toLowerCase().includes('privilegiato')}
+					<Eye class="size-4" strokeWidth={2.5} />
+				{/if}
 				{label}
 				{#if label.toLowerCase().includes('ping') && checked}
 					<span class="relative flex h-2 w-2">

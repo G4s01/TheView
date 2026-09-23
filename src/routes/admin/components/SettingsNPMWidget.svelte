@@ -67,9 +67,9 @@
 
 <div class="bg-card text-card-foreground rounded-2xl shadow-lg border border-border">
 	<div class="p-6">
-		<div class="flex flex-col sm:flex-row sm:items-center gap-3">
-			<div class="flex items-center gap-3 flex-1">
-				<div class="relative">
+		<div class="flex items-center justify-between gap-2 w-full">
+			<div class="flex items-center gap-3 flex-1 min-w-0 mr-2">
+				<div class="relative shrink-0">
 					<ServiceIcon icon="nginx-proxy-manager" name="NPM" size="lg" iconStyle="rounded-xl" />
 					{#if npmEnabled && !npmError && !isDiscovering && npmUrlCombined && npmEmail}
 						<!-- Pallino verde lampeggiante -->
@@ -79,18 +79,15 @@
 						</span>
 					{/if}
 				</div>
-				<div>
-					<h3 class="text-xl font-bold uppercase tracking-wider text-foreground">NGINX PROXY MANAGER</h3>
-					<p class="text-sm text-muted-foreground">COLLEGA E SCOVA I SERVIZI ESPOSTI</p>
-				</div>
+				<h3 class="text-sm sm:text-lg font-bold uppercase tracking-wider text-foreground truncate">NGINX PROXY MANAGER</h3>
 			</div>
 			
-			<div class="flex items-center gap-3 mt-4 sm:mt-0">
+			<div class="flex items-center gap-2 sm:gap-3 shrink-0">
 				{#if npmEnabled && npmError}
 					<CircleAlert class="text-destructive size-5" title="Errore di autenticazione: {npmError}" />
 				{/if}
 				<ModifyButton onclick={() => { isNpmEditing = !isNpmEditing; showNpmPassword = false; }} id="edit-npm-btn" />
-				<div class="flex items-center ml-2 border-l border-border pl-4">
+				<div class="flex items-center ml-1 sm:ml-2 border-l border-border pl-3 sm:pl-4">
 					<Switch checked={npmEnabled} onCheckedChange={toggleNpmEnabled} title="Abilita/Disabilita NPM" />
 				</div>
 			</div>
@@ -116,31 +113,33 @@
 					</div>
 				</div>
 				
-				<!-- Riga 2: URL, Annulla e Salva -->
-				<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center w-full">
-					<div class="md:col-span-12 flex gap-2 w-full items-end">
-						<div class="flex-1 min-w-0">
-							<UrlInput label="INDIRIZZO NPM (es. 192.168.1.100:81)" bind:value={npmUrlCombined} />
-						</div>
-						{#if originalUrl && originalEmail}
-							<BackButton 
-								onclick={handleCancel}
-								class="shrink-0"
-								text=""
-								title="ANNULLA"
-							/>
-						{/if}
-						<SaveButton 
-							class="shrink-0"
-							onclick={async () => {
-								await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: npmUrlCombined, npmEmail, npmPassword, npm_enabled: npmEnabled }) });
-								isNpmEditing = false;
-								showNpmPassword = false;
-								if (onSave) await onSave();
-							}}
-							title="SALVA"
-						/>
+				<!-- Riga 2: URL -->
+				<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+					<div class="md:col-span-12 h-10">
+						<UrlInput label="INDIRIZZO NPM (es. 192.168.1.100:81)" bind:value={npmUrlCombined} />
 					</div>
+				</div>
+				
+				<!-- Azioni -->
+				<div class="flex items-center justify-end gap-2 mt-2 w-full">
+					{#if originalUrl && originalEmail}
+						<BackButton 
+							onclick={handleCancel}
+							class="shrink-0"
+							text=""
+							title="ANNULLA"
+						/>
+					{/if}
+					<SaveButton 
+						class="w-32 h-10 shrink-0"
+						onclick={async () => {
+							await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: npmUrlCombined, npmEmail, npmPassword, npm_enabled: npmEnabled }) });
+							isNpmEditing = false;
+							showNpmPassword = false;
+							if (onSave) await onSave();
+						}}
+						title="SALVA"
+					/>
 				</div>
 			</div>
 		{/if}

@@ -33,7 +33,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: "qbit_password", label: "Password", type: "password" },
       {
         id: "qbit_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],
@@ -49,7 +49,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: "adguard_password", label: "Password", type: "password" },
       {
         id: "adguard_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],
@@ -65,7 +65,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: "beszel_password", label: "Password", type: "password" },
       {
         id: "beszel_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],
@@ -80,7 +80,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: "wgeasy_password", label: "Password", type: "password" },
       {
         id: "wgeasy_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],
@@ -95,7 +95,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: "duplicati_password", label: "Password", type: "password" },
       {
         id: "duplicati_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],
@@ -111,7 +111,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: "filebrowser_password", label: "Password", type: "password" },
       {
         id: "filebrowser_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],
@@ -129,7 +129,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       },
       {
         id: "docker_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],
@@ -145,7 +145,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: "dockhand_password", label: "Password", type: "password" },
       {
         id: "dockhand_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],
@@ -179,7 +179,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       },
       {
         id: "clock_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],
@@ -194,7 +194,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: "jellyfin_api_key", label: "API Key", type: "password" },
       {
         id: "jellyfin_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],
@@ -208,7 +208,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: "weather_location", label: "Cerca Località", type: "location" },
       {
         id: "weather_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],
@@ -229,7 +229,7 @@ export const WIDGET_REGISTRY: WidgetDef[] = [
       { id: "openwrt_password", label: "Password", type: "password" },
       {
         id: "openwrt_require_auth",
-        label: "Nascondi ad utenti non loggati",
+        label: "Privilegiato",
         type: "checkbox",
       },
     ],

@@ -135,20 +135,22 @@
 					{/each}
 				</div>
 				
-				<div class="flex justify-between items-center mt-2">
-					<div class="flex gap-4 items-center">
+				<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-4 w-full">
+					<div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center w-full sm:w-auto">
 					{#each widget.fields.filter((f: any) => f.type === 'checkbox') as field}
-						<ToggleInput label={field.label} checked={values[field.id] ?? false} onCheckedChange={(v) => values[field.id] = v} />
+						<div class="w-full sm:w-auto">
+							<ToggleInput label={field.label} checked={values[field.id] ?? false} onCheckedChange={(v) => values[field.id] = v} />
+						</div>
 					{/each}
 					</div>
-					<div class="flex items-center justify-end gap-2 shrink-0">
+					<div class="flex items-center justify-end gap-2 shrink-0 w-full sm:w-auto">
 						{#if onDelete}
 							<ConfirmDeleteButton onConfirm={onDelete} disabled={isSaving} />
 						{/if}
 						{#if onCancel}
 							<BackButton onclick={onCancel} disabled={isSaving} text="" title="ANNULLA" />
 						{/if}
-						<SaveButton class="w-32 h-10" onclick={handleSave} isLoading={isSaving} />
+						<SaveButton class="w-full sm:w-32 h-10 shrink-0" onclick={handleSave} isLoading={isSaving} />
 					</div>
 				</div>
 			</div>
@@ -195,20 +197,22 @@
 			{/each}
 		</div>
 		
-		<div class="flex justify-between items-center mt-2 w-full">
-			<div class="flex flex-col gap-2 items-start">
+		<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 w-full gap-4">
+			<div class="flex flex-col gap-2 items-start w-full sm:w-auto">
 			{#each widget.fields.filter((f: any) => f.type === 'checkbox') as field}
-				<ToggleInput label={field.label} checked={values[field.id] ?? false} onCheckedChange={(v) => values[field.id] = v} />
+				<div class="w-full sm:w-auto">
+					<ToggleInput label={field.label} checked={values[field.id] ?? false} onCheckedChange={(v) => values[field.id] = v} />
+				</div>
 			{/each}
 			</div>
-			<div class="flex items-center justify-end gap-2 shrink-0">
+			<div class="flex items-center justify-end gap-2 shrink-0 w-full sm:w-auto">
 				{#if onDelete}
 					<ConfirmDeleteButton onConfirm={onDelete} disabled={isSaving} />
 				{/if}
 				{#if onCancel}
 					<BackButton onclick={onCancel} disabled={isSaving} text="" title="ANNULLA" />
 				{/if}
-				<SaveButton class="w-32 h-10 shrink-0" onclick={handleSave} isLoading={isSaving} />
+				<SaveButton class="w-full sm:w-32 h-10 shrink-0" onclick={handleSave} isLoading={isSaving} />
 			</div>
 		</div>
 	</div>
