@@ -4,27 +4,32 @@
 	import SaveButton from '$lib/components/ui/SaveButton.svelte';
 	import BackButton from '$lib/components/ui/BackButton.svelte';
 	import ServiceIcon from '$lib/components/ui/ServiceIcon.svelte';
-	import ConfirmDeleteButton from '$lib/components/ui/ConfirmDeleteButton.svelte';
+	import ModifyButton from '$lib/components/ui/ModifyButton.svelte';
+	import { Switch } from "$lib/components/ui/switch";
 	import { slide } from 'svelte/transition';
-	import { Eye, EyeOff } from "@lucide/svelte";
+	import { Eye, EyeOff, CircleAlert } from "@lucide/svelte";
 	import { clickOutside } from '$lib/actions/clickOutside';
 
 	let {
+		npmEnabled = $bindable(false),
 		npmUrlCombined = $bindable(),
 		npmEmail = $bindable(),
 		npmPassword = $bindable(),
 		isNpmEditing = $bindable(),
 		showNpmPassword = $bindable(),
-		onDisconnect,
-		onSave
+		onSave,
+		npmError = null,
+		isDiscovering = false
 	} = $props<{
+		npmEnabled: boolean;
 		npmUrlCombined: string;
 		npmEmail: string;
 		npmPassword: string;
 		isNpmEditing: boolean;
 		showNpmPassword: boolean;
-		onDisconnect: () => void;
 		onSave: () => Promise<void>;
+		npmError: string | null;
+		isDiscovering: boolean;
 	}>();
 
 	let originalUrl = $state(npmUrlCombined);
@@ -46,31 +51,53 @@
 		isNpmEditing = false;
 		showNpmPassword = false;
 	}
+
+	async function toggleNpmEnabled(v: boolean) {
+		npmEnabled = v;
+		if (v && (!npmUrlCombined || !npmEmail || !npmPassword)) {
+			isNpmEditing = true;
+		}
+		// Save setting right away
+		await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: npmUrlCombined, npmEmail, npmPassword, npm_enabled: npmEnabled }) });
+		if (v && npmUrlCombined && npmEmail && npmPassword && !isNpmEditing) {
+			if (onSave) await onSave();
+		}
+	}
 </script>
 
 <div class="bg-card text-card-foreground rounded-2xl shadow-lg border border-border">
 	<div class="p-6">
-		<div class="flex items-center gap-3 mb-6">
-			<ServiceIcon icon="nginx-proxy-manager" name="NPM" size="lg" iconStyle="rounded-xl" />
-			<div>
-				<h3 class="text-xl font-bold uppercase tracking-wider text-foreground">NGINX PROXY MANAGER</h3>
-				<p class="text-sm text-muted-foreground">COLLEGA E SCOVA I SERVIZI ESPOSTI</p>
+		<div class="flex flex-col sm:flex-row sm:items-center gap-3">
+			<div class="flex items-center gap-3 flex-1">
+				<div class="relative">
+					<ServiceIcon icon="nginx-proxy-manager" name="NPM" size="lg" iconStyle="rounded-xl" />
+					{#if npmEnabled && !npmError && !isDiscovering && npmUrlCombined && npmEmail}
+						<!-- Pallino verde lampeggiante -->
+						<span class="absolute -top-1 -left-1 flex h-3 w-3">
+							<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+							<span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+						</span>
+					{/if}
+				</div>
+				<div>
+					<h3 class="text-xl font-bold uppercase tracking-wider text-foreground">NGINX PROXY MANAGER</h3>
+					<p class="text-sm text-muted-foreground">COLLEGA E SCOVA I SERVIZI ESPOSTI</p>
+				</div>
 			</div>
-			<div class="flex-1"></div>
-			{#if npmUrlCombined && npmEmail && npmPassword && !isNpmEditing}
-				<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent text-accent-foreground">
-					<span class="w-2 h-2 rounded-full bg-accent-foreground mr-2"></span>
-					CONFIGURATO
-				</span>
-			{:else}
-				<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-muted text-muted-foreground">
-					DISATTIVO
-				</span>
-			{/if}
+			
+			<div class="flex items-center gap-3 mt-4 sm:mt-0">
+				{#if npmEnabled && npmError}
+					<CircleAlert class="text-destructive size-5" title="Errore di autenticazione: {npmError}" />
+				{/if}
+				<ModifyButton onclick={() => { isNpmEditing = !isNpmEditing; showNpmPassword = false; }} id="edit-npm-btn" />
+				<div class="flex items-center ml-2 border-l border-border pl-4">
+					<Switch checked={npmEnabled} onCheckedChange={toggleNpmEnabled} title="Abilita/Disabilita NPM" />
+				</div>
+			</div>
 		</div>
 
 		{#if isNpmEditing}
-			<div class="flex flex-col gap-4 pt-2 w-full" transition:slide use:clickOutside={{ enabled: isNpmEditing, handler: handleCancel, ignore: '#edit-npm-btn' }}>
+			<div class="flex flex-col gap-4 pt-6 w-full" transition:slide use:clickOutside={{ enabled: isNpmEditing, handler: handleCancel, ignore: '#edit-npm-btn' }}>
 				<!-- Riga 1: Email e Password -->
 				<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
 					<div class="md:col-span-6 h-10">
@@ -106,7 +133,7 @@
 						<SaveButton 
 							class="shrink-0"
 							onclick={async () => {
-								await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: npmUrlCombined, npmEmail, npmPassword }) });
+								await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: npmUrlCombined, npmEmail, npmPassword, npm_enabled: npmEnabled }) });
 								isNpmEditing = false;
 								showNpmPassword = false;
 								if (onSave) await onSave();
@@ -116,28 +143,6 @@
 					</div>
 				</div>
 			</div>
-		{:else}
-			<div class="bg-muted text-muted-foreground rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-border" transition:slide>
-				<div class="flex items-center gap-3 mb-4 sm:mb-0">
-					<div class="p-2 bg-accent/20 text-accent rounded-lg">
-						<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-					</div>
-					<div>
-						<p class="text-sm font-medium text-foreground">CONNESSO A {npmUrlCombined}</p>
-						<p class="text-xs text-muted-foreground">ACCOUNT: {npmEmail}</p>
-					</div>
-				</div>
-				<div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-					<ConfirmDeleteButton 
-						class="shrink-0"
-						onConfirm={onDisconnect}
-					/>
-					<button id="edit-npm-btn" onclick={() => { isNpmEditing = true; showNpmPassword = false; }} class="px-4 py-2 bg-card border border-border text-foreground text-sm font-bold uppercase tracking-wider rounded-xl shadow-sm hover:bg-muted transition-colors edit-npm-btn">
-						MODIFICA
-					</button>
-				</div>
-			</div>
 		{/if}
 	</div>
 </div>
-

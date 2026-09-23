@@ -31,11 +31,14 @@
 	let isNpmEditing = $state(!initialNpmConfigured);
 	let showNpmPassword = $state(false);
 
+	let npmEnabled = $state($page.data.settings?.npm_enabled === 'true' || $page.data.settings?.npm_enabled === true);
+
 	async function confirmNpmDisconnect() {
 		npmUrlCombined = ''; npmEmail = ''; npmPassword = '';
 		isNpmEditing = true;
 		showNpmPassword = false;
-		await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: '', npmEmail: '', npmPassword: '' }) });
+		npmEnabled = false;
+		await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ npmUrl: '', npmEmail: '', npmPassword: '', npm_enabled: false }) });
 	}
 
 	onMount(async () => {
@@ -46,6 +49,7 @@
 				if (data.npmUrl) npmUrlCombined = data.npmUrl;
 				if (data.npmEmail) npmEmail = data.npmEmail;
 				if (data.npmPassword) npmPassword = data.npmPassword;
+				if (data.npm_enabled !== undefined) npmEnabled = data.npm_enabled === 'true' || data.npm_enabled === true;
 				
 				if (data.npmUrl && data.npmEmail && data.npmPassword) {
 					isNpmEditing = false;
@@ -67,7 +71,7 @@
 			await fetch('/api/settings', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ npmUrl: npmUrlCombined, npmEmail, npmPassword })
+				body: JSON.stringify({ npmUrl: npmUrlCombined, npmEmail, npmPassword, npm_enabled: npmEnabled })
 			});
 
 			const res = await fetch('/api/discovery');
@@ -88,13 +92,15 @@
 <div class="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
 	{#if mode === 'admin'}
 <SettingsNPMWidget
+		bind:npmEnabled
 		bind:npmUrlCombined
 		bind:npmEmail
 		bind:npmPassword
 		bind:isNpmEditing
 		bind:showNpmPassword
-		onDisconnect={confirmNpmDisconnect}
 		onSave={fetchDiscovery}
+		{npmError}
+		{isDiscovering}
 	/>
 {/if}
 
