@@ -55,6 +55,7 @@ TheView goes beyond simple links by offering deep integrations with your favorit
 - **Jellyfin**: Live "Now Playing" monitoring with beautiful backdrop UI and playback progression. Library statistics when idle.
 - **Beszel**: System stats, CPU, RAM, and Network usage monitoring.
 - **Dockhand**: Quick execution of configured docker backup/restore scripts.
+- **OpenWRT**: Monitor router health (CPU/RAM/Uptime) and live network interfaces with physical port status (Ping, Speed, Tx/Rx metrics) via ubus RPC.
 - **Clock**: A beautifully minimal analog/digital clock widget.
 
 ---
@@ -96,7 +97,7 @@ services:
 
 ## ⚙️ Configuration & Security
 
-TheView stores all state in a robust local SQLite database inside the `/app/data` volume. 
+TheView stores all state in a robust local SQLite database inside the `/app/data` volume.
 
 > [!IMPORTANT]
 > Your dashboard is entirely portable just by backing up the `data/sqlite.db` file!
@@ -112,6 +113,7 @@ All sensitive data (Passwords, API keys, and 2FA secrets) are **strongly encrypt
 ### 💾 Backup & Restore
 
 Backup or migrate your dashboard directly from the web interface:
+
 1. Go to **Settings > Backup e Ripristino**.
 2. Click **ESPORTA** to instantly download your entire SQLite database.
 3. You can restore an old backup by uploading it via **IMPORTA**. The dashboard will automatically restart to apply the new database.

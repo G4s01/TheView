@@ -53,7 +53,7 @@ Per garantirti sempre il contesto più aggiornato e idiomatico, devi **SEMPRE** 
 
 I widget seguono un pattern architetturale rigoroso a 4 livelli:
 
-1. **Admin Settings** (`src/routes/admin/components/Settings*Widget.svelte`): Form credenziali con crittografia AES-256-GCM.
+1. **Widget Registry** (`src/lib/config/widgetRegistry.ts`): Configurazione dei campi del widget. La UI (`/admin`) li legge e genera dinamicamente i form (DynamicWidgetForm). I dati vengono poi salvati su SQLite tramite le API che garantiscono crittografia AES-256-GCM.
 2. **Proxy API** (`src/routes/api/widgets/*/+server.ts`): Endpoint SvelteKit che decripta le credenziali, si autentica col servizio target e restituisce dati puliti. Gestisce TLS self-signed con `undici` Agent custom (MAI bypass globale).
 3. **TanStack Query Hook** (`src/lib/queries/use*.ts`): `createQuery` con `refetchInterval` configurato (3s per velocità, 30s per ping). Gestisce `isPending`, `isError`, `isSuccess`.
 4. **Widget UI** (`src/lib/components/widgets/*Widget.svelte`): Componente Svelte 5 che consuma il query hook e renderizza stati (Skeleton → Errore → Dati).
