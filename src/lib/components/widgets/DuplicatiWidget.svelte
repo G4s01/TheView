@@ -87,7 +87,7 @@
     }
 </script>
 
-<div class="h-full w-full flex flex-col p-2  overflow-hidden text-card-foreground @container">
+<div bind:clientWidth={rectW} bind:clientHeight={rectH} class="h-full w-full flex flex-col p-2 overflow-hidden text-card-foreground @container">
 	{#if !hideHeader}
 	<div class="flex items-center justify-between pb-2 mb-2 border-b border-border/50 shrink-0">
 		<div class="flex items-center gap-2">

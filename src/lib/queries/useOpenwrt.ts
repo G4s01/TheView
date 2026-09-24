@@ -45,6 +45,5 @@ export function useOpenwrt(serviceId: () => number, enabled = true) {
     },
     enabled,
     refetchInterval: 5000,
-    refetchIntervalInBackground: true,
   }));
 }

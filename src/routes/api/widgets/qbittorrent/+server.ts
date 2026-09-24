@@ -12,345 +12,379 @@ import type { RequestHandler } from "./$types";
 let cookieCache = "";
 
 interface QBittorrentTransferInfo {
-	dl_info_speed?: number;
-	up_info_speed?: number;
-	[key: string]: unknown;
+  dl_info_speed?: number;
+  up_info_speed?: number;
+  [key: string]: unknown;
 }
 
 interface QBittorrentTorrent {
-	hash: string;
-	name: string;
-	progress?: number;
-	dlspeed: number;
-	state: string;
-	eta: number;
-	num_leechs?: number;
-	num_incomplete?: number;
-	num_seeds?: number;
-	num_complete?: number;
-	[key: string]: unknown;
+  hash: string;
+  name: string;
+  progress?: number;
+  dlspeed: number;
+  state: string;
+  eta: number;
+  num_leechs?: number;
+  num_incomplete?: number;
+  num_seeds?: number;
+  num_complete?: number;
+  [key: string]: unknown;
 }
 
 interface QBittorrentActionBody {
-	hash: string;
-	action: "pause" | "resume" | "delete";
+  hash: string;
+  action: "pause" | "resume" | "delete";
 }
 
 export const GET: RequestHandler = async ({ url, locals }) => {
-	const serviceId = url.searchParams.get('id');
-	if (!serviceId) return new Response('Bad Request: missing id', { status: 400 });
-	
-	const serviceIdParsed = parseInt(serviceId, 10);
-	if (isNaN(serviceIdParsed)) return new Response('Bad Request: invalid id', { status: 400 });
+  const serviceId = url.searchParams.get("id");
+  if (!serviceId)
+    return new Response("Bad Request: missing id", { status: 400 });
 
-	const service = await db.select().from(services).where(eq(services.id, serviceIdParsed)).get();
-	if (!service) return new Response('Not Found: service does not exist', { status: 404 });
-	
-	if (service.requireAuth && !locals.isAdmin) {
-		return new Response('Unauthorized', { status: 401 });
-	}
+  const serviceIdParsed = parseInt(serviceId, 10);
+  if (isNaN(serviceIdParsed))
+    return new Response("Bad Request: invalid id", { status: 400 });
 
-	try {
-		const settings = await getSettings();
-		const url = settings.qbit_url;
-		const username = settings.qbit_username;
-		const passwordEnc = settings.qbit_password;
+  const service = await db
+    .select()
+    .from(services)
+    .where(eq(services.id, serviceIdParsed))
+    .get();
+  if (!service)
+    return new Response("Not Found: service does not exist", { status: 404 });
 
-		if (!url || !username || !passwordEnc) {
-			return json(
-				{ error: "Credenziali qBittorrent non configurate" },
-				{ status: 400 },
-			);
-		}
+  const settings = await getSettings();
+  const requireAuth =
+    settings["qbit_require_auth"] === "true" ||
+    settings["qbit_require_auth"] === true;
+  if (requireAuth && !locals.isAdmin) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
-		const password = decryptString(passwordEnc);
-		if (!password) {
-			return json({ error: "Errore decrittografia password" }, { status: 401 });
-		}
+  try {
+    const url = settings.qbit_url;
+    const username = settings.qbit_username;
+    const passwordEnc = settings.qbit_password;
 
-		const agent = new Agent({ connect: { rejectUnauthorized: false } });
-		const rawTargetUrl = rewriteUrlForDocker(url);
-		const targetUrl = rawTargetUrl.endsWith("/")
-			? rawTargetUrl.slice(0, -1)
-			: rawTargetUrl;
+    if (!url || !username || !passwordEnc) {
+      return json(
+        { error: "Credenziali qBittorrent non configurate" },
+        { status: 400 },
+      );
+    }
 
-		const controller = new AbortController();
-		const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const password = decryptString(passwordEnc);
+    if (!password) {
+      return json({ error: "Errore decrittografia password" }, { status: 401 });
+    }
 
-		const reqHeaders = new Headers();
-		if (cookieCache) {
-			reqHeaders.set("Cookie", cookieCache);
-		}
-		reqHeaders.set("Referer", targetUrl);
+    const agent = new Agent({ connect: { rejectUnauthorized: false } });
+    const rawTargetUrl = rewriteUrlForDocker(url);
+    const targetUrl = rawTargetUrl.endsWith("/")
+      ? rawTargetUrl.slice(0, -1)
+      : rawTargetUrl;
 
-		try {
-			let transferRes = await undiciFetch(`${targetUrl}/api/v2/transfer/info`, {
-				headers: reqHeaders,
-				dispatcher: agent,
-				signal: controller.signal as RequestInit["signal"],
-			});
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-			// 403 Forbidden indicates auth is needed
-			if (transferRes.status === 403) {
-				const loginForm = new URLSearchParams();
-				loginForm.append("username", username);
-				loginForm.append("password", password);
+    const reqHeaders = new Headers();
+    if (cookieCache) {
+      reqHeaders.set("Cookie", cookieCache);
+    }
+    reqHeaders.set("Referer", targetUrl);
 
-				const loginRes = await undiciFetch(`${targetUrl}/api/v2/auth/login`, {
-					method: "POST",
-					body: loginForm.toString(),
-					headers: {
-						"Content-Type": "application/x-www-form-urlencoded",
-						Referer: targetUrl,
-					},
-					dispatcher: agent,
-					signal: controller.signal as RequestInit["signal"],
-				});
+    try {
+      let transferRes = await undiciFetch(`${targetUrl}/api/v2/transfer/info`, {
+        headers: reqHeaders,
+        dispatcher: agent,
+        signal: controller.signal as RequestInit["signal"],
+      });
 
-				if (!loginRes.ok) {
-					clearTimeout(timeoutId);
-					return json({ error: "AUTENTICAZIONE FALLITA" }, { status: 401 });
-				}
+      // 403 Forbidden indicates auth is needed
+      if (transferRes.status === 403) {
+        const loginForm = new URLSearchParams();
+        loginForm.append("username", username);
+        loginForm.append("password", password);
 
-				const cookies = loginRes.headers.getSetCookie
-					? loginRes.headers.getSetCookie()
-					: [loginRes.headers.get("set-cookie") || ""];
-				let sidMatch = false;
-				for (const c of cookies) {
-					if (!c) continue;
-					const match = c.match(/SID=([^;]+)/);
-					if (match) {
-						cookieCache = `SID=${match[1]}`;
-						sidMatch = true;
-					}
-				}
+        const loginRes = await undiciFetch(`${targetUrl}/api/v2/auth/login`, {
+          method: "POST",
+          body: loginForm.toString(),
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Referer: targetUrl,
+          },
+          dispatcher: agent,
+          signal: controller.signal as RequestInit["signal"],
+        });
 
-				if (!sidMatch) {
-					clearTimeout(timeoutId);
-					return json({ error: "Cookie SID mancante" }, { status: 401 });
-				}
+        if (!loginRes.ok) {
+          clearTimeout(timeoutId);
+          return json({ error: "AUTENTICAZIONE FALLITA" }, { status: 401 });
+        }
 
-				reqHeaders.set("Cookie", cookieCache);
+        const cookies = loginRes.headers.getSetCookie
+          ? loginRes.headers.getSetCookie()
+          : [loginRes.headers.get("set-cookie") || ""];
+        let sidMatch = false;
+        for (const c of cookies) {
+          if (!c) continue;
+          const match = c.match(/SID=([^;]+)/);
+          if (match) {
+            cookieCache = `SID=${match[1]}`;
+            sidMatch = true;
+          }
+        }
 
-				// Retry transfer info
-				transferRes = await undiciFetch(`${targetUrl}/api/v2/transfer/info`, {
-					headers: reqHeaders,
-					dispatcher: agent,
-					signal: controller.signal as RequestInit["signal"],
-				});
-			}
+        if (!sidMatch) {
+          clearTimeout(timeoutId);
+          return json({ error: "Cookie SID mancante" }, { status: 401 });
+        }
 
-			if (!transferRes.ok) {
-				clearTimeout(timeoutId);
-				return json(
-					{ error: "Errore recupero transfer info" },
-					{ status: transferRes.status },
-				);
-			}
+        reqHeaders.set("Cookie", cookieCache);
 
-			const activeTorrentsRes = await undiciFetch(
-				`${targetUrl}/api/v2/torrents/info?filter=all`,
-				{
-					headers: reqHeaders,
-					dispatcher: agent,
-					signal: controller.signal as RequestInit["signal"],
-				},
-			);
+        // Retry transfer info
+        transferRes = await undiciFetch(`${targetUrl}/api/v2/transfer/info`, {
+          headers: reqHeaders,
+          dispatcher: agent,
+          signal: controller.signal as RequestInit["signal"],
+        });
+      }
 
-			clearTimeout(timeoutId);
+      if (!transferRes.ok) {
+        clearTimeout(timeoutId);
+        return json(
+          { error: "Errore recupero transfer info" },
+          { status: transferRes.status },
+        );
+      }
 
-			if (!activeTorrentsRes.ok) {
-				return json(
-					{ error: "Errore recupero torrents info" },
-					{ status: activeTorrentsRes.status },
-				);
-			}
+      const activeTorrentsRes = await undiciFetch(
+        `${targetUrl}/api/v2/torrents/info?filter=all`,
+        {
+          headers: reqHeaders,
+          dispatcher: agent,
+          signal: controller.signal as RequestInit["signal"],
+        },
+      );
 
-			const transferData = (await transferRes.json()) as QBittorrentTransferInfo;
-			const allTorrentsData = (await activeTorrentsRes.json()) as QBittorrentTorrent[];
+      clearTimeout(timeoutId);
 
-			const active_torrents = Array.isArray(allTorrentsData)
-				? allTorrentsData.filter((t) =>
-						[
-							"downloading",
-							"uploading",
-							"stalledDL",
-							"stalledUP",
-							"metaDL",
-						].includes(t.state),
-					).length
-				: 0;
+      if (!activeTorrentsRes.ok) {
+        return json(
+          { error: "Errore recupero torrents info" },
+          { status: activeTorrentsRes.status },
+        );
+      }
 
-			let sortedTorrents = Array.isArray(allTorrentsData)
-				? [...allTorrentsData]
-				: [];
-			sortedTorrents.sort((a, b) => {
-				const isActiveA = ["downloading", "uploading", "metaDL"].includes(
-					a.state,
-				)
-					? 1
-					: 0;
-				const isActiveB = ["downloading", "uploading", "metaDL"].includes(
-					b.state,
-				)
-					? 1
-					: 0;
-				if (isActiveA !== isActiveB) return isActiveB - isActiveA;
-				return b.dlspeed - a.dlspeed;
-			});
+      const transferData =
+        (await transferRes.json()) as QBittorrentTransferInfo;
+      const allTorrentsData =
+        (await activeTorrentsRes.json()) as QBittorrentTorrent[];
 
-			const torrentsList = sortedTorrents.slice(0, 5).map((t) => ({
-				hash: t.hash,
-				name: t.name,
-				progress: (t.progress || 0) * 100,
-				dlspeed: t.dlspeed,
-				state: t.state,
-				eta: t.eta,
-				connection_status: `peers: ${t.num_leechs || 0}/${t.num_incomplete || 0}, seeds: ${t.num_seeds || 0}/${t.num_complete || 0}`,
-			}));
+      const active_torrents = Array.isArray(allTorrentsData)
+        ? allTorrentsData.filter((t) =>
+            [
+              "downloading",
+              "uploading",
+              "stalledDL",
+              "stalledUP",
+              "metaDL",
+            ].includes(t.state),
+          ).length
+        : 0;
 
-			return json({
-				dl_info_speed: transferData.dl_info_speed || 0,
-				up_info_speed: transferData.up_info_speed || 0,
-				active_torrents,
-				torrents: torrentsList,
-			});
-		} catch (e: unknown) {
-			clearTimeout(timeoutId);
-			throw e;
-		}
-	} catch (e: unknown) {
-		const errorMessage = e instanceof Error ? e.message : 'Errore sconosciuto';
-		console.error("qBittorrent proxy error:", errorMessage);
-		if (e instanceof Error && (e.name === "AbortError" || errorMessage.includes("abort"))) {
-			return json(
-				{ error: "Timeout connessione a qBittorrent" },
-				{ status: 504 },
-			);
-		}
-		return json({ error: "Errore interno proxy", details: errorMessage }, { status: 500 });
-	}
+      let sortedTorrents = Array.isArray(allTorrentsData)
+        ? [...allTorrentsData]
+        : [];
+      sortedTorrents.sort((a, b) => {
+        const isActiveA = ["downloading", "uploading", "metaDL"].includes(
+          a.state,
+        )
+          ? 1
+          : 0;
+        const isActiveB = ["downloading", "uploading", "metaDL"].includes(
+          b.state,
+        )
+          ? 1
+          : 0;
+        if (isActiveA !== isActiveB) return isActiveB - isActiveA;
+        return b.dlspeed - a.dlspeed;
+      });
+
+      const torrentsList = sortedTorrents.slice(0, 5).map((t) => ({
+        hash: t.hash,
+        name: t.name,
+        progress: (t.progress || 0) * 100,
+        dlspeed: t.dlspeed,
+        state: t.state,
+        eta: t.eta,
+        connection_status: `peers: ${t.num_leechs || 0}/${t.num_incomplete || 0}, seeds: ${t.num_seeds || 0}/${t.num_complete || 0}`,
+      }));
+
+      return json({
+        dl_info_speed: transferData.dl_info_speed || 0,
+        up_info_speed: transferData.up_info_speed || 0,
+        active_torrents,
+        torrents: torrentsList,
+      });
+    } catch (e: unknown) {
+      clearTimeout(timeoutId);
+      throw e;
+    }
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : "Errore sconosciuto";
+    console.error("qBittorrent proxy error:", errorMessage);
+    if (
+      e instanceof Error &&
+      (e.name === "AbortError" || errorMessage.includes("abort"))
+    ) {
+      return json(
+        { error: "Timeout connessione a qBittorrent" },
+        { status: 504 },
+      );
+    }
+    return json(
+      { error: "Errore interno proxy", details: errorMessage },
+      { status: 500 },
+    );
+  }
 };
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-	if (!locals.isAdmin) return json({ error: "Non autorizzato" }, { status: 401 });
+  if (!locals.isAdmin)
+    return json({ error: "Non autorizzato" }, { status: 401 });
 
-	try {
-		const settings = await getSettings();
-		const url = settings.qbit_url;
-		if (!url)
-			return json({ error: "qBittorrent non configurato" }, { status: 400 });
+  try {
+    const settings = await getSettings();
+    const url = settings.qbit_url;
+    if (!url)
+      return json({ error: "qBittorrent non configurato" }, { status: 400 });
 
-		const agent = new Agent({ connect: { rejectUnauthorized: false } });
-		const rawTargetUrl = rewriteUrlForDocker(url);
-		const targetUrl = rawTargetUrl.endsWith("/")
-			? rawTargetUrl.slice(0, -1)
-			: rawTargetUrl;
+    const agent = new Agent({ connect: { rejectUnauthorized: false } });
+    const rawTargetUrl = rewriteUrlForDocker(url);
+    const targetUrl = rawTargetUrl.endsWith("/")
+      ? rawTargetUrl.slice(0, -1)
+      : rawTargetUrl;
 
-		const headersObj: Record<string, string> = {
-			Referer: targetUrl,
-		};
-		if (cookieCache) {
-			headersObj["Cookie"] = cookieCache;
-		}
+    const headersObj: Record<string, string> = {
+      Referer: targetUrl,
+    };
+    if (cookieCache) {
+      headersObj["Cookie"] = cookieCache;
+    }
 
-		const contentType = request.headers.get("content-type") || "";
+    const contentType = request.headers.get("content-type") || "";
 
-		if (contentType.includes("multipart/form-data")) {
-			headersObj["Content-Type"] = contentType; // Forward the boundary!
+    if (contentType.includes("multipart/form-data")) {
+      headersObj["Content-Type"] = contentType; // Forward the boundary!
 
-			if (!request.body) {
-				return json({ error: "Payload form-data vuoto" }, { status: 400 });
-			}
+      if (!request.body) {
+        return json({ error: "Payload form-data vuoto" }, { status: 400 });
+      }
 
-			const res = await undiciFetch(`${targetUrl}/api/v2/torrents/add`, {
-				method: "POST",
-				headers: headersObj,
-				body: request.body as unknown as AsyncIterable<Uint8Array>,
-				dispatcher: agent,
-				duplex: "half",
-			});
+      const res = await undiciFetch(`${targetUrl}/api/v2/torrents/add`, {
+        method: "POST",
+        headers: headersObj,
+        body: request.body as unknown as AsyncIterable<Uint8Array>,
+        dispatcher: agent,
+        duplex: "half",
+      });
 
-			if (!res.ok) {
-				const errorText = await res.text().catch(() => 'unknown error');
-				console.log(`Add failed: ${errorText}`);
-				return json(
-					{ error: "Aggiunta torrent fallita", details: errorText },
-					{ status: res.status },
-				);
-			}
-			return json({ success: true });
-		} else {
-			const jsonBody = await request.json().catch(() => null);
-			if (!jsonBody) {
-				return json({ error: "Payload JSON mancante o non valido" }, { status: 400 });
-			}
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => "unknown error");
+        console.log(`Add failed: ${errorText}`);
+        return json(
+          { error: "Aggiunta torrent fallita", details: errorText },
+          { status: res.status },
+        );
+      }
+      return json({ success: true });
+    } else {
+      const jsonBody = await request.json().catch(() => null);
+      if (!jsonBody) {
+        return json(
+          { error: "Payload JSON mancante o non valido" },
+          { status: 400 },
+        );
+      }
 
-			const { hash, action, url: magnetUrl } = jsonBody as any;
+      const { hash, action, url: magnetUrl } = jsonBody as any;
 
-			if (action === "add_url") {
-				if (!magnetUrl) return json({ error: "URL mancante" }, { status: 400 });
-				const form = new URLSearchParams();
-				form.append("urls", magnetUrl);
-				const res = await undiciFetch(`${targetUrl}/api/v2/torrents/add`, {
-					method: "POST",
-					headers: {
-						Referer: targetUrl,
-						"Content-Type": "application/x-www-form-urlencoded",
-						...(cookieCache ? { Cookie: cookieCache } : {})
-					},
-					body: form.toString(),
-					dispatcher: agent
-				});
-				if (!res.ok) {
-					const err = await res.text().catch(() => 'err');
-					return json({ error: "Add URL fallito", details: err }, { status: res.status });
-				}
-				return json({ success: true });
-			}
+      if (action === "add_url") {
+        if (!magnetUrl) return json({ error: "URL mancante" }, { status: 400 });
+        const form = new URLSearchParams();
+        form.append("urls", magnetUrl);
+        const res = await undiciFetch(`${targetUrl}/api/v2/torrents/add`, {
+          method: "POST",
+          headers: {
+            Referer: targetUrl,
+            "Content-Type": "application/x-www-form-urlencoded",
+            ...(cookieCache ? { Cookie: cookieCache } : {}),
+          },
+          body: form.toString(),
+          dispatcher: agent,
+        });
+        if (!res.ok) {
+          const err = await res.text().catch(() => "err");
+          return json(
+            { error: "Add URL fallito", details: err },
+            { status: res.status },
+          );
+        }
+        return json({ success: true });
+      }
 
-			if (!hash || !["pause", "resume", "delete"].includes(action)) {
-				return json({ error: "Parametri non validi" }, { status: 400 });
-			}
+      if (!hash || !["pause", "resume", "delete"].includes(action)) {
+        return json({ error: "Parametri non validi" }, { status: 400 });
+      }
 
-			const actionMap: Record<string, string> = {
-				pause: "stop",
-				resume: "start",
-				delete: "delete",
-			};
-			const mappedAction = actionMap[action];
+      const actionMap: Record<string, string> = {
+        pause: "stop",
+        resume: "start",
+        delete: "delete",
+      };
+      const mappedAction = actionMap[action];
 
-			const form = new URLSearchParams();
-			form.append("hashes", hash);
-			if (mappedAction === "delete") {
-				form.append("deleteFiles", "false");
-			}
+      const form = new URLSearchParams();
+      form.append("hashes", hash);
+      if (mappedAction === "delete") {
+        form.append("deleteFiles", "false");
+      }
 
-			headersObj["Content-Type"] = "application/x-www-form-urlencoded";
+      headersObj["Content-Type"] = "application/x-www-form-urlencoded";
 
-			const res = await undiciFetch(
-				`${targetUrl}/api/v2/torrents/${mappedAction}`,
-				{
-					method: "POST",
-					headers: headersObj,
-					body: form.toString(),
-					dispatcher: agent,
-				},
-			);
+      const res = await undiciFetch(
+        `${targetUrl}/api/v2/torrents/${mappedAction}`,
+        {
+          method: "POST",
+          headers: headersObj,
+          body: form.toString(),
+          dispatcher: agent,
+        },
+      );
 
-			if (!res.ok) {
-				const errorText = await res.text().catch(() => 'unknown error');
-				console.log(
-					`qBittorrent action ${action} failed. Status: ${res.status}. Body: ${errorText}`,
-				);
-				return json({ error: `Azione ${action} fallita`, details: errorText }, { status: res.status });
-			}
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => "unknown error");
+        console.log(
+          `qBittorrent action ${action} failed. Status: ${res.status}. Body: ${errorText}`,
+        );
+        return json(
+          { error: `Azione ${action} fallita`, details: errorText },
+          { status: res.status },
+        );
+      }
 
-			return json({ success: true });
-		}
-	} catch (e: unknown) {
-		const errorMessage = e instanceof Error ? e.message : 'Errore sconosciuto';
-		console.error("qBittorrent action error:", errorMessage);
-		return json({ error: "Errore interno durante l'azione qBittorrent", details: errorMessage }, { status: 500 });
-	}
+      return json({ success: true });
+    }
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : "Errore sconosciuto";
+    console.error("qBittorrent action error:", errorMessage);
+    return json(
+      {
+        error: "Errore interno durante l'azione qBittorrent",
+        details: errorMessage,
+      },
+      { status: 500 },
+    );
+  }
 };

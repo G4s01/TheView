@@ -29,7 +29,7 @@
 	let cols = $derived((rectW ? rectW >= 450 : nodeW >= 4) || isWide ? 'grid-cols-2' : 'grid-cols-1');
 </script>
 
-<div class="h-full w-full flex flex-col p-4">
+<div bind:clientWidth={rectW} bind:clientHeight={rectH} class="h-full w-full flex flex-col p-4">
 	{#if !hideHeader}
 	<div class="flex items-center justify-between mb-4">
 		<div class="flex items-center gap-2">

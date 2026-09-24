@@ -55,7 +55,7 @@
 {#if showImage}
     <img 
         src={iconUrl} 
-        alt={name} 
+        alt={name} loading="lazy" decoding="async" 
         class={cn(sizeClass, 'object-contain', imageRadiusClass, className)} 
         onerror={() => { imageError = true; }}
     />

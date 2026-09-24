@@ -34,7 +34,7 @@
 		iconStyle?: string;
 	}>();
 	
-	const pingQuery = usePing(() => service.url, () => service.pingEnabled);
+	const pingQuery = usePing(() => service.id, () => service.pingEnabled);
 	let liveStatus = $derived(pingQuery.data ? { isOnline: pingQuery.data.status === 'online', latencyMs: pingQuery.data.responseTimeMs } : null);
 	
 	let dockerVersionInfo = $state<{ version: string; updateAvailable: boolean; updateUrl?: string } | null>(null);

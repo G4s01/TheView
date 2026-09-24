@@ -1,22 +1,22 @@
 import { createQuery } from "@tanstack/svelte-query";
 
 export function usePing(
-  url: () => string,
+  id: () => number,
   enabled: () => boolean = () => true,
 ) {
   return createQuery(() => ({
-    queryKey: ["ping", url()],
+    queryKey: ["ping", id()],
     queryFn: async () => {
-      const currentUrl = url();
+      const currentId = id();
       const res = await fetch(
-        `/api/services/ping?url=${encodeURIComponent(currentUrl)}`,
+        `/api/services/ping?id=${currentId}`,
       );
       if (!res.ok) {
         throw new Error("Network response was not ok");
       }
       return res.json();
     },
-    enabled: enabled() && !!url(),
+    enabled: enabled() && !!id(),
     refetchInterval: 30000,
     staleTime: 10000,
   }));

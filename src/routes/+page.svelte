@@ -238,6 +238,19 @@
 			});
 
 			grid!.on('removed', (event: Event, items: any[]) => {
+				if (items) {
+					items.forEach((n: any) => {
+						if (n.id) {
+							const idNum = parseInt(n.id.toString());
+							const instance = mountedWidgets.get(idNum);
+							if (instance) {
+								unmount(instance);
+								mountedWidgets.delete(idNum);
+								mountedServices.delete(idNum);
+							}
+						}
+					});
+				}
 				if (appState.isEditMode) saveGridState();
 			});
 
@@ -289,7 +302,18 @@
 					existingNodes.forEach(nodeId => {
 						if (!newServices.find(s => s.id.toString() === nodeId)) {
 							const el = grid!.engine.nodes.find(n => n.id?.toString() === nodeId)?.el;
-							if (el) grid!.removeWidget(el, true);
+							if (el) {
+								if (nodeId) {
+									const idNum = parseInt(nodeId);
+									const instance = mountedWidgets.get(idNum);
+									if (instance) {
+										unmount(instance);
+										mountedWidgets.delete(idNum);
+										mountedServices.delete(idNum);
+									}
+								}
+								grid!.removeWidget(el, true);
+							}
 						}
 					});
 

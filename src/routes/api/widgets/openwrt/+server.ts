@@ -16,29 +16,31 @@ const agent = new Agent({
 });
 
 export const GET: RequestHandler = async ({ locals, url }) => {
-	const serviceId = url.searchParams.get('id');
-	if (!serviceId) return new Response('Bad Request: missing id', { status: 400 });
-	
-	const serviceIdParsed = parseInt(serviceId, 10);
-	if (isNaN(serviceIdParsed)) return new Response('Bad Request: invalid id', { status: 400 });
+  const serviceId = url.searchParams.get("id");
+  if (!serviceId)
+    return new Response("Bad Request: missing id", { status: 400 });
 
-	const service = await db.select().from(services).where(eq(services.id, serviceIdParsed)).get();
-	if (!service) return new Response('Not Found: service does not exist', { status: 404 });
-	
-	if (service.requireAuth && !locals.isAdmin) {
-		return new Response('Unauthorized', { status: 401 });
-	}
+  const serviceIdParsed = parseInt(serviceId, 10);
+  if (isNaN(serviceIdParsed))
+    return new Response("Bad Request: invalid id", { status: 400 });
+
+  const service = await db
+    .select()
+    .from(services)
+    .where(eq(services.id, serviceIdParsed))
+    .get();
+  if (!service)
+    return new Response("Not Found: service does not exist", { status: 404 });
+
+  const settings = await getSettings();
+  const requireAuth =
+    settings["openwrt_require_auth"] === "true" ||
+    settings["openwrt_require_auth"] === true;
+  if (requireAuth && !locals.isAdmin) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
   try {
-    const settings = await getSettings();
-    if (
-      (settings.openwrt_require_auth === "true" ||
-        settings.openwrt_require_auth === true) &&
-      !locals.isAdmin
-    ) {
-      return json({ error: "Non autorizzato" }, { status: 401 });
-    }
-
     const url = settings.openwrt_url as string;
     const username = settings.openwrt_username as string;
     const encryptedPassword = settings.openwrt_password as string;
