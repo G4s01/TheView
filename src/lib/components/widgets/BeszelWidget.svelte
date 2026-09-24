@@ -13,10 +13,8 @@
 		return `${m}m`;
 	}
 
-	let { size = 'gs-2x2', hideHeader = false } = $props<{
-		size?: string;
-		hideHeader?: boolean;
-	}>();
+	let { service, size = 'gs-2x2', hideHeader = false } = $props<{ service: any; size?: string;
+		hideHeader?: boolean; }>();
 
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
@@ -24,7 +22,7 @@
 	let rectH = $state(0);
 	let isWide = $derived(rectW && rectH ? rectW > rectH * 1.1 : nodeW > nodeH);
 
-	let query = useBeszel();
+	let query = useBeszel(() => service.id);
 	let items = $derived(query.data?.items || []);
 
 	// Layout responsive basato sulle dimensioni reali di Gridstack
@@ -72,7 +70,7 @@
 		{:else}
 			<div class="grid {cols} gap-3 pb-1">
 				{#each items as node}
-					<BeszelNode {node} />
+					<BeszelNode service={service} {node} />
 				{/each}
 			</div>
 		{/if}

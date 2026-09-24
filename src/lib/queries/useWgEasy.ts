@@ -1,10 +1,10 @@
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
 
-export function useWgEasy() {
+export function useWgEasy(serviceId: () => number) {
 	return createQuery(() => ({
-		queryKey: ['wgeasy'],
+		queryKey: ["wgeasy", serviceId()],
 		queryFn: async () => {
-			const res = await fetch('/api/widgets/wg-easy');
+			const res = await fetch(`/api/widgets/wg-easy?id=${serviceId()}`);
 			if (!res.ok) {
 				const errorData = await res.json().catch(() => ({}));
 				throw new Error(errorData.error || 'Errore recupero Wg-easy');

@@ -4,11 +4,11 @@ import {
   useQueryClient,
 } from "@tanstack/svelte-query";
 
-export function useDocker() {
+export function useDocker(serviceId: () => number) {
   return createQuery(() => ({
-    queryKey: ["docker_stats"],
+    queryKey: ["docker_stats", serviceId()],
     queryFn: async () => {
-      const res = await fetch("/api/widgets/docker");
+      const res = await fetch(`/api/widgets/docker?id=${serviceId()}`);
       if (!res.ok) {
         let msg = "Errore di connessione";
         try {

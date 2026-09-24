@@ -2,7 +2,7 @@
 	import { Cpu, HardDrive, MemoryStick, Clock, ChevronDown, ChevronUp, Box, ArrowDown, ArrowUp } from '@lucide/svelte';
 	import { useBeszelContainers } from '$lib/queries/useBeszel';
 
-	let { node } = $props<{ node: any }>();
+	let { service, node } = $props<{ service: any; node: any }>();
 	let info = $derived(node.info || {});
 	
 	let expanded = $state(false);

@@ -1,10 +1,10 @@
 import { createQuery } from '@tanstack/svelte-query';
 
-export function useBeszel() {
+export function useBeszel(serviceId: () => number) {
 	return createQuery(() => ({
-		queryKey: ['beszel'],
+		queryKey: ["beszel", serviceId()],
 		queryFn: async () => {
-			const res = await fetch('/api/widgets/beszel');
+			const res = await fetch(`/api/widgets/beszel?id=${serviceId()}`);
 			if (!res.ok) {
 				const errorData = await res.json().catch(() => ({}));
 				throw new Error(errorData.error || 'Errore nel recupero dei dati Beszel');

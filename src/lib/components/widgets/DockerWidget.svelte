@@ -4,7 +4,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { appState } from "$lib/client/state.svelte";
 
-	let { size = "gs-2x2", hideHeader = false } = $props<{ size?: string, hideHeader?: boolean }>();
+	let { service, size = "gs-2x2", hideHeader = false } = $props<{ service: any; size?: string, hideHeader?: boolean }>();
 
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
@@ -12,7 +12,7 @@
 	let rectH = $state(0);
 	let isWide = $derived(rectW && rectH ? rectW > rectH * 1.1 : nodeW > nodeH);
 
-	let query = useDocker();
+	let query = useDocker(() => service.id);
 	let actions = useDockerActions();
 
 	let stats = $derived(query.data?.stats || { total: 0, running: 0, stopped: 0, paused: 0 });

@@ -4,14 +4,14 @@
 	import { Button } from "$lib/components/ui/button";
 	import { Progress } from "$lib/components/ui/progress";
 	
-	let { size = 'gs-2x2', hideHeader = false } = $props<{ size?: string, hideHeader?: boolean }>();
+	let { service, size = 'gs-2x2', hideHeader = false } = $props<{ service: any; size?: string, hideHeader?: boolean }>();
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
 	let rectW = $state(0);
 	let rectH = $state(0);
 	let isWide = $derived(rectW && rectH ? rectW > rectH * 1.1 : nodeW > nodeH);
 	
-	let query = useDuplicati();
+	let query = useDuplicati(() => service.id);
 	let actions = useDuplicatiActions();
 
 	let serverState = $derived(query.data?.serverState || {});

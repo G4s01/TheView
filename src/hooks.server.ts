@@ -9,7 +9,14 @@ import { env } from "$env/dynamic/private";
 setDefaultResultOrder("ipv4first");
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const sessionToken = event.cookies.get("admin_session");
+  const isSecure = env.SECURE_COOKIE === "true";
+  const cookieName = isSecure ? "__Host-admin_session" : "admin_session";
+  let sessionToken = event.cookies.get(cookieName);
+
+  if (!sessionToken && isSecure) {
+    // Fallback during transition if the user already had the non-host cookie
+    sessionToken = event.cookies.get("admin_session");
+  }
 
   if (!sessionToken) {
     event.locals.isAdmin = false;
@@ -19,25 +26,26 @@ export const handle: Handle = async ({ event, resolve }) => {
     if (sessionToken === "active") {
       event.locals.isAdmin = false;
       event.locals.session = null;
-      event.cookies.delete("admin_session", { path: "/" });
+      event.cookies.delete(cookieName, { path: "/" });
+      if (isSecure) event.cookies.delete("admin_session", { path: "/" });
     } else {
       const { session } = await validateSession(sessionToken);
       if (session) {
         event.locals.isAdmin = true;
         event.locals.session = session;
         // Estensione del cookie sul client in caso di sessione estesa
-        const isSecure = env.SECURE_COOKIE === "true";
-        event.cookies.set("admin_session", sessionToken, {
+        event.cookies.set(cookieName, sessionToken, {
           path: "/",
           httpOnly: true,
-          sameSite: "lax",
+          sameSite: "strict",
           secure: isSecure,
           expires: session.expiresAt,
         });
       } else {
         event.locals.isAdmin = false;
         event.locals.session = null;
-        event.cookies.delete("admin_session", { path: "/" });
+        event.cookies.delete(cookieName, { path: "/" });
+        if (isSecure) event.cookies.delete("admin_session", { path: "/" });
       }
     }
   }

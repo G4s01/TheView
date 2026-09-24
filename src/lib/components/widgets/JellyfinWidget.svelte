@@ -3,7 +3,7 @@
 	import { Film, Tv, Music, Users, AlertCircle } from '@lucide/svelte';
 	import { Progress } from "$lib/components/ui/progress";
 
-	let { size = 'gs-2x2' } = $props<{ size?: string }>();
+	let { service, size = 'gs-2x2' } = $props<{ service: any; size?: string }>();
 
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
@@ -12,7 +12,7 @@
 	let isWide = $derived(rectW && rectH ? rectW > rectH * 1.1 : nodeW > nodeH);
 	let isTall = $derived(rectW && rectH ? rectH > rectW * 1.1 : nodeH > nodeW);
 
-	const query = useJellyfin();
+	const query = useJellyfin(() => service.id);
 
 	let data = $derived(query.data || {});
 	let nowPlaying = $derived(data.nowPlaying);

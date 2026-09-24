@@ -32,11 +32,11 @@ export interface OpenwrtData {
   }[];
 }
 
-export function useOpenwrt(enabled = true) {
+export function useOpenwrt(serviceId: () => number, enabled = true) {
   return createQuery(() => ({
-    queryKey: ["openwrt"],
+    queryKey: ["openwrt", serviceId()],
     queryFn: async (): Promise<OpenwrtData> => {
-      const response = await fetch("/api/widgets/openwrt");
+      const response = await fetch(`/api/widgets/openwrt?id=${serviceId()}`);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `Errore HTTP ${response.status}`);

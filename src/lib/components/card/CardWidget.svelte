@@ -66,51 +66,51 @@
 		{#if showWidget}
 			{#if service.widgetType === 'qbittorrent'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<QBittorrentWidget size={currentSize} />
+					<QBittorrentWidget service={service} size={currentSize} />
 				</div>
 			{:else if service.widgetType === 'adguard'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<AdGuardWidget size={currentSize} />
+					<AdGuardWidget service={service} size={currentSize} />
 				</div>
 			{:else if service.widgetType === 'beszel'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<BeszelWidget size={currentSize} />
+					<BeszelWidget service={service} size={currentSize} />
 				</div>
 			{:else if service.widgetType === 'wgeasy'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<WgEasyWidget size={currentSize} />
+					<WgEasyWidget service={service} size={currentSize} />
 				</div>
 			{:else if service.widgetType === 'duplicati'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<DuplicatiWidget size={currentSize} />
+					<DuplicatiWidget service={service} size={currentSize} />
 				</div>
 			{:else if service.widgetType === 'docker'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<DockerWidget size={currentSize} />
+					<DockerWidget service={service} size={currentSize} />
 				</div>
 			{:else if service.widgetType === 'dockhand'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<DockhandWidget size={currentSize} />
+					<DockhandWidget service={service} size={currentSize} />
 				</div>
 			{:else if service.widgetType === 'filebrowser'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<FilebrowserWidget size={currentSize} />
+					<FilebrowserWidget service={service} size={currentSize} />
 				</div>
 			{:else if service.widgetType === 'clock'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<ClockWidget />
+					<ClockWidget service={service} />
 				</div>
 			{:else if service.widgetType === 'weather'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<WeatherWidget nodeW={nodeW} nodeH={nodeH} />
+					<WeatherWidget service={service} nodeW={nodeW} nodeH={nodeH} />
 				</div>
 			{:else if service.widgetType === 'jellyfin'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<JellyfinWidget size={currentSize} />
+					<JellyfinWidget service={service} size={currentSize} />
 				</div>
 			{:else if service.widgetType === 'openwrt'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<OpenwrtWidget />
+					<OpenwrtWidget service={service} />
 				</div>
 			{/if}
 		{:else}
@@ -138,51 +138,51 @@
 	<div class="bg-card border border-border p-4 rounded-xl {isWide ? 'rounded-l-none' : 'rounded-t-none'} shadow-sm hover:shadow-md transition-all duration-500 flex flex-col h-full w-full overflow-hidden col-span-1 row-span-1 {appState.isEditMode ? 'pointer-events-none' : ''}">
 		{#if service.widgetType === 'qbittorrent'}
 			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-				<QBittorrentWidget size={currentSize} />
+				<QBittorrentWidget service={service} size={currentSize} />
 			</div>
 		{:else if service.widgetType === 'adguard'}
 			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-				<AdGuardWidget size={currentSize} />
+				<AdGuardWidget service={service} size={currentSize} />
 			</div>
 		{:else if service.widgetType === 'beszel'}
 			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-				<BeszelWidget size={currentSize} />
+				<BeszelWidget service={service} size={currentSize} />
 			</div>
 		{:else if service.widgetType === 'wgeasy'}
 			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-				<WgEasyWidget size={currentSize} />
+				<WgEasyWidget service={service} size={currentSize} />
 			</div>
 		{:else if service.widgetType === 'duplicati'}
 			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-				<DuplicatiWidget size={currentSize} />
+				<DuplicatiWidget service={service} size={currentSize} />
 			</div>
 		{:else if service.widgetType === 'docker'}
 			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-				<DockerWidget size={currentSize} />
+				<DockerWidget service={service} size={currentSize} />
 			</div>
 		{:else if service.widgetType === 'dockhand'}
 			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-				<DockhandWidget size={currentSize} />
+				<DockhandWidget service={service} size={currentSize} />
 			</div>
 		{:else if service.widgetType === 'filebrowser'}
 			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-				<FilebrowserWidget size={currentSize} />
+				<FilebrowserWidget service={service} size={currentSize} />
 			</div>
 		{:else if service.widgetType === 'clock'}
 			<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-				<ClockWidget />
+				<ClockWidget service={service} />
 			</div>
 		{:else if service.widgetType === 'weather'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<WeatherWidget nodeW={nodeW} nodeH={nodeH} />
+					<WeatherWidget service={service} nodeW={nodeW} nodeH={nodeH} />
 				</div>
 			{:else if service.widgetType === 'jellyfin'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<JellyfinWidget size={currentSize} />
+					<JellyfinWidget service={service} size={currentSize} />
 				</div>
 			{:else if service.widgetType === 'openwrt'}
 				<div class="w-full h-full flex flex-col min-h-0" role="presentation" onkeydown={(e) => e.stopPropagation()}>
-					<OpenwrtWidget />
+					<OpenwrtWidget service={service} />
 				</div>
 		{/if}
 	</div>
@@ -190,51 +190,51 @@
 	<CardLink {service} {status} {latencyMs} {iconStyle} {currentSize} {showDescriptionDesktop} {showDescriptionMobile} {dockerVersionInfo} {iconBgColor} centerText={true} hidePing={service.widgetType === 'dockhand' || service.widgetType === 'docker'}>
 		{#if service.widgetType === 'qbittorrent'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<QBittorrentWidget size={currentSize} />
+				<QBittorrentWidget service={service} size={currentSize} />
 			</div>
 		{:else if service.widgetType === 'adguard'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<AdGuardWidget size={currentSize} />
+				<AdGuardWidget service={service} size={currentSize} />
 			</div>
 		{:else if service.widgetType === 'beszel'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<BeszelWidget size={currentSize} hideHeader={true} />
+				<BeszelWidget service={service} size={currentSize} hideHeader={true} />
 			</div>
 		{:else if service.widgetType === 'wgeasy'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<WgEasyWidget size={currentSize} hideHeader={true} />
+				<WgEasyWidget service={service} size={currentSize} hideHeader={true} />
 			</div>
 		{:else if service.widgetType === 'duplicati'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<DuplicatiWidget size={currentSize} hideHeader={true} />
+				<DuplicatiWidget service={service} size={currentSize} hideHeader={true} />
 			</div>
 		{:else if service.widgetType === 'docker'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<DockerWidget size={currentSize} hideHeader={true} />
+				<DockerWidget service={service} size={currentSize} hideHeader={true} />
 			</div>
 		{:else if service.widgetType === 'dockhand'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<DockhandWidget size={currentSize} hideHeader={true} />
+				<DockhandWidget service={service} size={currentSize} hideHeader={true} />
 			</div>
 		{:else if service.widgetType === 'filebrowser'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<FilebrowserWidget size={currentSize} />
+				<FilebrowserWidget service={service} size={currentSize} />
 			</div>
 		{:else if service.widgetType === 'clock'}
 			<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-				<ClockWidget />
+				<ClockWidget service={service} />
 			</div>
 		{:else if service.widgetType === 'weather'}
 				<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-					<WeatherWidget nodeW={nodeW} nodeH={nodeH} />
+					<WeatherWidget service={service} nodeW={nodeW} nodeH={nodeH} />
 				</div>
 			{:else if service.widgetType === 'jellyfin'}
 				<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-					<JellyfinWidget size={currentSize} />
+					<JellyfinWidget service={service} size={currentSize} />
 				</div>
 			{:else if service.widgetType === 'openwrt'}
 				<div class="mt-3 pt-3 border-t border-border w-full text-left flex-1 min-h-0 flex flex-col" role="presentation" onclick={(e) => e.preventDefault()} onkeydown={(e) => e.stopPropagation()}>
-					<OpenwrtWidget hideHeader={true} />
+					<OpenwrtWidget service={service} hideHeader={true} />
 				</div>
 		{/if}
 	</CardLink>

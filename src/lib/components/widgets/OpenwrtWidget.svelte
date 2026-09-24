@@ -2,16 +2,14 @@
 	import { useOpenwrt } from '$lib/queries/useOpenwrt';
 	import { Router, Activity, ArrowDown, ArrowUp } from '@lucide/svelte';
 
-	let { hideHeader = false } = $props<{
-		hideHeader?: boolean;
-	}>();
+	let { service, hideHeader = false } = $props<{ service: any; hideHeader?: boolean; }>();
 
 	let rectW = $state(0);
 	let rectH = $state(0);
 	let isWide = $derived(rectW > rectH * 1.2);
 	let cols = $derived(rectW >= 400 || isWide ? 'grid-cols-2' : 'grid-cols-1');
 
-	let query = useOpenwrt();
+	let query = useOpenwrt(() => service.id);
 	let data = $derived(query.data);
 	let interfaces = $derived(data?.interfaces || []);
 	let devices = $derived(data?.devices || []);

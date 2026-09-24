@@ -8,42 +8,23 @@ export const GET: RequestHandler = async ({ locals }) => {
 
   // Rimuovi o maschera i dati sensibili prima di inviarli al client
   const safeSettings = { ...settings };
-  // Decrypt passwords for the admin client
-  const { decryptString } = await import("$lib/server/crypto");
+  // Maschera le password per il client admin
   if (safeSettings.adminPassword) delete safeSettings.adminPassword; // Never send admin hash
   if (safeSettings.totp_secret) delete safeSettings.totp_secret; // Never send TOTP secret to frontend
-  if (safeSettings.npmPassword)
-    safeSettings.npmPassword = decryptString(safeSettings.npmPassword);
-  if (safeSettings.qbit_password)
-    safeSettings.qbit_password = decryptString(safeSettings.qbit_password);
-  if (safeSettings.adguard_password)
-    safeSettings.adguard_password = decryptString(
-      safeSettings.adguard_password,
-    );
-  if (safeSettings.beszel_password)
-    safeSettings.beszel_password = decryptString(safeSettings.beszel_password);
-  if (safeSettings.wgeasy_password)
-    safeSettings.wgeasy_password = decryptString(safeSettings.wgeasy_password);
+
+  if (safeSettings.npmPassword) safeSettings.npmPassword = "********";
+  if (safeSettings.qbit_password) safeSettings.qbit_password = "********";
+  if (safeSettings.adguard_password) safeSettings.adguard_password = "********";
+  if (safeSettings.beszel_password) safeSettings.beszel_password = "********";
+  if (safeSettings.wgeasy_password) safeSettings.wgeasy_password = "********";
   if (safeSettings.duplicati_password)
-    safeSettings.duplicati_password = decryptString(
-      safeSettings.duplicati_password,
-    );
+    safeSettings.duplicati_password = "********";
   if (safeSettings.dockhand_password)
-    safeSettings.dockhand_password = decryptString(
-      safeSettings.dockhand_password,
-    );
-  if (safeSettings.jellyfin_api_key)
-    safeSettings.jellyfin_api_key = decryptString(
-      safeSettings.jellyfin_api_key,
-    );
+    safeSettings.dockhand_password = "********";
+  if (safeSettings.jellyfin_api_key) safeSettings.jellyfin_api_key = "********";
   if (safeSettings.filebrowser_password)
-    safeSettings.filebrowser_password = decryptString(
-      safeSettings.filebrowser_password,
-    );
-  if (safeSettings.openwrt_password)
-    safeSettings.openwrt_password = decryptString(
-      safeSettings.openwrt_password,
-    );
+    safeSettings.filebrowser_password = "********";
+  if (safeSettings.openwrt_password) safeSettings.openwrt_password = "********";
 
   return json(safeSettings);
 };

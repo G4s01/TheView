@@ -63,11 +63,12 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
       const token = generateSessionToken();
       const session = await createSession(token);
       const isSecure = env.SECURE_COOKIE === "true";
+      const cookieName = isSecure ? "__Host-admin_session" : "admin_session";
 
-      cookies.set("admin_session", token, {
+      cookies.set(cookieName, token, {
         path: "/",
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "strict",
         secure: isSecure,
         expires: session.expiresAt,
       });

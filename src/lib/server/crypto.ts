@@ -5,11 +5,16 @@ import { env } from "$env/dynamic/private";
 
 // HASHING for admin password (one-way)
 export function hashPassword(password: string): string {
-  return crypto.createHash("sha256").update(password).digest("hex");
+  const salt = crypto.randomBytes(16).toString("hex");
+  const derivedKey = crypto.scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${derivedKey}`;
 }
 
 export function verifyPassword(password: string, hash: string): boolean {
-  return hashPassword(password) === hash;
+  if (!hash.includes(":")) return false; // Non è un hash scrypt valido
+  const [salt, key] = hash.split(":");
+  const derivedKey = crypto.scryptSync(password, salt, 64).toString("hex");
+  return key === derivedKey;
 }
 
 // ENCRYPTION for third-party passwords (two-way)
@@ -77,10 +82,10 @@ export function encryptString(text: string): string {
 }
 
 export function decryptString(encryptedText: string): string {
-  if (!encryptedText || !encryptedText.includes(":")) return encryptedText; // Probabilmente è in chiaro
+  if (!encryptedText || !encryptedText.includes(":")) return ""; // Impedisce il ritorno di testo in chiaro in caso di fallimento
   try {
     const parts = encryptedText.split(":");
-    if (parts.length !== 3) return encryptedText;
+    if (parts.length !== 3) return "";
 
     const [ivHex, authTagHex, encryptedHex] = parts;
     const key = getSecretKey();

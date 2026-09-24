@@ -4,9 +4,9 @@
     import { Button } from "$lib/components/ui/button";
     import { appState } from '$lib/client/state.svelte';
 
-	let { size = '1x1', hideHeader = false } = $props<{ size?: string, hideHeader?: boolean }>();
+	let { service, size = '1x1', hideHeader = false } = $props<{ service: any; size?: string, hideHeader?: boolean }>();
 
-	let query = useDockhand();
+	let query = useDockhand(() => service.id);
     let actions = useDockhandActions();
 	let containers = $derived.by(() => {
         const data = Array.isArray(query.data) ? query.data : [];

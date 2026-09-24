@@ -4,11 +4,11 @@ import {
   useQueryClient,
 } from "@tanstack/svelte-query";
 
-export function useDuplicati() {
+export function useDuplicati(serviceId: () => number) {
   return createQuery(() => ({
-    queryKey: ["duplicati_status"],
+    queryKey: ["duplicati_status", serviceId()],
     queryFn: async () => {
-      const res = await fetch("/api/widgets/duplicati");
+      const res = await fetch(`/api/widgets/duplicati?id=${serviceId()}`);
       if (!res.ok) {
         let msg = "Errore di connessione";
         try {

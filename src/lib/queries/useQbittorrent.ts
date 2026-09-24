@@ -4,11 +4,11 @@ import {
   useQueryClient,
 } from "@tanstack/svelte-query";
 
-export function useQbittorrent(enabled: () => boolean = () => true) {
+export function useQbittorrent(serviceId: () => number, enabled: () => boolean = () => true) {
   return createQuery(() => ({
-    queryKey: ["qbittorrent"],
+    queryKey: ["qbittorrent", serviceId()],
     queryFn: async () => {
-      const res = await fetch("/api/widgets/qbittorrent");
+      const res = await fetch(`/api/widgets/qbittorrent?id=${serviceId()}`);
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error || "Failed to fetch qBittorrent data");

@@ -1,4 +1,5 @@
 <script lang="ts">
+	let { service } = $props<any>();
   import { onMount } from 'svelte';
   import { appState } from '$lib/client/state.svelte';
 

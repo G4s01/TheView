@@ -4,7 +4,7 @@
 	import { Skeleton } from "$lib/components/ui/skeleton";
 	import { Progress } from "$lib/components/ui/progress";
 	
-	let { size = 'gs-2x2' } = $props<{ size?: string }>();
+	let { service, size = 'gs-2x2' } = $props<{ service: any; size?: string }>();
 
 	let nodeW = $derived(parseInt(size.split('x')[0].replace('gs-', '')) || 2);
 	let nodeH = $derived(parseInt(size.split('x')[1]) || 2);
@@ -12,7 +12,7 @@
 	let rectH = $state(0);
 	let isWidgetLayout = $derived(rectW && rectH ? Math.abs(rectW - rectH) > 50 || (rectW >= 280 && rectH >= 280) : nodeW !== nodeH || (nodeW >= 4 && nodeH >= 4));
 	
-	const query = useQbittorrent();
+	const query = useQbittorrent(() => service.id);
 	const pauseMutation = useQbittorrentPause();
 	const resumeMutation = useQbittorrentResume();
 	const deleteMutation = useQbittorrentDelete();

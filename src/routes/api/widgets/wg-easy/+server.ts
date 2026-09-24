@@ -1,3 +1,6 @@
+import { db } from "$lib/server/db";
+import { services } from "$lib/server/db/schema";
+import { eq } from "drizzle-orm";
 import { json } from '@sveltejs/kit';
 import { getSettings } from '$lib/server/settings';
 import { decryptString } from '$lib/server/crypto';
@@ -36,7 +39,20 @@ async function getAuthCookie(normalizedUrl: string, password: string) {
     return null;
 }
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ url, locals }) => {
+	const serviceId = url.searchParams.get('id');
+	if (!serviceId) return new Response('Bad Request: missing id', { status: 400 });
+	
+	const serviceIdParsed = parseInt(serviceId, 10);
+	if (isNaN(serviceIdParsed)) return new Response('Bad Request: invalid id', { status: 400 });
+
+	const service = await db.select().from(services).where(eq(services.id, serviceIdParsed)).get();
+	if (!service) return new Response('Not Found: service does not exist', { status: 404 });
+	
+	if (service.requireAuth && !locals.isAdmin) {
+		return new Response('Unauthorized', { status: 401 });
+	}
+
 	const settings = await getSettings();
 	const wgeasy_url = settings.wgeasy_url as string;
 	const encryptedPassword = settings.wgeasy_password as string;

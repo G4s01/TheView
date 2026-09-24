@@ -1,8 +1,24 @@
+import { db } from "$lib/server/db";
+import { services } from "$lib/server/db/schema";
+import { eq } from "drizzle-orm";
 import { json } from "@sveltejs/kit";
 import { getSettings } from "$lib/server/settings";
 import type { RequestHandler } from "./$types";
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ url, locals }) => {
+	const serviceId = url.searchParams.get('id');
+	if (!serviceId) return new Response('Bad Request: missing id', { status: 400 });
+	
+	const serviceIdParsed = parseInt(serviceId, 10);
+	if (isNaN(serviceIdParsed)) return new Response('Bad Request: invalid id', { status: 400 });
+
+	const service = await db.select().from(services).where(eq(services.id, serviceIdParsed)).get();
+	if (!service) return new Response('Not Found: service does not exist', { status: 404 });
+	
+	if (service.requireAuth && !locals.isAdmin) {
+		return new Response('Unauthorized', { status: 401 });
+	}
+
   try {
     const settings = await getSettings();
     const locationStr = (settings.weather_location as string) || '41.90278,12.49637,Roma'; // Default Rome

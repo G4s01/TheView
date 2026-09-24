@@ -5,14 +5,14 @@
     CloudSnow, CloudLightning, Wind
   } from '@lucide/svelte';
   
-  let { nodeW = 1, nodeH = 1 } = $props<{ nodeW?: number, nodeH?: number }>();
+  let { service, nodeW = 1, nodeH = 1 } = $props<{ service: any; nodeW?: number, nodeH?: number }>();
   let rectW = $state(0);
   let rectH = $state(0);
   let isWide = $derived(rectW > 450 || (rectW && rectH ? rectW > rectH * 1.2 : nodeW > nodeH));
   let isTall = $derived(rectW < 350 || (rectW && rectH ? rectH > rectW * 1.2 : nodeH > nodeW));
   let isLarge = $derived(rectW >= 250 || (nodeW >= 2 && nodeH >= 2));
   
-  const query = useWeather();
+  const query = useWeather(() => service.id);
   let selectedDayIndex = $state(0);
 
   function getWeatherIcon(code: number) {

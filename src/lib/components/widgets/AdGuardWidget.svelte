@@ -8,9 +8,9 @@
 	import { Button } from "$lib/components/ui/button";
 	import TimeWheelPicker from '$lib/components/ui/TimeWheelPicker.svelte';
 	
-	let { size = 'gs-2x2' } = $props<{ size?: string }>();
+	let { service, size = 'gs-2x2' } = $props<{ service: any; size?: string }>();
 	
-	const query = useAdGuardStats();
+	const query = useAdGuardStats(() => service.id);
 	const toggle = useAdGuardToggle();
 	
 	let isAdmin = $derived(appState.isAdmin);

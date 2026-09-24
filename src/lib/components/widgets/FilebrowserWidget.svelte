@@ -2,9 +2,9 @@
 	import { useFilebrowser } from '$lib/queries/useFilebrowser';
 	import { HardDrive, AlertCircle } from '@lucide/svelte';
 
-	let { size = '1x1' } = $props<{ size: string }>();
+	let { service, size = '1x1' } = $props<{ service: any; size: string }>();
 
-	const filebrowser = useFilebrowser();
+	const filebrowser = useFilebrowser(() => service.id);
 
 	function formatBytes(bytes: number, decimals = 2) {
 		if (!bytes || bytes === 0) return '0 B';

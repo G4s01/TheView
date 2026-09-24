@@ -1,13 +1,33 @@
 import { json } from "@sveltejs/kit";
 import { Agent, fetch as undiciFetch } from "undici";
 import { rewriteUrlForDocker } from "$lib/server/dockerHost";
+import { db } from "$lib/server/db";
+import { services } from "$lib/server/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET({ url }) {
-  const targetUrl = url.searchParams.get("url");
+  const serviceIdStr = url.searchParams.get("id");
 
-  if (!targetUrl) {
-    return json({ error: "Missing url parameter" }, { status: 400 });
+  if (!serviceIdStr) {
+    return json({ error: "Missing id parameter" }, { status: 400 });
   }
+
+  const serviceId = parseInt(serviceIdStr, 10);
+  if (isNaN(serviceId)) {
+    return json({ error: "Invalid id parameter" }, { status: 400 });
+  }
+
+  // Fetch the real URL from the database
+  const [service] = await db
+    .select()
+    .from(services)
+    .where(eq(services.id, serviceId));
+
+  if (!service || !service.url) {
+    return json({ error: "Service not found or no URL" }, { status: 404 });
+  }
+
+  const targetUrl = service.url;
 
   const start = performance.now();
   let rewrittenUrl = targetUrl;

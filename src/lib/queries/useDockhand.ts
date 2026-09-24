@@ -1,10 +1,10 @@
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
 
-export function useDockhand() {
+export function useDockhand(serviceId: () => number) {
 	return createQuery(() => ({
-		queryKey: ['dockhand'],
+		queryKey: ["dockhand", serviceId()],
 		queryFn: async () => {
-			const res = await fetch('/api/widgets/dockhand');
+			const res = await fetch(`/api/widgets/dockhand?id=${serviceId()}`);
 			if (!res.ok) {
 				const errorData = await res.json().catch(() => ({}));
 				throw new Error(errorData.error || 'Errore recupero Dockhand');

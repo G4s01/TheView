@@ -4,11 +4,11 @@ import {
   useQueryClient,
 } from "@tanstack/svelte-query";
 
-export function useAdGuardStats() {
+export function useAdGuardStats(serviceId: () => number) {
   return createQuery(() => ({
-    queryKey: ["adguard"],
+    queryKey: ["adguard", serviceId()],
     queryFn: async () => {
-      const res = await fetch("/api/widgets/adguard");
+      const res = await fetch(`/api/widgets/adguard?id=${serviceId()}`);
       if (!res.ok) throw new Error("AdGuard API Error");
       return res.json();
     },
