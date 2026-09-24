@@ -110,6 +110,8 @@ To avoid permission issues with the mounted `/app/data` volume, TheView supports
 
 All sensitive data (Passwords, API keys, and 2FA secrets) are **strongly encrypted or hashed** (AES-256-GCM / SHA-256) inside the database. The system automatically generates a unique `APP_SECRET` safely stored inside the persistent `/app/data/secret.key` file.
 
+**Privileged Widgets (Access Control):** You can mark any interactive widget as "Privileged" in the Admin settings. This hides the widget from unauthenticated users and entirely blocks the backend proxy API (Fail-Closed `HTTP 401`) preventing unauthorized execution or data leaks.
+
 ### 💾 Backup & Restore
 
 Backup or migrate your dashboard directly from the web interface:
