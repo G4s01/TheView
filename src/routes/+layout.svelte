@@ -214,7 +214,7 @@
 						</button>
 						{/if}
 						<div class="hidden md:block w-px h-4 bg-border mx-1"></div>
-						<button class="p-1.5 text-destructive hover:opacity-80 transition-colors" onclick={async () => { await fetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); window.location.reload(); }} title="Esci dalla sessione">
+						<button class="p-1.5 text-destructive hover:opacity-80 transition-colors" onclick={async () => { await fetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); await import('$app/navigation').then(m => m.invalidateAll()); window.location.reload(); }} title="Esci dalla sessione">
 							<LogOut class="size-5" strokeWidth={1.5} />
 						</button>
 					{:else}

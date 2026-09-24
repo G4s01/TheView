@@ -108,7 +108,9 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 
     // Crittografia/Hash dinamico
     const { hashPassword, encryptString } = await import("$lib/server/crypto");
-    if (newSettings.adminPassword) {
+    if (newSettings.adminPassword === "") {
+      delete newSettings.adminPassword; // Evita di salvare una stringa vuota per errore
+    } else if (newSettings.adminPassword) {
       newSettings.adminPassword = hashPassword(newSettings.adminPassword);
     }
     if (newSettings.npmPassword) {

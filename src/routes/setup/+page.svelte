@@ -62,7 +62,7 @@
         required 
         class="pr-10"
       >
-        <button type="button" onclick={() => showPassword = !showPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground">
+        <button type="button" tabindex="-1" onclick={() => showPassword = !showPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground">
           {#if showPassword}
             <EyeOff class="h-5 w-5" strokeWidth={1.5} />
           {:else}
@@ -78,7 +78,7 @@
         required 
         class="pr-10"
       >
-        <button type="button" onclick={() => showConfirmPassword = !showConfirmPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground">
+        <button type="button" tabindex="-1" onclick={() => showConfirmPassword = !showConfirmPassword} class="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground">
           {#if showConfirmPassword}
             <EyeOff class="h-5 w-5" strokeWidth={1.5} />
           {:else}

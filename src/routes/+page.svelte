@@ -238,6 +238,19 @@
 			});
 
 			grid!.on('removed', (event: Event, items: any[]) => {
+				if (items) {
+					items.forEach((n: any) => {
+						if (n.id) {
+							const idNum = parseInt(n.id.toString());
+							const instance = mountedWidgets.get(idNum);
+							if (instance) {
+								unmount(instance);
+								mountedWidgets.delete(idNum);
+								mountedServices.delete(idNum);
+							}
+						}
+					});
+				}
 				if (appState.isEditMode) saveGridState();
 			});
 

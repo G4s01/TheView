@@ -9,7 +9,8 @@ export async function getSettings(): Promise<Record<string, any>> {
     for (const row of rows) {
       try {
         // If it looks like a boolean or number, parse it
-        if (row.value === "true") settingsObj[row.key] = true;
+        if (row.key === "adminPassword") settingsObj[row.key] = row.value;
+        else if (row.value === "true") settingsObj[row.key] = true;
         else if (row.value === "false") settingsObj[row.key] = false;
         else if (!isNaN(Number(row.value)) && row.value.trim() !== "")
           settingsObj[row.key] = Number(row.value);
@@ -21,7 +22,7 @@ export async function getSettings(): Promise<Record<string, any>> {
     return settingsObj;
   } catch (e) {
     console.error("Failed to read settings from DB", e);
-    return {};
+    throw e;
   }
 }
 
@@ -50,6 +51,6 @@ export async function saveSettings(newSettings: Record<string, any>) {
     return merged;
   } catch (e) {
     console.error("Failed to save settings to DB", e);
-    return {};
+    throw e;
   }
 }

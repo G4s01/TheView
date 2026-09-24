@@ -51,6 +51,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 
   const settings = await getSettings();
+  console.log("adminPassword is:", settings.adminPassword);
   const needsSetup =
     !settings.adminPassword || settings.adminPassword === "admin";
 

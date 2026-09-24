@@ -36,7 +36,7 @@
 	let isSaving2FA = $state(false);
 
 	function preSavePassword() {
-		if (!adminPassword) { toast.warning("INSERIRE PASSWORD!"); return; }
+		if (!adminPassword || adminPassword.length < 4) { toast.warning("LA PASSWORD DEVE AVERE ALMENO 4 CARATTERI!"); return; }
 		if (adminPassword !== adminPasswordConfirm) { toast.warning("PASSWORD DIVERSE!"); return; }
 		
 		if (totpEnabled && isChangingAdminPasswordStep === 1) {
@@ -48,6 +48,7 @@
 	}
 
 	async function savePassword() {
+		if (!adminPassword || adminPassword.length < 4) return;
 		try {
 			const payload: any = { adminPassword };
 			if (totpEnabled && changePasswordOtpCode) {
@@ -320,7 +321,7 @@
 					</div>
 				{:else}
 					{#if isChangingAdminPasswordStep === 1}
-						<div transition:slide class="grid grid-cols-[1fr_auto] gap-4 items-end w-full" use:clickOutside={{ enabled: isChangingAdminPassword, handler: () => { isChangingAdminPassword = false; isChangingAdminPasswordStep = 1; adminPassword = ''; adminPasswordConfirm = ''; }, ignore: '#edit-security-btn' }}>
+						<div transition:slide class="grid grid-cols-[1fr_auto] gap-4 items-end w-full" use:clickOutside={{ enabled: isChangingAdminPassword, handler: () => { if (showConfirmDialog) return; isChangingAdminPassword = false; isChangingAdminPasswordStep = 1; adminPassword = ''; adminPasswordConfirm = ''; }, ignore: '#edit-security-btn' }}>
 							<div class="w-full">
 								<TextInput 
 									label="NUOVA PASSWORD" 
@@ -378,7 +379,7 @@
 							/>
 						</div>
 					{:else if isChangingAdminPasswordStep === 2}
-						<div transition:slide class="flex flex-col items-center gap-6 w-full mt-4" use:clickOutside={{ enabled: isChangingAdminPassword, handler: () => { isChangingAdminPassword = false; isChangingAdminPasswordStep = 1; adminPassword = ''; adminPasswordConfirm = ''; changePasswordOtpCode = ''; }, ignore: '#edit-security-btn' }}>
+						<div transition:slide class="flex flex-col items-center gap-6 w-full mt-4" use:clickOutside={{ enabled: isChangingAdminPassword, handler: () => { if (showConfirmDialog) return; isChangingAdminPassword = false; isChangingAdminPasswordStep = 1; adminPassword = ''; adminPasswordConfirm = ''; changePasswordOtpCode = ''; }, ignore: '#edit-security-btn' }}>
 							<div class="bg-primary/10 p-3 rounded-lg border border-primary/20 w-full mb-2">
 								<p class="text-xs font-bold text-center text-primary uppercase">CONFERMA CON 2FA</p>
 								<p class="text-xs text-center mt-1 text-foreground">INSERISCI L'OTP PER VALIDARE L'OPERAZIONE</p>
